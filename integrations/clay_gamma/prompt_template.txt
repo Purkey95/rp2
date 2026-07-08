@@ -1,0 +1,19 @@
+Create a personalized one-page proposal microsite for {company}.
+
+About the prospect:
+- Company: {company}
+- Contact: {first_name} {last_name}, {title}
+- Industry: {industry}
+- Website: {domain}
+- What they do: {description}
+
+The page should:
+1. Open with a bold headline addressed directly to {company}.
+2. Show that we understand the {industry} industry: name two or three
+   concrete challenges companies like {company} face today.
+3. Explain how our offering addresses each of those challenges.
+4. Include a short expected-outcomes section (time saved, revenue impact,
+   risk reduced) framed for a {title}.
+5. Close with a clear call to action to book an intro call.
+
+Keep it concise, confident, and specific to {company} — no generic filler.
