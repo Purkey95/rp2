@@ -68,4 +68,12 @@ clean:
 	rm -rf $(VENV) .mypy_cache/ build dist/ log/ output/ src/*.egg-info/
 	find . -type f -name '*.pyc' -delete
 
-.PHONY: all archive check clean lint reformat run securitycheck typecheck
+# --- agentic loop ops (see loop/README.md) ---
+tick:            ; ./loop/loop.sh
+queue:           ; @grep -E "review:|queued:|FAILED:|rerouted" loop/memory/STATE.md || echo empty
+trust:           ; @./loop/scripts/trust-log.sh --render
+audit:           ; @./loop/scripts/cost-check.sh --report
+goals:           ; @./loop/verify-goals.sh
+clean-worktrees: ; @git worktree list | awk '/wt-/{print $$1}' | xargs -rn1 git worktree remove --force
+
+.PHONY: all archive check clean lint reformat run securitycheck typecheck tick queue trust audit goals clean-worktrees

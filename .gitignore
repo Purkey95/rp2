@@ -24,3 +24,9 @@ __pycache__/
 src/*.egg-info/
 .venv/
 .vscode/
+
+# agentic loop runtime artifacts (ledgers STATE.md/trust.tsv/goal-ledger.tsv ARE tracked)
+loop/memory/tick-*.md
+loop/memory/cron.log
+loop/memory/usage.log
+loop/work-order.json
