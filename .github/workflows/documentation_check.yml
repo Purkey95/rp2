@@ -9,3 +9,13 @@ jobs:
     steps:
     - uses: actions/checkout@main
     - uses: gaurav-nelson/github-action-markdown-link-check@v1
+
+  plugin-documentation-check:
+    name: Check plugin documentation is in sync with code
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@main
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+    - run: python3 scripts/check_documentation.py

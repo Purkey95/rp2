@@ -42,6 +42,9 @@ static_analysis: $(VENV)/bin/activate
 	$(VENV)/bin/pylint -r y src tests/*.py
 	$(VENV)/bin/bandit -r src/
 
+doc_check:
+	python3 scripts/check_documentation.py
+
 reformat: $(VENV)/bin/activate
 	$(VENV)/bin/isort .
 	$(VENV)/bin/black src/ tests/
@@ -68,4 +71,4 @@ clean:
 	rm -rf $(VENV) .mypy_cache/ build dist/ log/ output/ src/*.egg-info/
 	find . -type f -name '*.pyc' -delete
 
-.PHONY: all archive check clean lint reformat run securitycheck typecheck
+.PHONY: all archive check clean doc_check lint reformat run securitycheck typecheck
