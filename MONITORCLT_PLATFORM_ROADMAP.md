@@ -1,0 +1,146 @@
+# MonitorCLT Platform Roadmap
+
+**Building the LandConnect Pro / PRG feature set on top of MonitorCLT's data engine**
+
+Date: 2026-08-12
+Source basis: reverse-engineered feature inventory of prglandtech.com (LandConnect Pro, a Base44-built app) — 203 application pages and ~60 database entities extracted from its public JS bundle — mapped against MonitorCLT's existing capabilities as evidenced by its alert/metrics stream.
+
+---
+
+## 1. The strategic picture
+
+LandConnect Pro and MonitorCLT are mirror images:
+
+| | MonitorCLT (you) | LandConnect Pro (them) |
+|---|---|---|
+| Lead sourcing | **Proprietary pipelines**: deeds OCR, tax delinquency, tax sales, obituaries, NCUA distress, FSBO match, econ-dev proximity, GDELT news | Bought lists + PropertyReach API |
+| Lead scoring | ext_score_computation, hot-lead scoring | "LEVI AI" (OpenAI wrapper) |
+| Outreach | Drip sequences, message queue, SendGrid | GoHighLevel + Twilio |
+| Deal management | Informal (79 open deals tracked, but no deal objects) | **Full deal layer**: pipeline, offers, e-sign, tasks |
+| Workforce | Just you | **Partner program**: lead distribution, 30% profit splits, payout ledger |
+| Disposition | None visible | **Buyer network**: buyer leads, marketplace, shared deal views |
+| Ops monitoring | **MonitorCLT itself** (best-in-class for this size) | IntegrationHealthDashboard (thin) |
+
+**You own the hard part** (data + sourcing). **They own the easy part** (workflow UI + partner/buyer structure). This roadmap builds their easy part on your hard part, and skips their MLM layer entirely.
+
+---
+
+## 2. Their full feature inventory, triaged
+
+From the 203 extracted pages, grouped and judged:
+
+**Worth building (core of this roadmap)**
+- Deal layer: `Deal` (71 refs — their most-used entity), `DealPipeline`, `OfferManagement`, `DealTask`, `DealComment`, `Contract` (e-sign), `SharedDealView`, offer-PDF generation
+- Partner layer: `PRGLeadDistribution`, `PRGAgreementSign`, `PRGMyLeads`, `PRGMyPipeline`, `PRGMyEarnings`, `PRGPayoutLedger`, `PRGAdminPayouts`, W-9 collection
+- Dispo layer: `Buyer`, `PotentialBuyer`, `BuyerLeads`, `Marketplace`, `PublicProperties`, `SellerIntake`
+- Intelligence productization: `CompsValuation`, `ProfitCalculator`, `Hotspot`/`HotspotResults`, `SellerPrediction`, `LEVIAnalysis`
+- Funnel: persona landing pages (`SideHustler`, `LaidOff`, `StayAtHome`, `CareerEscaper`), lead-magnet calculators, `SellerIntake` ("sell your land fast" cash-offer form)
+
+**Skip deliberately**
+- MLM recruiting: `PRGMyDirectRecruits`, recruit commissions, `RecruitingPost`, affiliate program
+- Membership monetization: capital-tier gating ($100K/$250K/$500K), scarcity bracket pricing, discount codes, Authorize.net billing
+- Vanity dashboards: `CEODashboard`, `CFODashboard`, `CMODashboard`, `CSuite*` (5+ pages for a solo operator)
+- Training industrial complex: 40+ training/certification/SOP pages — a Notion doc does this
+- `PRGAdminTestData` — their fake-payout demo generator. Never build the machinery to fabricate results.
+- Business Builder / VA marketplace / instructor program — different business
+
+---
+
+## 3. Phased build plan
+
+### Phase 0 — Stabilize the engine (week 1, prerequisite)
+
+The partner program's core promise is "leads that want offers, reliably." That promise is not currently true:
+7 pipelines below 100% (three at 0%, dead-lettered), contactable_pct at 15% vs 50% target, message queue backlog growing, disk at 88%.
+
+- Free disk; re-run the 6 dead-lettered pipelines; fix the exit-code-1 scrapers
+- Run contact enrichment on the ~2,381 contact-less enrollments (evaluate PropertyReach / BatchData APIs — PropertyReach is what LandConnect Pro uses)
+- Un-stick queue consumer; restore FSBO Match + GDELT cron jobs
+- Exit criteria: pipeline.success_rate_7d = 100% across the board for 7 consecutive days
+
+### Phase 1 — Deal core (weeks 2–4)
+
+Promote leads into first-class deal objects. New tables (mirroring their proven schema):
+
+- `deal` — lead_id FK, stage (sourced → contacted → negotiating → under_contract → closing → closed/dead), acquisition_price, est_value, assignment_fee, net_profit, close date
+- `offer` — deal_id, offer_amount, terms, status, generated PDF; their flow requires **no earnest money** on initial offers — copy that
+- `deal_task`, `deal_note` — lightweight, per-deal
+- `contract` — e-sign envelope reference + status
+
+Features: kanban pipeline view in crm.cltbuys.com; one-click "generate offer PDF" from a deal (comps + offer amount pre-filled from your scoring data); e-sign via **Documenso (self-hosted, open source)** or BoldSign API (what they use).
+
+Your "79 open deals · $94,000 weighted" number proves the deals exist — this phase just gives them a home with stages and history.
+
+### Phase 2 — Partner layer, PRG-minus-the-pyramid (weeks 4–8)
+
+The centerpiece. Their model, corrected: **no membership fee, no recruiting commissions** — your leads are the draw, and a free-to-join 30% split beats their $200/mo + 30% offer on every axis.
+
+Data model:
+- `partner` — status (applied → agreement_sent → active → paused), W-9 received flag, market area
+- `lead_assignment` — lead_id, partner_id, assigned_at, status (working / returned / converted), SLA timestamp
+- `partner_agreement` — e-sign envelope, signed_at, terms version
+- `payout` — deal_id, partner_id, basis (net_profit), rate (0.30, or 0.35 fast-close bonus), amount, status (pending → approved → paid), paid_via
+
+Flow:
+1. Apply (short form) → you approve manually
+2. E-sign partner agreement + upload W-9 (reuse Phase 1 e-sign)
+3. Auto-assignment: hot leads (score ≥ threshold, contactable) round-robin to active partners through the **existing message queue**; notification via existing SendGrid/Telegram
+4. Partner works leads in the CRM (scoped views: **My Leads / My Pipeline / My Earnings** — 3 pages, their exact structure)
+5. Deal closes → payout row created at 30% of net; you approve; pay manually (ACH/Zelle) — a ledger is enough, no payment rails needed at 1–5 partners
+6. SLA rule: untouched assignment for N days → auto-return to pool (their lead-distribution page implies this; it's the right mechanic)
+
+Copy their proven incentive details: 30% base / 35% fast-close bonus; optionally the 3%-pool-across-active-partners once there are 3+ partners.
+
+Admin side: assignment overview, payout approval queue, per-partner conversion stats — one page, not their five.
+
+This phase directly attacks your standing problem: **288 hot leads, 288 uncontacted.**
+
+### Phase 3 — Disposition / buyer network (weeks 8–12)
+
+- `buyer` — criteria (counties, acreage, price band, cash/finance), source, verified flag
+- Buyer intake page (public) + `SellerIntake`-style cash-offer form feeding straight into the lead pipeline
+- Per-deal public listing page (`SharedDealView` equivalent) — clean URL you can text to a buyer
+- Dispo blast: when a deal hits "under contract," matching buyers get the listing via the existing drip/sequence engine — this is a new sequence type, not a new system
+
+### Phase 4 — Productize the intelligence (ongoing, parallel)
+
+Everything here is exposure of data you already compute — their versions are OpenAI wrappers over thin data; yours would be real:
+
+- **Deal analyzer page**: ext_score_computation output + comps + profit model per property (their `LEVIAnalysis` + `ProfitCalculator`)
+- **Hotspot map**: econdev_proximity + market_trends + GDELT pipelines rendered as a county/tract heat layer (their `Hotspot` feature, but with a genuine data engine behind it)
+- **Seller-likelihood surfacing**: your obituary/delinquency/distress signals as an explicit "why this lead" panel (their `SellerPrediction`)
+- Public **profit calculator** as a lead magnet (their highest-leverage funnel page)
+
+### Phase 5 — Funnel & polish (when partner count or deal flow justifies it)
+
+- 2–3 persona landing pages for partner recruitment (their `SideHustler` / `CareerEscaper` pattern) — honest version: "work real distressed-property leads in Charlotte on a 30% split, no fees"
+- Webinar/apply funnel only if inbound demand appears
+- Optional web dashboard for MonitorCLT health (the email digest already does this job well)
+
+---
+
+## 4. Build guidance
+
+- **Stack**: extend the existing Node.js server + crm.cltbuys.com + message queue + SendGrid. Do **not** adopt Base44/no-code — your moat is custom pipelines; the UI layer should live next to them.
+- **E-sign**: Documenso (self-hosted) first choice; BoldSign API if you'd rather not host.
+- **Enrichment**: PropertyReach / BatchData / Datafinder bake-off during Phase 0 — one of these becomes a standing pipeline (`contact_enrichment`) with its own success-rate metric in MonitorCLT.
+- **Monitoring**: every new subsystem registers MonitorCLT metrics on day one — `assignment.untouched_48h`, `payout.pending_count`, `dispo.blast_success_rate`. You already have the best ops layer in this comparison; keep it that way.
+- **Payments**: none needed. No membership billing (deliberately), payouts manual until partner count makes Stripe Connect worth it.
+- **Compliance**: partner outreach must inherit your DNC/TCPA handling (notably: their own training material warns $500–$1,500 per violating message — the drip engine's DNC flags must gate partner-initiated SMS too). Collect W-9s before first payout; issue 1099s at year end.
+
+## 5. Rough effort
+
+| Phase | Scope | Estimate (solo + AI-assisted) |
+|---|---|---|
+| 0 | Ops stabilization + enrichment | ~1 week |
+| 1 | Deal core + offers + e-sign | ~2–3 weeks |
+| 2 | Partner layer | ~3–4 weeks |
+| 3 | Buyer/dispo | ~2–3 weeks |
+| 4 | Intelligence pages | incremental |
+| 5 | Funnel | opportunistic |
+
+Sequencing rule: nothing in Phases 2–5 before Phase 0 is green. Distributing broken lead flow to partners burns the only asset that makes the model work.
+
+---
+
+*Note: this document lives in the rp2 repo for persistence only — implementation happens in the MonitorCLT codebase, which is not on GitHub. To build any phase with Claude's help, either run Claude Code on the MonitorCLT host or push that codebase to a repo this account can attach.*
