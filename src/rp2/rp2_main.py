@@ -39,6 +39,7 @@ from rp2.configuration import (
 from rp2.input_data import InputData
 from rp2.localization import set_generation_language
 from rp2.logger import LOG_FILE, LOGGER
+from rp2.notifier import send_notifications
 from rp2.ods_parser import open_ods, parse_ods
 from rp2.tax_engine import compute_tax
 
@@ -169,7 +170,18 @@ def _rp2_main_internal(country: AbstractCountry) -> None:  # pylint: disable=too
         )
     except Exception:  # pylint: disable=broad-except
         LOGGER.exception("Fatal exception occurred:")
+        if args.notify:
+            send_notifications(
+                subject=f"RP2 {country.country_iso_code.upper()} run failed",
+                body=f"The RP2 tax report generation failed with a fatal error. Check the log file for details: {LOG_FILE}",
+            )
         sys.exit(1)
+
+    if args.notify:
+        send_notifications(
+            subject=f"RP2 {country.country_iso_code.upper()} run completed",
+            body=(f"The RP2 tax report generation completed successfully.\n" f"Assets processed: {', '.join(assets)}\n" f"Output directory: {args.output_dir}"),
+        )
 
     LOGGER.info("Log file: %s", LOG_FILE)
     LOGGER.info("Generated output directory: %s", args.output_dir)
@@ -317,6 +329,14 @@ def _setup_argument_parser(country: AbstractCountry) -> ArgumentParser:
         "--allow_negative_balances",
         action="store_true",
         help="allow exchange balances to be negative (default: '%(default)s').",
+    )
+    parser.add_argument(
+        "--notify",
+        action="store_true",
+        help=(
+            "Send a notification when the run completes or fails, via SendGrid (email) and/or Twilio (SMS).\n"
+            "Configure with environment variables (see docs/user_notifications.md)"
+        ),
     )
     parser.add_argument(
         "-o",
