@@ -119,6 +119,34 @@ Everything here is exposure of data you already compute — their versions are O
 
 ---
 
+## 3b. To-do — Phone & SMS activation (parallel track, start immediately)
+
+Runs alongside Phase 0 — carrier approval takes 1–3 weeks, so registration starts now even though sending starts later.
+
+**Week 1 — registration (the slow track):**
+- [ ] Confirm LLC + EIN paperwork in hand
+- [ ] Add privacy policy + SMS terms page to cltbuys.com (opt-in description, "Reply STOP to opt out / HELP for help, msg & data rates may apply")
+- [ ] Create Twilio account; buy 1–2 local 704/980 numbers with SMS + voice
+- [ ] Register A2P 10DLC Brand (EIN registration, not sole-prop — higher throughput)
+- [ ] Register Campaign (honest use case, 2–5 sample messages, opt-in flow description) → wait out review
+- [ ] Create Messaging Service; attach numbers; enable Advanced Opt-Out
+
+**Weeks 1–2 — MonitorCLT build (parallel):**
+- [ ] `sms_sender` queue worker: channel=sms steps, gated on opt-in/DNC, quiet hours (8am–9pm recipient-local; 8pm in FL-style states), per-number daily cap
+- [ ] Inbound-message webhook → CRM replies; delivery-status webhook → per-message status
+- [ ] STOP-reply sync → DB opt-out flag that gates sequence enrollment (Twilio-side block alone is not enough)
+- [ ] Inbound voice: forward to cell + voicemail transcription (TwiML)
+- [ ] Register metrics: `sms.delivery_rate`, `sms.reply_rate`, `sms.optout_rate`, `sms.queue_backlog` (alert if delivery < ~95%)
+- [ ] End-to-end test against own phone before campaign approval lands
+
+**On approval — go-live:**
+- [ ] Turn on inbound voice + manual 1:1 first-touch texting immediately
+- [ ] Automated sequences: opted-in contacts only; warm-up ramp ~20–50/day per number for ~2 weeks; no link shorteners (own domain only)
+- [ ] DNC scrub (federal registry + internal flags) + litigator scrub before any send; log consent source + timestamp per contact
+- [ ] Cold volume stays on direct mail (Regrid addresses) — mail generates the inbound that creates SMS consent
+
+**Later (with partners):** OpenPhone (~$15/user/mo) as the human calling app; keep Twilio for the automated side.
+
 ## 4. Build guidance
 
 - **Stack**: extend the existing Node.js server + crm.cltbuys.com + message queue + SendGrid. Do **not** adopt Base44/no-code — your moat is custom pipelines; the UI layer should live next to them.
