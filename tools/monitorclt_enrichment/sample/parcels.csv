@@ -1,0 +1,11 @@
+apn,situs_street,situs_city,situs_state,situs_zip,owner_name,mail_street,mail_city,mail_state,mail_zip,acreage,zoning,land_use
+07104521,123 North Main St,Charlotte,NC,28202,"WILLIAMS, DAVID R",5000 Park Rd,Charlotte,NC,28209,0.34,R-5,SINGLE FAMILY
+05512304,4520 Wilkinson Boulevard,Charlotte,NC,28208,"CAROLINA HOLDINGS LLC",PO Box 1234,Tampa,FL,33601,1.20,I-1,VACANT INDUSTRIAL
+09330188,88 Rocky River Road,Mint Hill,NC,28227,"PATEL, ANJALI",88 Rocky River Rd,Mint Hill,NC,28227,2.05,R-3,SINGLE FAMILY
+21440567,,Matthews,NC,28105,"SMITH, MARY A",742 Evergreen Ter,Charlotte,NC,28210,0.50,R-4,RESIDENTIAL VACANT
+07655012,17 Oak Court,Matthews,NC,28105,"JONES, ROBERT",17 Oak Ct,Matthews,NC,28105,0.28,R-5,SINGLE FAMILY
+11902388,900 S Tryon Street,Charlotte,NC,28203,"UPTOWN LAND CO LLC",120 5th Ave,New York,NY,10011,0.75,UMUD,COMMERCIAL VACANT
+14235009,255 Providence Road,Charlotte,NC,28207,"MARTIN, ELIZABETH",255 Providence Rd,Charlotte,NC,28207,0.60,R-3,SINGLE FAMILY
+16700423,1200 Central Avenue,Charlotte,NC,28204,"NGUYEN, TAM",9900 Monroe Rd,Charlotte,NC,28270,0.22,B-1,COMMERCIAL
+88213045,3301 Freedom Dr,Charlotte,NC,28208,"FREEDOM PARTNERS LLC",PO Box 55,Charlotte,NC,28230,3.40,I-2,VACANT INDUSTRIAL
+99999999,1 Nowhere Ln,Nowhere,NC,00000,"UNMATCHED OWNER",1 Nowhere Ln,Nowhere,NC,00000,0.10,NA,NA

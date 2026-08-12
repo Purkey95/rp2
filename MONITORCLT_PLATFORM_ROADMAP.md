@@ -119,6 +119,27 @@ Everything here is exposure of data you already compute — their versions are O
 
 ---
 
+## 3a. To-do — Contact enrichment (Phase 0 core; started)
+
+Two-step: parcel join (free, own data) → skip trace (paid, only on what survives). Starter engine committed at `tools/monitorclt_enrichment/` — runs, tested, CSV-driven; wire to the live DB.
+
+**Step 1 — parcel join (build/wire):**
+- [x] Engine written + tested: address/name normalizer, APN/situs/owner-name matching, absentee flag, mail-merge + skip-trace-queue split, MonitorCLT metrics (`tools/monitorclt_enrichment/`)
+- [ ] Load Regrid county exports (Mecklenburg, Iredell first) into a `parcels` table keyed by APN
+- [ ] Replace `load_csv`/`write_csv` with Postgres queries against real `contacts`/`parcels`
+- [ ] Run against full contact base; review `metrics.json` (match_rate, mailable_pct)
+- [ ] Register as standing `contact_enrichment` pipeline (nightly + on new-lead insert)
+- [ ] Emit `enrichment.*` metrics into MonitorCLT daily digest
+
+**Step 2 — skip trace (paid):**
+- [ ] Bake-off BatchData / PropertyReach / Datafinder on a sample of `skip_trace_queue.csv` (hit rate + cost/record)
+- [ ] Wire winner as a second stage: queue → API → write phone/email back to contact
+- [ ] Add `skip_trace.hit_rate` + `skip_trace.spend` metrics; watch `sequence.contactable_pct` climb toward 50%
+
+**Direct mail (unlocked by Step 1 alone — no skip trace needed):**
+- [ ] Feed `mail_merge.csv` to a mail house or Lob/Click2Mail API; mail absentee owners first (strongest sell signal)
+- [ ] Letter CTA drives an inbound call/text → that inbound *creates* the SMS consent the automated lanes need
+
 ## 3b. To-do — Phone & SMS activation (parallel track, start immediately)
 
 Runs alongside Phase 0 — carrier approval takes 1–3 weeks, so registration starts now even though sending starts later.
