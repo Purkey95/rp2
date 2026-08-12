@@ -54,7 +54,7 @@ The partner program's core promise is "leads that want offers, reliably." That p
 7 pipelines below 100% (three at 0%, dead-lettered), contactable_pct at 15% vs 50% target, message queue backlog growing, disk at 88%.
 
 - Free disk; re-run the 6 dead-lettered pipelines; fix the exit-code-1 scrapers
-- Run contact enrichment on the ~2,381 contact-less enrollments (evaluate PropertyReach / BatchData APIs — PropertyReach is what LandConnect Pro uses)
+- Run contact enrichment on the ~2,381 contact-less enrollments — two-step: **Regrid membership** (already held) for owner names + mailing addresses via parcel joins, then a skip-trace API (BatchData / PropertyReach / Datafinder) to turn those into phones and emails
 - Un-stick queue consumer; restore FSBO Match + GDELT cron jobs
 - Exit criteria: pipeline.success_rate_7d = 100% across the board for 7 consecutive days
 
@@ -123,7 +123,8 @@ Everything here is exposure of data you already compute — their versions are O
 
 - **Stack**: extend the existing Node.js server + crm.cltbuys.com + message queue + SendGrid. Do **not** adopt Base44/no-code — your moat is custom pipelines; the UI layer should live next to them.
 - **E-sign**: Documenso (self-hosted) first choice; BoldSign API if you'd rather not host.
-- **Enrichment**: PropertyReach / BatchData / Datafinder bake-off during Phase 0 — one of these becomes a standing pipeline (`contact_enrichment`) with its own success-rate metric in MonitorCLT.
+- **Parcel data (Regrid)**: stand up a local parcel table per target county (Pro exports or Data Store county files), keyed by APN, refreshed on a standing `regrid_sync` pipeline. It becomes the join backbone: deed→parcel matching for `rod_match`, owner mailing addresses for enrichment, estate-lead matching for `obituaries`, adjacent-owner ("neighbor letter") dispo lists per deal, and parcel boundaries/zoning for the deal analyzer and hotspot map. If the membership includes (or is upgraded to) an API plan, wire typeahead/parcel lookups directly into the pipelines instead of batch joins.
+- **Contact enrichment**: Regrid supplies owner + mailing address, not phones/emails — pair it with a skip-trace API (BatchData / PropertyReach / Datafinder bake-off) as a standing `contact_enrichment` pipeline with its own success-rate metric in MonitorCLT.
 - **Monitoring**: every new subsystem registers MonitorCLT metrics on day one — `assignment.untouched_48h`, `payout.pending_count`, `dispo.blast_success_rate`. You already have the best ops layer in this comparison; keep it that way.
 - **Payments**: none needed. No membership billing (deliberately), payouts manual until partner count makes Stripe Connect worth it.
 - **Compliance**: partner outreach must inherit your DNC/TCPA handling (notably: their own training material warns $500–$1,500 per violating message — the drip engine's DNC flags must gate partner-initiated SMS too). Collect W-9s before first payout; issue 1099s at year end.
