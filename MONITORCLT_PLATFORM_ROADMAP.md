@@ -139,8 +139,9 @@ Two patterns borrowed from HomeSignal and wired to run: enforced provenance (ant
 - [x] Generic **json_api** adapter built (Tyler CSS / DevNet Wedge / Evolve / Accela backends are config-driven registry entries; fixture-tested) + `PORTALS.md` access playbook
 - [x] CSV-export adapter built → Union tax delinquency wired live (DevNet Wedge `/search/csv`), previously a total gap
 - [x] Tyler EnerGov CSS wired live via json_api → Iredell permits + code cases (anonymous JSON backend; nested pagination + dotted-path fields supported)
-- [ ] PDF adapter → Union delinquent-tax advertisement (adds $ amounts the CSV lacks); browser_api (Playwright) → bot-protected portals (St. Louis Collector, Statesville CSS behind Cloudflare)
-- [ ] Discover remaining portal backends: Union Evolve (permits/code), St. Louis Accela; **spatial-join** adapter (Iredell flag-only delinquency)
+- [x] PDF-list adapter built → Union delinquent-tax advertisement wired live (2,945 rows with $ amounts; Akamai passes with browser headers, no Playwright)
+- [ ] browser_api (Playwright) adapter → genuinely bot-protected portals (St. Louis Collector, Statesville CSS behind Cloudflare) — build when a source needs it
+- [ ] Discover remaining portal backends (in progress): Union Evolve (permits/code), St. Louis Accela permits + 1st/2nd/3rd tax sale; **spatial-join** adapter (Iredell flag-only delinquency)
 - [ ] Add CSV / CKAN / RSS / EPA adapters behind the same interface as needed
 - [ ] Register each source as a MonitorCLT pipeline (nightly) with its own success metric + freshness gate (several layers are stale snapshots)
 

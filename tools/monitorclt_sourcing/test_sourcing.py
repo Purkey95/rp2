@@ -165,6 +165,30 @@ def main():
     ok &= check("csv record url from template",
                 any(s.source_url == "https://wedge.example/parcel/view/01012001A/2026" for s in csig), True)
 
+    # ---- PDF-list adapter (delinquent-tax-advertisement-shaped), offline ----
+    from adapters.pdf_list import PdfListAdapter
+    pdf_entry = {
+        "registry_id": "demo-pdf", "platform": "pdf", "source_name": "Demo Delinquent Tax Ad",
+        "row_regex": r"^(?P<owner>\S.*?\S)\s{2,}(?P<description>\S.*?\S)\s{2,}(?P<amount>[\d,]+\.\d{2})\s*$",
+        "dataset_url": "https://county.example/delinquent-ad",
+        "column_map": {"native_id": "_rowline", "situs_address": "description"},
+        "default_bucket": "active", "default_type": "tax_delinquency",
+    }
+    pdf_text = (
+        "         NOTICE OF UNPAID 2025 REAL ESTATE TAXES\n"
+        "OWNER NAME                          DESCRIPTION            AMOUNT DUE\n"
+        "104-A WAXHAW HOLDINGS LLC          104 WAXHAW PARK DR       2248.21\n"
+        "ABEE, MOLLY CHRISTINA              2411 POTTER DOWNS DR     1862.64\n"
+        "  (page 1 of 42)\n"
+        "ZULUAGA, GUILLERMO                 1811 CONFEDERATE ST       505.41\n"
+    )
+    pdf_adapter = PdfListAdapter(fetch_json=lambda e: pdf_text)
+    psig, pq, prep = pdf_adapter.run(pdf_entry)
+    ok &= check("pdf rows parsed (headers skipped)", prep.emitted, 3)
+    ok &= check("pdf amount captured in raw", psig[0].raw.get("amount"), "2248.21")
+    ok &= check("pdf situs mapped", psig[1].situs_address, "2411 POTTER DOWNS DR")
+    ok &= check("pdf all delinquent (default_bucket)", all(s.bucket == "active" for s in psig), True)
+
     # ---- Registry validation catches an unsourceable entry ----
     bad = {"registry_id": "x", "platform": "socrata", "source_name": "X",
            "domain": "d", "dataset_id": "i",

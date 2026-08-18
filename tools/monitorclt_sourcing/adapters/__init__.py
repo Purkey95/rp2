@@ -4,12 +4,14 @@ from .arcgis import ArcgisAdapter
 from .socrata import SocrataAdapter
 from .json_api import JsonApiAdapter
 from .csv_export import CsvExportAdapter
+from .pdf_list import PdfListAdapter
 
 ADAPTERS = {
     "arcgis": ArcgisAdapter,
     "socrata": SocrataAdapter,
     "json_api": JsonApiAdapter,
     "csv_export": CsvExportAdapter,
+    "pdf": PdfListAdapter,
 }
 
 

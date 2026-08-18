@@ -253,6 +253,22 @@
       "status_to_bucket": {"In Progress": "active", "On Hold": "active", "Fees Paid": "active", "Closed - Resolved": "resolved", "Closed - Unfounded": "resolved"},
       "type_map": {"Minimum Housing": "housing_violation", "Work Without Permit": "unpermitted_work", "On-Site Water Protection": "environmental", "Vector": "nuisance", "Erosion Control": "erosion_control"},
       "default_type": "code_case"
+    },
+    {
+      "registry_id": "union-delinquent-tax-advertisement",
+      "platform": "pdf",
+      "source_name": "Union County NC Delinquent Tax Lien Advertisement",
+      "request": {
+        "url": "https://www.unioncountync.gov/home/showpublisheddocument/11418/639099489231370000",
+        "headers": {"Referer": "https://www.unioncountync.gov/government/departments-r-z/taxes-property/collection-payment/delinquent-tax-lien-advertisement"}
+      },
+      "row_regex": "^(?P<owner>\\S.*?\\S)\\s{2,}(?P<description>\\S.*?\\S)\\s{2,}(?P<amount>[\\d,]+\\.\\d{2})\\s*$",
+      "dataset_url": "https://www.unioncountync.gov/government/departments-r-z/taxes-property/collection-payment/delinquent-tax-lien-advertisement",
+      "note": "Annual statutory delinquent-tax advertisement (G.S. 105-369), ~2,945 rows. Adds the AMOUNT DUE that the DevNet CSV lacks (owner + situs + amount in raw). Live-verified: Akamai passes with browser headers (no Playwright needed); pdftotext -layout + row_regex. Update url yearly (new showpublisheddocument id from the advertisement page). No per-record URL -> dataset_url (advertisement page), sourced precision.",
+      "column_map": {"native_id": "_rowline", "situs_address": "description"},
+      "default_bucket": "active",
+      "default_status_label": "unpaid",
+      "default_type": "tax_delinquency"
     }
   ],
 
@@ -264,14 +280,6 @@
       "service_url": "https://maps.iredellcountync.gov/server/rest/services/Data/DelinquentTaxes/MapServer/0",
       "blocked_by": "needs_spatial_join",
       "note": "3,142 delinquent parcel polygons, but the layer carries ONLY DELINQ flag + ASOF date -- no PIN/owner/address. Needs a spatial join to TaxSQL_Parcels to attach a subject. Fields: DELINQ='Delinquent Taxes Owed', ASOF."
-    },
-    {
-      "registry_id": "union-delinquent-tax-advertisement-pdf",
-      "platform": "pdf",
-      "source_name": "Union County NC Delinquent Tax Lien Advertisement (annual PDF)",
-      "blocked_by": "needs_pdf_adapter",
-      "url": "https://www.unioncountync.gov/government/departments-r-z/taxes-property/collection-payment/delinquent-tax-lien-advertisement",
-      "note": "Authoritative annual delinquent list under G.S. 105-369 (~2,900 rows: OWNER NAME | DESCRIPTION/situs | AMOUNT DUE). Adds the dollar amount the DevNet CSV lacks. Akamai-protected: needs full browser headers (Sec-Fetch-*, Accept-Language, Referer) -> browser_api/pdf adapter. Tax delinquency itself is already wired via union-tax-delinquency-csv (status + parcel key, no amount)."
     },
     {
       "registry_id": "union-permits-code-evolve",
