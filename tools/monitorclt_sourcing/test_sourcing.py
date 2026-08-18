@@ -93,6 +93,41 @@ def main():
     ok &= check("statusless bucket=active", all(s.bucket == "active" for s in lsig), True)
     ok &= check("statusless type", all(s.signal_type == "tax_sale" for s in lsig), True)
 
+    # ---- JSON-API portal adapter (Tyler-CSS-shaped), paginated, offline ----
+    from adapters.json_api import JsonApiAdapter
+    css_entry = {
+        "registry_id": "demo-css", "platform": "json_api", "source_name": "Demo County Permits (CSS)",
+        "request": {"url": "https://css.example/api/search", "method": "POST", "body": {},
+                    "page_param": "PageNumber", "page_in": "body", "page_start": 1,
+                    "page_size_param": "PageSize", "page_size": 2},
+        "records_path": "Result.EntityResults",
+        "record_url_template": "https://css.example/permit/{CaseNumber}",
+        "column_map": {"native_id": "CaseNumber", "status": "StatusCode", "type": "CaseType",
+                       "apn": "ParcelNumber", "situs_address": "Address"},
+        "status_to_bucket": {"Issued": "active", "Finaled": "resolved"},
+        "type_map": {"Building": "building_permit", "Demolition": "demolition_permit"},
+    }
+    pages = {
+        1: {"Result": {"EntityResults": [
+            {"CaseNumber": "BLDR-26-001", "StatusCode": "Issued", "CaseType": "Building",
+             "ParcelNumber": "0710-45", "Address": "5 Main St"},
+            {"CaseNumber": "DEM-26-002", "StatusCode": "Finaled", "CaseType": "Demolition",
+             "ParcelNumber": "0710-46", "Address": "7 Oak Ave"}]}},
+        2: {"Result": {"EntityResults": []}},  # short page -> stop
+    }
+
+    def fake_css(spec):
+        return pages.get(spec["body"].get("PageNumber"), {"Result": {"EntityResults": []}})
+
+    adapter = JsonApiAdapter(fetch_json=fake_css)
+    jsignals, jq, jrep = adapter.run(css_entry)
+    ok &= check("json_api emitted (paginated)", jrep.emitted, 2)
+    ok &= check("json_api record url from template",
+                jsignals[0].source_url, "https://css.example/permit/BLDR-26-001")
+    ok &= check("json_api classified", sorted(s.signal_type for s in jsignals),
+                ["building_permit", "demolition_permit"])
+    ok &= check("json_api buckets", sorted(s.bucket for s in jsignals), ["active", "resolved"])
+
     # ---- Registry validation catches an unsourceable entry ----
     bad = {"registry_id": "x", "platform": "socrata", "source_name": "X",
            "domain": "d", "dataset_id": "i",

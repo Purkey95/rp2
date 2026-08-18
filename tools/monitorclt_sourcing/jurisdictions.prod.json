@@ -3,6 +3,23 @@
 
   "sources": [
     {
+      "registry_id": "meck-permits",
+      "platform": "arcgis",
+      "source_name": "Charlotte-Mecklenburg Accela Permits",
+      "service_url": "https://meckgis.mecklenburgcountync.gov/server/rest/services/AccelaAllPermits/FeatureServer/0",
+      "fetch_mode": "groupby",
+      "groupby_fields": ["permit_number", "permit_status", "type_of_work", "cama_parcel_number", "project_address", "zip_code", "latitude", "longitude"],
+      "groupby_stat_field": "OBJECTID",
+      "where": "1=1",
+      "dataset_url": "https://meckgis.mecklenburgcountync.gov/server/rest/services/AccelaAllPermits/FeatureServer/0",
+      "date_field": "issue_date",
+      "note": "Server blocks record-level outFields queries (HTTP 400); ingested via groupBy so each grouped feature is one permit. Per-record permalink unavailable -> dataset_url fallback (sourced precision). permit_type is NULL -> type_of_work.",
+      "column_map": {"native_id": "permit_number", "status": "permit_status", "type": "type_of_work", "apn": "cama_parcel_number", "situs_address": "project_address", "situs_zip": "zip_code", "lat": "latitude", "lng": "longitude"},
+      "status_to_bucket": {"Inspection Phase": "active", "In Review": "active", "In Review - Waiting on Agency": "active", "Additional Info Required": "active", "Permits Issued": "active", "COC Issued": "active", "TCO Issued": "active", "Pending": "active", "Pending Permit Issuance": "active", "Pending - Condition": "active", "Closed - Complete": "resolved", "Closed - COC Issued": "resolved", "Closed - Withdrawn": "resolved", "Project Ended - Success": "resolved", "Cancelled": "resolved", "Permit Expired": "resolved", "Expired": "resolved", "All Finaled": "resolved", "Building Finaled": "resolved", "Resigned": "resolved", "Bond Amount Exceeded": "resolved"},
+      "type_map": {"New": "new_construction", "Alteration": "renovation_permit", "Addition": "addition_permit", "StandaloneBuilding": "building_permit", "Demolition": "demolition_permit", "Accessory": "accessory_permit", "Electrical": "electrical_permit", "Mechanical": "mechanical_permit", "Equipment Changeout": "equipment_changeout", "Plumbing": "plumbing_permit", "PoolSpa": "pool_spa", "Fire": "fire_permit", "Upfit": "commercial_upfit", "Site Works": "site_works", "In Scope": "in_scope"},
+      "default_type": "building_permit"
+    },
+    {
       "registry_id": "meck-code-enforcement",
       "platform": "arcgis",
       "source_name": "Charlotte-Mecklenburg Code Enforcement",
@@ -177,15 +194,6 @@
   ],
 
   "sources_pending_adapter": [
-    {
-      "registry_id": "meck-permits",
-      "platform": "arcgis",
-      "source_name": "Charlotte-Mecklenburg Accela Permits (ALL)",
-      "service_url": "https://meckgis.mecklenburgcountync.gov/server/rest/services/AccelaAllPermits/FeatureServer/0",
-      "blocked_by": "groupby_only",
-      "note": "184,539 rows, fresh to 2026-08-19. Server returns HTTP 400 on record-level outFields queries; data must be pulled via groupByFieldsForStatistics(permit_number,project_address,cama_parcel_number,permit_status,type_of_work,zip_code). Needs an ArcGIS groupBy fetch mode in the adapter. permit_type is NULL -> use type_of_work.",
-      "fields": {"native_id": "permit_number", "status": "permit_status", "type": "type_of_work", "apn": "cama_parcel_number", "situs_address": "project_address", "situs_zip": "zip_code", "lat": "latitude", "lng": "longitude"}
-    },
     {
       "registry_id": "iredell-tax-delinquency",
       "platform": "arcgis",

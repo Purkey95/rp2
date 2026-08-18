@@ -2,10 +2,12 @@
 
 from .arcgis import ArcgisAdapter
 from .socrata import SocrataAdapter
+from .json_api import JsonApiAdapter
 
 ADAPTERS = {
     "arcgis": ArcgisAdapter,
     "socrata": SocrataAdapter,
+    "json_api": JsonApiAdapter,
 }
 
 

@@ -57,6 +57,7 @@ def main():
     ap.add_argument("--source", required=True, help="registry_id to run")
     ap.add_argument("--fixture", help="JSON fixture path (offline mode)")
     ap.add_argument("--zip", help="restrict to one ZIP")
+    ap.add_argument("--limit", type=int, help="cap records fetched (smoke-testing big feeds)")
     ap.add_argument("--outdir", default="out")
     args = ap.parse_args()
 
@@ -70,7 +71,12 @@ def main():
         signals, quarantines, report = normalize_rows(entry, rows)
     else:
         adapter = get_adapter(entry["platform"], fetch_json=live_fetch_json)
-        signals, quarantines, report = adapter.run(entry, args.zip)
+        if args.limit:
+            import itertools
+            rows = list(itertools.islice(adapter.fetch_rows(entry, args.zip), args.limit))
+            signals, quarantines, report = normalize_rows(entry, rows)
+        else:
+            signals, quarantines, report = adapter.run(entry, args.zip)
 
     os.makedirs(args.outdir, exist_ok=True)
     write_jsonl(os.path.join(args.outdir, "signals.jsonl"), [s.as_row() for s in signals])
