@@ -1,0 +1,7 @@
+{"signal_type": "tax_delinquency", "bucket": "active", "apn": "07104521", "source_url": "https://union.example/parcel/07104521"}
+{"signal_type": "code_violation", "bucket": "active", "apn": "07104521", "source_url": "https://charlotte.example/case/CE-1"}
+{"signal_type": "foreclosure", "bucket": "active", "apn": "11902388", "source_url": "https://meck.example/foreclosure/1"}
+{"signal_type": "vacancy", "bucket": "active", "apn": "11902388", "source_url": "https://stl.example/vacancy/1"}
+{"signal_type": "code_violation", "bucket": "resolved", "apn": "16700423", "source_url": "https://charlotte.example/case/CE-2"}
+{"signal_type": "demolition_permit", "bucket": "active", "apn": "09330188", "source_url": "https://rowan.example/permit/DEM-9"}
+{"signal_type": "tax_delinquency", "bucket": "active", "apn": "05512304", "source_url": "https://rowan.example/parcel/05512304"}

@@ -1,0 +1,85 @@
+{
+  "_comment": "Owner Distress Score config. signal_weights apply when a signal of that type is present and ACTIVE (open/unresolved) on the parcel. Types marked (future) in the README aren't wired to a source yet but score automatically the moment one is. derived_weights are computed in-module from parcel fields. A stacking bonus rewards signals spanning multiple categories, per the 'stack them' thesis. Weights are a starting point -- tune freely.",
+
+  "signal_weights": {
+    "tax_delinquency": 20,
+    "tax_sale": 20,
+    "foreclosure": 20,
+    "forced_sale": 18,
+    "demo_sale": 15,
+    "demolition_permit": 20,
+    "vacancy": 15,
+    "code_violation": 15,
+    "code_case": 15,
+    "nuisance": 15,
+    "housing_violation": 15,
+    "unpermitted_work": 10,
+    "zoning_violation": 8,
+    "environmental": 12,
+    "erosion_control": 6,
+    "renovation_permit": 6,
+    "development_case": 4,
+    "rezoning": 3,
+
+    "hoa_lien": 15,
+    "municipal_lien": 15,
+    "judgment_lien": 12,
+    "mechanics_lien": 12,
+    "tax_lien": 15,
+    "inherited_recent": 12,
+    "probate": 12,
+    "divorce": 10,
+    "bankruptcy": 12,
+    "eviction": 10,
+    "repeat_eviction": 15,
+    "expired_mls": 12,
+    "failed_inspection": 12,
+    "utility_inactive": 15,
+    "fire_damage": 20,
+    "storm_damage": 12
+  },
+
+  "derived_weights": {
+    "absentee": 8,
+    "out_of_state": 7,
+    "long_tenure_20y": 5,
+    "high_equity_proxy": 8,
+    "recently_sold_another": 10,
+    "large_portfolio": 4
+  },
+
+  "category_of": {
+    "tax_delinquency": "financial", "tax_sale": "financial", "foreclosure": "financial",
+    "forced_sale": "financial", "demo_sale": "financial",
+    "hoa_lien": "financial", "municipal_lien": "financial", "judgment_lien": "financial",
+    "mechanics_lien": "financial", "tax_lien": "financial", "bankruptcy": "financial",
+    "high_equity_proxy": "financial",
+
+    "code_violation": "deterioration", "code_case": "deterioration", "nuisance": "deterioration",
+    "housing_violation": "deterioration", "unpermitted_work": "deterioration",
+    "zoning_violation": "deterioration", "environmental": "deterioration",
+    "demolition_permit": "deterioration", "renovation_permit": "deterioration",
+    "erosion_control": "deterioration", "failed_inspection": "deterioration",
+    "fire_damage": "deterioration", "storm_damage": "deterioration", "vacancy": "deterioration",
+
+    "inherited_recent": "transition", "probate": "transition", "divorce": "transition",
+    "eviction": "transition", "repeat_eviction": "transition",
+
+    "recently_sold_another": "behavioral", "large_portfolio": "behavioral",
+    "expired_mls": "behavioral", "utility_inactive": "behavioral",
+
+    "absentee": "ownership", "out_of_state": "ownership", "long_tenure_20y": "ownership",
+    "development_case": "ownership", "rezoning": "ownership"
+  },
+
+  "stacking_bonus_per_extra_category": 6,
+  "stacking_bonus_cap": 18,
+
+  "bands": [
+    {"min": 81, "label": "immediate", "action": "immediate research / outreach"},
+    {"min": 61, "label": "priority", "action": "priority acquisition lead"},
+    {"min": 41, "label": "mail_call", "action": "direct mail + call"},
+    {"min": 21, "label": "digital", "action": "low-cost digital / direct mail"},
+    {"min": 0, "label": "skip", "action": "don't market"}
+  ]
+}

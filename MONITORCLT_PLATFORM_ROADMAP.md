@@ -150,6 +150,17 @@ Two patterns borrowed from HomeSignal and wired to run: enforced provenance (ant
 **Entity resolution (next; not yet built):**
 - [ ] Resolve parcels → beneficial owner (LLC/person) so portfolio/repeat-seller signals surface — the edge neither HomeSignal nor LandConnect has
 
+## 3a2. To-do — Owner Distress Score (synthesis; built)
+
+The capstone that turns sourced signals into ranked leads. Starter engine at `tools/monitorclt_score/` — runs, 14 tests green, every point traceable to its source.
+
+- [x] Scoring engine: joins `signals` (active only) to parcels, computes derived signals (absentee, out-of-state, 20y tenure, high-equity proxy, portfolio) + behavioral (`recently_sold_another` via owner entity resolution), stacks across categories, bands 0–100
+- [x] Configurable `weights.json` (point weights + category map + bands); config-ready weights for not-yet-wired signals (liens, probate, eviction, MLS, fire/utility) that score automatically once a source emits them
+- [x] Full provenance: each contributing point carries its `source_url` or computed reason
+- [ ] Wire `load_*` to Postgres (`signals` + enrichment `parcels`); write to a `leads` table; emit `score.leads_priority_plus` + band counts to the digest
+- [ ] Add entity-resolution depth (portfolio-shrinking over time, quitclaim/LLC-transfer events) once ROD deed data is wired
+- [ ] Tune weights against real closed-deal outcomes
+
 ## 3a. To-do — Contact enrichment (Phase 0 core; started)
 
 Two-step: parcel join (free, own data) → skip trace (paid, only on what survives). Starter engine committed at `tools/monitorclt_enrichment/` — runs, tested, CSV-driven; wire to the live DB.
