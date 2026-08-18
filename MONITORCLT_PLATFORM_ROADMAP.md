@@ -135,7 +135,10 @@ Two patterns borrowed from HomeSignal and wired to run: enforced provenance (ant
 - [x] Live-proven end-to-end: Iredell dev cases 47/47, St. Louis tax sale 1,039/1,039 through the real endpoints
 - [ ] Run the remaining 10 sources on the host + upsert into `signals`; emit `source_coverage` to the digest
 - [ ] Convert the dead-lettered scrapers: `stlco_taxsale` → St. Louis Post_Third (DONE as registry entry); `rod_lending_ocr`/`rod_match` → Mecklenburg foreclosure deeds + parcels; `iredell_delinquent` → Iredell delinquency (needs spatial-join adapter)
-- [ ] Build the pending adapters: ArcGIS **groupBy** mode (Mecklenburg permits, 184k), **spatial-join** (Iredell/flag-only delinquency), and **HTML/PDF** (Union, Gaston tax, St. Louis 1st/2nd/3rd, Accela/DevNet portals) — this is where the remaining distress signals live
+- [x] ArcGIS **groupBy** mode built + live-verified → Mecklenburg permits (184k) now a live source with point coords
+- [x] Generic **json_api** adapter built (Tyler CSS / DevNet Wedge / Evolve / Accela backends are config-driven registry entries; fixture-tested) + `PORTALS.md` access playbook
+- [ ] Discover + wire real portal endpoints (in progress): Union tax delinquency (DevNet Wedge / delinquent-tax advertisement), Iredell Tyler EnerGov CSS permits/code
+- [ ] Build remaining pending adapters: **spatial-join** (Iredell/flag-only delinquency) and **browser_api** (Playwright, for bot-protected portals like St. Louis Collector)
 - [ ] Add CSV / CKAN / RSS / EPA adapters behind the same interface as needed
 - [ ] Register each source as a MonitorCLT pipeline (nightly) with its own success metric + freshness gate (several layers are stale snapshots)
 
