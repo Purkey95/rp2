@@ -1,0 +1,230 @@
+{
+  "_comment": "MonitorCLT production jurisdiction registry. Endpoints byte-verified live 2026-08-18 against each county's ArcGIS service (record counts + field names confirmed). Three arrays: 'sources' run through the adapters->signals pipeline NOW; 'sources_pending_adapter' are verified but need an adapter capability we haven't built (groupBy, spatial-join, or HTML/PDF); 'parcel_sources' are reference parcels that feed the enrichment parcels table, NOT the signals pipeline. source_url for each signal is a per-record ArcGIS /query permalink (record precision). All ArcGIS queries carry outSR=4326 (handled by the adapter) so St. Louis (wkid 102696) etc. return lat/lng. No API keys required for any endpoint.",
+
+  "sources": [
+    {
+      "registry_id": "meck-code-enforcement",
+      "platform": "arcgis",
+      "source_name": "Charlotte-Mecklenburg Code Enforcement",
+      "service_url": "https://gis.charlottenc.gov/arcgis/rest/services/HNS/CodeEnforcementCasesAll/MapServer/0",
+      "where": "1=1",
+      "record_url_template": "https://gis.charlottenc.gov/arcgis/rest/services/HNS/CodeEnforcementCasesAll/MapServer/0/query?where=CaseNumber='{CaseNumber}'&outFields=*&f=html",
+      "dataset_url": "https://gis.charlottenc.gov/arcgis/rest/services/HNS/CodeEnforcementCasesAll/MapServer/0",
+      "date_field": "DateCreated",
+      "column_map": {"native_id": "CaseNumber", "status": "CaseStatus", "type": "CaseType", "apn": "ParcelId", "situs_address": "FullAddress"},
+      "status_to_bucket": {"Open": "active", "New": "active", "Closed": "resolved"},
+      "type_map": {"Nuisance": "nuisance", "Zoning": "zoning_violation", "Housing": "housing_violation", "Graffiti": "graffiti", "Parking": "parking_violation", "Commercial": "commercial_violation"},
+      "default_type": "code_violation"
+    },
+    {
+      "registry_id": "meck-foreclosure",
+      "platform": "arcgis",
+      "source_name": "Mecklenburg County Foreclosure Deed Transfers",
+      "service_url": "https://meckgis.mecklenburgcountync.gov/server/rest/services/TaxParcelSales/FeatureServer/0",
+      "where": "salesvalidity='FC'",
+      "record_url_template": "https://meckgis.mecklenburgcountync.gov/server/rest/services/TaxParcelSales/FeatureServer/0/query?where=transferid={transferid}&outFields=*&f=html",
+      "dataset_url": "https://meckgis.mecklenburgcountync.gov/server/rest/services/TaxParcelSales/FeatureServer/0",
+      "date_field": "saledate",
+      "note": "Realized foreclosure DEED transfers (salesvalidity=FC), not a pre-foreclosure list. status is the validity code (constant FC here).",
+      "column_map": {"native_id": "transferid", "status": "salesvalidity", "type": "naldesc", "apn": "parcelid"},
+      "status_to_bucket": {"FC": "active"},
+      "type_map": {"FORECLOSURE": "foreclosure", "FORCED SALE OR AUCTION": "forced_sale", "DEMO SALE": "demo_sale"},
+      "default_type": "foreclosure"
+    },
+    {
+      "registry_id": "meck-rezoning",
+      "platform": "arcgis",
+      "source_name": "Charlotte Rezoning Petitions",
+      "service_url": "https://gis.charlottenc.gov/arcgis/rest/services/PLN/RezoningHistory/MapServer/0",
+      "where": "1=1",
+      "record_url_template": "https://gis.charlottenc.gov/public/PlanningRezoning/Files/{Petition}/{Petition}_Application.PDF",
+      "dataset_url": "https://gis.charlottenc.gov/arcgis/rest/services/PLN/RezoningHistory/MapServer/0",
+      "date_field": "Received",
+      "note": "Polygon layer, no address attribute (spatial-join to parcels for address). record_url is the real per-petition application PDF.",
+      "column_map": {"native_id": "Petition", "status": "Status", "type": "Type"},
+      "status_to_bucket": {"Pen": "active", "App": "resolved", "Den": "resolved", "Wd": "resolved", "Def": "resolved"},
+      "type_map": {"CD": "conditional_district", "NC": "general_district", "CV": "conventional", "Conditional": "conditional_district"},
+      "default_type": "rezoning"
+    },
+    {
+      "registry_id": "iredell-development-cases",
+      "platform": "arcgis",
+      "source_name": "Iredell County Development Activity",
+      "service_url": "https://maps.iredellcountync.gov/server/rest/services/Planning/Development_Activity_Countywide/MapServer/2",
+      "where": "1=1",
+      "record_url_template": "https://maps.iredellcountync.gov/server/rest/services/Planning/Development_Activity_Countywide/MapServer/2/query?where=OBJECTID={OBJECTID}&outFields=*&f=html",
+      "dataset_url": "https://maps.iredellcountync.gov/server/rest/services/Planning/Development_Activity_Countywide/MapServer/2",
+      "date_field": "TRC_Date",
+      "column_map": {"native_id": "OBJECTID", "status": "Status", "type": "Type", "apn": "PINs", "situs_address": "Address"},
+      "status_to_bucket": {"Sketch Plan": "active", "Submitted, In Review": "active", "Preliminary Plat Approved": "active", "Final Plat Approved, Under Construction": "active", "Under Construction": "active", "Denied": "resolved"},
+      "type_map": {"Standard Subdivision": "subdivision", "Cluster": "cluster_subdivision", "PUD": "pud"},
+      "default_type": "development_case"
+    },
+    {
+      "registry_id": "cabarrus-permits",
+      "platform": "arcgis",
+      "source_name": "Cabarrus County Plan-Review Permits",
+      "service_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/Current_Accela_Permits/Plan_Reviews/MapServer/0",
+      "where": "1=1",
+      "record_url_template": "https://location.cabarruscounty.us/arcgisservices/rest/services/Current_Accela_Permits/Plan_Reviews/MapServer/0/query?where=B1_ALT_ID='{B1_ALT_ID}'&outFields=*&f=html",
+      "dataset_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/Current_Accela_Permits/Plan_Reviews/MapServer/0",
+      "date_field": "B1_APPL_STATUS_DATE",
+      "freshness_note": "STALE: snapshot last updated ~2025-04-04 as of research. Confirm refresh cadence before trusting as live.",
+      "column_map": {"native_id": "B1_ALT_ID", "status": "B1_APPL_STATUS", "type": "ReviewType", "apn": "ParcelNum", "situs_address": "StreetAddress"},
+      "status_to_bucket": {"Initial Submission": "active", "Plans Received": "active", "In Review": "active", "Additional Info Requested": "active", "Changes Required": "active", "Pending": "active", "Awaiting Payment": "active", "Pending Payment": "active", "Building Permit In Process": "active", "County Review Complete": "active", "Approved for Permitting": "active", "Building Approved": "active", "Building Approved with Cond": "active", "BU Complete": "resolved", "Record Complete": "resolved"},
+      "type_map": {"Residential": "residential_permit", "Commercial New": "commercial_permit", "Commercial Upfit": "commercial_upfit", "Commercial Site": "commercial_site", "Industrial Site": "industrial_site", "Subdivision Construction": "subdivision", "Preliminary Plat": "preliminary_plat", "Final Plat": "final_plat", "Sign": "sign_permit", "Fire": "fire_permit", "Fire Equipment": "fire_permit", "Temporary Use": "temporary_use", "Temporary Power": "temporary_power"},
+      "default_type": "plan_review"
+    },
+    {
+      "registry_id": "cabarrus-foreclosure",
+      "platform": "arcgis",
+      "source_name": "Cabarrus County Tax Foreclosure Sales",
+      "service_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/Foreclosure/Foreclosure/MapServer/0",
+      "where": "1=1",
+      "record_url_template": "https://location.cabarruscounty.us/arcgisservices/rest/services/Foreclosure/Foreclosure/MapServer/0/query?where=USER_CaseNumber='{USER_CaseNumber}'&outFields=*&f=html",
+      "dataset_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/Foreclosure/Foreclosure/MapServer/0",
+      "date_field": "USER_DateTimeStamp",
+      "freshness_note": "STALE: max timestamp 2019 as of research. Verify it still updates before use.",
+      "column_map": {"native_id": "USER_CaseNumber", "status": "USER_Status", "apn": "USER_RealIDGIS", "situs_address": "Match_addr"},
+      "status_to_bucket": {"COMPLAINT/JUDGMENT": "active", "UPSET BID PERIOD": "active", "SALE SCHEDULED": "active"},
+      "default_type": "tax_foreclosure"
+    },
+    {
+      "registry_id": "gaston-permits",
+      "platform": "arcgis",
+      "source_name": "Gaston County Residential Building Permits",
+      "service_url": "https://services6.arcgis.com/qnm8JRPoNeQjgcLi/arcgis/rest/services/BuildingPermits_2026/FeatureServer/0",
+      "where": "1=1",
+      "record_url_template": "https://services6.arcgis.com/qnm8JRPoNeQjgcLi/arcgis/rest/services/BuildingPermits_2026/FeatureServer/0/query?where=PERMIT_NUMBER='{PERMIT_NUMBER}'&outFields=*&f=html",
+      "dataset_url": "https://services6.arcgis.com/qnm8JRPoNeQjgcLi/arcgis/rest/services/BuildingPermits_2026/FeatureServer/0",
+      "date_field": "ISSUE_DATE",
+      "note": "Residential new-construction only (no commercial/remodel/demo). No parcel/PIN.",
+      "column_map": {"native_id": "PERMIT_NUMBER", "status": "STATUS", "type": "WORK_CLASS", "situs_address": "WHOLE_ADDRESS_2", "situs_zip": "POSTALCODE"},
+      "status_to_bucket": {"Issued": "active", "Complete": "resolved", "Expired": "resolved", "Void": "resolved"},
+      "type_map": {"New Single Family": "new_single_family", "New Multi Family": "new_multi_family", "Modular Home": "modular_home"},
+      "default_type": "residential_permit"
+    },
+    {
+      "registry_id": "lincoln-code-violations",
+      "platform": "arcgis",
+      "source_name": "Lincoln County Code Violations",
+      "service_url": "https://arcgisserver.lincolncountync.gov/arcgis/rest/services/ComDev/MapServer/15",
+      "where": "1=1",
+      "record_url_template": "https://arcgisserver.lincolncountync.gov/arcgis/rest/services/ComDev/MapServer/15/query?where=VIOLATIONID='{VIOLATIONID}'&outFields=*&f=html",
+      "dataset_url": "https://arcgisserver.lincolncountync.gov/arcgis/rest/services/ComDev/MapServer/15",
+      "date_field": "SUBMITDT",
+      "column_map": {"native_id": "VIOLATIONID", "status": "STATUS", "type": "VIOLATEDESC", "situs_address": "FULLADDR"},
+      "status_to_bucket": {"Open": "active", "Closed": "resolved"},
+      "type_map": {"Abandoned structure": "vacancy", "Junk vehicles": "code_violation", "Junkyard": "code_violation", "Construction debris": "code_violation", "Demolition debris": "code_violation", "Manufactured home - No permit": "unpermitted_work", "Accessory structure - No permit": "unpermitted_work", "Addition/Alteration - No permit": "unpermitted_work", "Setback encroachment": "zoning_violation", "Building code": "code_violation"},
+      "default_type": "code_violation"
+    },
+    {
+      "registry_id": "rowan-permits",
+      "platform": "arcgis",
+      "source_name": "Rowan County Building Permits",
+      "service_url": "https://gis.rowancountync.gov/arcgis/rest/services/Public/Building_Permits/MapServer/6",
+      "where": "1=1",
+      "record_url_template": "https://gis.rowancountync.gov/arcgis/rest/services/Public/Building_Permits/MapServer/6/query?where=sPermitNum='{sPermitNum}'&outFields=*&f=html",
+      "dataset_url": "https://gis.rowancountync.gov/arcgis/rest/services/Public/Building_Permits/MapServer/6",
+      "date_field": "dIssued",
+      "note": "Address is split across sAddress1/sPreDirection/sAddress2/sStreetT; situs_address maps to sAddress1 only (partial).",
+      "column_map": {"native_id": "sPermitNum", "status": "sName", "type": "PermitType", "apn": "sPacelNum", "situs_address": "sAddress1"},
+      "status_to_bucket": {"Submitted": "active", "Action Required": "active", "Active": "active", "Approved": "active", "Final": "resolved", "Expired/Inactive": "resolved", "Refunded": "resolved", "Rejected/Denied": "resolved"},
+      "type_map": {"Commercial": "commercial_permit", "Electrical": "electrical_permit", "Mechanical": "mechanical_permit", "Plans Review": "plan_review", "Plumbing": "plumbing_permit", "Residential": "residential_permit", "Special": "special_permit"},
+      "default_type": "building_permit"
+    },
+    {
+      "registry_id": "rowan-tax-delinquency",
+      "platform": "arcgis",
+      "source_name": "Rowan County Tax Delinquency (balance-due parcels)",
+      "service_url": "https://gis.rowancountync.gov/arcgis/rest/services/Public/RowanTaxParcels/MapServer/0",
+      "where": "BALDUE='Y'",
+      "record_url_template": "https://gis.rowancountync.gov/arcgis/rest/services/Public/RowanTaxParcels/MapServer/0/query?where=PIN='{PIN}'&outFields=*&f=html",
+      "dataset_url": "https://gis.rowancountync.gov/arcgis/rest/services/Public/RowanTaxParcels/MapServer/0",
+      "note": "Delinquency-by-flag: BALDUE='Y' parcels. No balance amount or age. status is the flag value.",
+      "column_map": {"native_id": "PIN", "status": "BALDUE", "apn": "PIN", "situs_address": "PROP_ADDRESS", "situs_zip": "ZIPCODE"},
+      "status_to_bucket": {"Y": "active"},
+      "default_type": "tax_delinquency"
+    },
+    {
+      "registry_id": "stlouis-tax-sale-post-third",
+      "platform": "arcgis",
+      "source_name": "St. Louis County MO Post-Third Tax Sale Offerings",
+      "service_url": "https://services2.arcgis.com/w657bnjzrjguNyOy/arcgis/rest/services/Post_Third/FeatureServer/0",
+      "where": "1=1",
+      "record_url_template": "https://services2.arcgis.com/w657bnjzrjguNyOy/arcgis/rest/services/Post_Third/FeatureServer/0/query?where=THIRD_csv_LOCATOR='{THIRD_csv_LOCATOR}'&outFields=*&f=html",
+      "dataset_url": "https://services2.arcgis.com/w657bnjzrjguNyOy/arcgis/rest/services/Post_Third/FeatureServer/0",
+      "note": "Statusless roster (every row is an active tax-sale offering) -> default_bucket. wkid 102696; adapter's outSR=4326 handles it.",
+      "column_map": {"native_id": "THIRD_csv_LOCATOR", "apn": "THIRD_csv_LOCATOR", "situs_address": "THIRD_csv_Address", "situs_zip": "THIRD_csv_Zip"},
+      "status_to_bucket": {},
+      "default_bucket": "active",
+      "default_status_label": "post_third_offering",
+      "default_type": "tax_sale"
+    },
+    {
+      "registry_id": "stlouis-vacancy",
+      "platform": "arcgis",
+      "source_name": "St. Louis County MO Vacancy Inspected Parcels",
+      "service_url": "https://services2.arcgis.com/w657bnjzrjguNyOy/arcgis/rest/services/Vacancy_Parcels_Inspected/FeatureServer/0",
+      "where": "1=1",
+      "record_url_template": "https://services2.arcgis.com/w657bnjzrjguNyOy/arcgis/rest/services/Vacancy_Parcels_Inspected/FeatureServer/0/query?where=OBJECTID={OBJECTID}&outFields=*&f=html",
+      "dataset_url": "https://services2.arcgis.com/w657bnjzrjguNyOy/arcgis/rest/services/Vacancy_Parcels_Inspected/FeatureServer/0",
+      "freshness_note": "Inspections ~2022; small set (146). Confirm cadence.",
+      "column_map": {"native_id": "OBJECTID", "status": "USER_STATUS", "apn": "LOCATOR", "situs_address": "PROP_ADD", "situs_zip": "PROP_ZIP"},
+      "status_to_bucket": {"OPEN": "active", "Send to Inspector": "active", "Sent to Vacant Monitor": "active", "Notice of Violation Issued": "active", "NOT QUALIFIED": "resolved"},
+      "default_type": "vacancy"
+    }
+  ],
+
+  "sources_pending_adapter": [
+    {
+      "registry_id": "meck-permits",
+      "platform": "arcgis",
+      "source_name": "Charlotte-Mecklenburg Accela Permits (ALL)",
+      "service_url": "https://meckgis.mecklenburgcountync.gov/server/rest/services/AccelaAllPermits/FeatureServer/0",
+      "blocked_by": "groupby_only",
+      "note": "184,539 rows, fresh to 2026-08-19. Server returns HTTP 400 on record-level outFields queries; data must be pulled via groupByFieldsForStatistics(permit_number,project_address,cama_parcel_number,permit_status,type_of_work,zip_code). Needs an ArcGIS groupBy fetch mode in the adapter. permit_type is NULL -> use type_of_work.",
+      "fields": {"native_id": "permit_number", "status": "permit_status", "type": "type_of_work", "apn": "cama_parcel_number", "situs_address": "project_address", "situs_zip": "zip_code", "lat": "latitude", "lng": "longitude"}
+    },
+    {
+      "registry_id": "iredell-tax-delinquency",
+      "platform": "arcgis",
+      "source_name": "Iredell County Delinquent Taxes",
+      "service_url": "https://maps.iredellcountync.gov/server/rest/services/Data/DelinquentTaxes/MapServer/0",
+      "blocked_by": "needs_spatial_join",
+      "note": "3,142 delinquent parcel polygons, but the layer carries ONLY DELINQ flag + ASOF date -- no PIN/owner/address. Needs a spatial join to TaxSQL_Parcels to attach a subject. Fields: DELINQ='Delinquent Taxes Owed', ASOF."
+    },
+    {
+      "registry_id": "union-distress-html",
+      "platform": "html",
+      "source_name": "Union County NC distress (permits/tax) -- portals only",
+      "blocked_by": "no_open_api",
+      "note": "Union publishes permits via Evolve portal (ucinspect.unioncountync.gov/evolvepublic), tax via DevNet Wedge (unionnc.devnetwedge.com) + PDF lien advertisements. No ArcGIS/Socrata. Needs HTML/PDF adapter. Parcels + zoning ARE open (see parcel_sources)."
+    },
+    {
+      "registry_id": "gaston-tax-foreclosure-html",
+      "platform": "html",
+      "source_name": "Gaston County Tax Foreclosures -- HTML only",
+      "blocked_by": "no_open_api",
+      "note": "gastongov.com/668 + Kania Law Firm foreclosure listings. HTML, needs adapter."
+    },
+    {
+      "registry_id": "stlouis-tax-sale-123-html",
+      "platform": "html",
+      "source_name": "St. Louis County MO 1st/2nd/3rd sale + Accela permits -- HTML only",
+      "blocked_by": "no_open_api",
+      "note": "1st/2nd/3rd-year sale lists on Collector pages (bot-protected 403); permits on Accela (aca-prod.accela.com/SLC). Only Post-Third is an open API (in 'sources'). Needs HTML/browser adapter."
+    }
+  ],
+
+  "parcel_sources": [
+    {"registry_id": "meck-parcels", "platform": "arcgis", "county": "Mecklenburg", "service_url": "https://gis.charlottenc.gov/arcgis/rest/services/CLT_Ex/CLTEx_MoreInfo/MapServer/4", "count": 442310, "apn": "PID", "owner": ["Owner_FirstName", "Owner_LastName"], "situs": "Location", "mail": ["Mailing_Address", "City", "State", "Zip_Code"], "coords_from": "https://meckgis.mecklenburgcountync.gov/server/rest/services/TaxParcel_camadata/FeatureServer/0 (xcoord/ycoord)", "record_url": "Property_URL"},
+    {"registry_id": "iredell-parcels", "platform": "arcgis", "county": "Iredell", "service_url": "https://maps.iredellcountync.gov/server/rest/services/Data/TaxSQL_Parcels/FeatureServer/0", "count": 110030, "apn": "PIN", "owner": ["Name", "Jan1Own1"], "situs": ["HouseNumber", "SDIR", "STREET", "STYPE"], "mail": ["ADD1", "CITY", "STATE", "ZIP"]},
+    {"registry_id": "union-parcels", "platform": "arcgis", "county": "Union", "service_url": "https://gis.unioncountync.gov/server/rest/services/Hosted/Infovision/FeatureServer/2", "count": 112630, "apn": "acctno", "owner": "NONE (owner name not in any public Union GIS layer)", "situs": "physstradd", "mail": ["curr_city", "curr_state", "curr_zipcode"]},
+    {"registry_id": "cabarrus-parcels", "platform": "arcgis", "county": "Cabarrus", "service_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/Tax_Parcels_Full/MapServer/0", "count": 110215, "apn": "PIN14", "owner": ["AcctName1", "AcctName2"], "situs": "NONE (mailing only; join Addresses layer for situs)", "mail": ["MailAddr1", "MailCity", "MailState", "MailZipCode"], "extra": "VacantOrImproved flag, SalePrice/DeedBook"},
+    {"registry_id": "gaston-parcels", "platform": "arcgis", "county": "Gaston", "service_url": "https://cogserver.gastonianc.gov/serverweb/rest/services/Parcels/GastonCountyParcels/MapServer/0", "count": 115066, "apn": "PIN", "owner": ["CURR_NAME1", "CURR_NAME2"], "situs": "PHYSSTRADD", "mail": ["CURR_ADDR1", "CURR_CITY", "CURR_STATE", "CURR_ZIPCODE"]},
+    {"registry_id": "lincoln-parcels", "platform": "arcgis", "county": "Lincoln", "service_url": "https://arcgisserver.lincolncountync.gov/arcgis/rest/services/Server_TaxParcelViewerSP/MapServer/0", "count": 56969, "apn": "PIN", "owner": ["NAME1", "NAME2"], "situs": "PHYSICALADDR", "mail": ["ADDRESS1", "CITY", "STATE", "ZIP"], "extra": "VACANT (Y/N) flag, SALEPRICE/SDATE"},
+    {"registry_id": "rowan-parcels", "platform": "arcgis", "county": "Rowan", "service_url": "https://gis.rowancountync.gov/arcgis/rest/services/Public/RowanTaxParcels/MapServer/0", "count": 83713, "apn": "PIN", "owner": ["OWNNAME", "OWN2"], "situs": "PROP_ADDRESS", "mail": ["TAXADD1", "CITY", "STATE", "ZIPCODE"], "extra": "BALDUE flag, SALE_AMT/DATESOLD"},
+    {"registry_id": "stlouis-parcels", "platform": "arcgis", "county": "St. Louis MO", "service_url": "https://maps.stlouisco.com/hosting/rest/services/Maps/AGS_Parcels/MapServer/0", "count": 401431, "apn": "LOCATOR", "owner": ["OWNER_NAME"], "situs": "PROP_ADD", "mail": ["OWN_ADD", "OWN_CITY", "OWN_STATE", "OWN_ZIP"], "extra": "wkid 102696 -> outSR=4326; ZONING, ACRES, TOTAPVAL"}
+  ]
+}

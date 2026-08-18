@@ -130,11 +130,14 @@ Two patterns borrowed from HomeSignal and wired to run: enforced provenance (ant
 - [ ] Emit `source_coverage` into the MonitorCLT daily digest (a source dropping to `coverage_coming` = the alert the dead-lettering never gave)
 
 **Adapters (built ArcGIS + Socrata):**
-- [x] Generic ArcGIS + Socrata adapters, registry-driven (add a county = one JSON entry, no code); five governance rules enforced in a shared normalizer; CLI dry-run + live modes
-- [ ] Build the real `jurisdictions.prod.json` — start with Mecklenburg + Iredell permits/tax/code endpoints
-- [ ] Convert the flakiest dead-lettered scrapers (`rod_lending_ocr`, `stlco_taxsale`, `ncua_distress`) to registry entries where the county exposes ArcGIS/Socrata
+- [x] Generic ArcGIS + Socrata adapters, registry-driven (add a county = one JSON entry, no code); five governance rules enforced in a shared normalizer; CLI dry-run + live modes; statusless (`default_bucket`) support for tax-sale/demolition rosters
+- [x] Built + validated real `jurisdictions.prod.json` — 12 signal sources across 8 counties (Mecklenburg, Iredell, Union, Cabarrus, Gaston, Lincoln, Rowan NC + St. Louis MO) + 8 parcel sources, all endpoints byte-verified live
+- [x] Live-proven end-to-end: Iredell dev cases 47/47, St. Louis tax sale 1,039/1,039 through the real endpoints
+- [ ] Run the remaining 10 sources on the host + upsert into `signals`; emit `source_coverage` to the digest
+- [ ] Convert the dead-lettered scrapers: `stlco_taxsale` → St. Louis Post_Third (DONE as registry entry); `rod_lending_ocr`/`rod_match` → Mecklenburg foreclosure deeds + parcels; `iredell_delinquent` → Iredell delinquency (needs spatial-join adapter)
+- [ ] Build the pending adapters: ArcGIS **groupBy** mode (Mecklenburg permits, 184k), **spatial-join** (Iredell/flag-only delinquency), and **HTML/PDF** (Union, Gaston tax, St. Louis 1st/2nd/3rd, Accela/DevNet portals) — this is where the remaining distress signals live
 - [ ] Add CSV / CKAN / RSS / EPA adapters behind the same interface as needed
-- [ ] Register each source as a MonitorCLT pipeline (nightly) with its own success metric
+- [ ] Register each source as a MonitorCLT pipeline (nightly) with its own success metric + freshness gate (several layers are stale snapshots)
 
 **Entity resolution (next; not yet built):**
 - [ ] Resolve parcels → beneficial owner (LLC/person) so portfolio/repeat-seller signals surface — the edge neither HomeSignal nor LandConnect has

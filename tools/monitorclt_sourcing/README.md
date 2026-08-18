@@ -70,6 +70,26 @@ Then:
    `coverage_coming` (i.e. it stopped returning data) alerts you the way a
    dead-lettered scraper should have.
 
+## Verified county coverage (jurisdictions.prod.json)
+
+Endpoints byte-verified live 2026-08-18 against each county's ArcGIS service.
+`jurisdictions.prod.json` holds three arrays: **sources** (12, run now), **sources_pending_adapter** (need a capability we haven't built), **parcel_sources** (8, feed enrichment, not signals). Two sources were live-run end-to-end through the adapters (Iredell dev cases 47/47; St. Louis tax sale 1,039/1,039).
+
+| County | Runnable signal sources | Notes |
+|---|---|---|
+| Mecklenburg | code enforcement (429k), foreclosure deeds (42k FC) | permits (184k, fresh) need a **groupBy** adapter mode (pending) |
+| Iredell | development cases | delinquency layer needs a **spatial join** (pending) |
+| Cabarrus | permits (128k), tax foreclosure (210) | both flagged **stale** — confirm cadence |
+| Gaston | residential permits | tax foreclosure is HTML-only (pending) |
+| Lincoln | code violations (3.4k) | no permit/tax feed |
+| Rowan | building permits (138k), tax-delinquency flag (3.1k) | richest NC permit feed |
+| St. Louis MO | tax sale post-third (1,039), vacancy (146) | 1st/2nd/3rd sale + Accela permits HTML-only (pending) |
+| Union | — | all distress behind Evolve/DevNet portals (pending HTML adapter) |
+
+Parcels (owner + address) verified and available for **every** county → `parcel_sources`, for the enrichment join.
+
+**The gap this exposes honestly:** for several counties the highest-value distress signals (tax delinquency, tax sale, code) are *not* open APIs — they live behind Tyler/Accela/Evolve/DevNet portals or PDF advertisements. Those need the HTML/PDF adapter (next), and it's exactly why MonitorCLT's original per-portal scrapers existed and kept breaking.
+
 ## Adding a county / source
 
 Append one entry to the registry. No code changes. Minimum keys:

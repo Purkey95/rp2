@@ -78,13 +78,26 @@ def normalize_row(entry, row):
         return Quarantine("no_source_url", "row produced no record or dataset URL", row)
 
     # Rule 4 — NEVER GUESS THE BUCKET: exact status lookup; blank/unmapped excluded.
-    status = _get(row, cmap.get("status"))
-    if not status:
-        return Quarantine("blank_status", "status field empty", row)
-    status_to_bucket = {k.strip().lower(): v for k, v in entry.get("status_to_bucket", {}).items()}
-    bucket = status_to_bucket.get(status.lower())
-    if bucket is None:
-        return Quarantine("unmapped_status", status, row)
+    # A statusless source (a tax-sale or demolition LIST, where every row is the
+    # same actionable state) declares default_bucket instead of a status column —
+    # this is a fixed, source-level assertion, not a per-row guess.
+    status_col = cmap.get("status")
+    if not status_col and entry.get("default_bucket"):
+        status = entry.get("default_status_label", "listed")
+        bucket = entry["default_bucket"]
+    else:
+        status = _get(row, status_col)
+        if not status:
+            return Quarantine("blank_status", "status field empty", row)
+        # Collapse internal whitespace for the lookup (a double space in a county
+        # status string is never semantically meaningful) — but keep the raw status
+        # on the signal for provenance.
+        def _norm(s):
+            return " ".join(s.split()).lower()
+        status_to_bucket = {_norm(k): v for k, v in entry.get("status_to_bucket", {}).items()}
+        bucket = status_to_bucket.get(_norm(status))
+        if bucket is None:
+            return Quarantine("unmapped_status", status, row)
     if bucket not in BUCKETS:
         return Quarantine("unmapped_status", f"bucket '{bucket}' not canonical", row)
 

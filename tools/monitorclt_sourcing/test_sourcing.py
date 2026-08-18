@@ -78,6 +78,21 @@ def main():
     ok &= check("stable ids (idempotent)",
                 [s.signal_id for s in signals] == [s.signal_id for s in s2], True)
 
+    # ---- Statusless source uses default_bucket (tax-sale/demolition list) ----
+    listing_entry = {
+        "registry_id": "x", "platform": "arcgis", "source_name": "Tax Sale List",
+        "service_url": "https://h/FeatureServer/0", "dataset_url": "https://h/FeatureServer/0",
+        "default_bucket": "active", "default_type": "tax_sale",
+        "column_map": {"native_id": "id", "apn": "locator", "situs_address": "addr"},
+        "status_to_bucket": {},
+    }
+    lrows = [{"id": "TS-1", "locator": "12-345", "addr": "1 Main St"},
+             {"id": "TS-2", "locator": "67-890", "addr": "2 Oak Ave"}]
+    lsig, lq, lrep = normalize_rows(listing_entry, lrows)
+    ok &= check("statusless default_bucket emits", lrep.emitted, 2)
+    ok &= check("statusless bucket=active", all(s.bucket == "active" for s in lsig), True)
+    ok &= check("statusless type", all(s.signal_type == "tax_sale" for s in lsig), True)
+
     # ---- Registry validation catches an unsourceable entry ----
     bad = {"registry_id": "x", "platform": "socrata", "source_name": "X",
            "domain": "d", "dataset_id": "i",

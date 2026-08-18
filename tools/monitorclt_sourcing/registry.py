@@ -8,7 +8,7 @@ rather than silently emitting nothing at 3am.
 
 import json
 
-REQUIRED = ("registry_id", "platform", "source_name", "column_map", "status_to_bucket")
+REQUIRED = ("registry_id", "platform", "source_name", "column_map")
 PLATFORM_KEYS = {
     "arcgis": ("service_url",),
     "socrata": ("domain", "dataset_id"),
@@ -25,8 +25,13 @@ def validate_entry(entry):
         if not entry.get(k):
             problems.append(f"{plat} entry missing '{k}'")
     cmap = entry.get("column_map", {})
-    if not cmap.get("status"):
-        problems.append("column_map.status is required (drives the bucket rule)")
+    # A source needs EITHER a status column (with a status_to_bucket map) OR a
+    # default_bucket (statusless list, e.g. a tax-sale roster).
+    if cmap.get("status"):
+        if not entry.get("status_to_bucket"):
+            problems.append("column_map.status is set but status_to_bucket is missing/empty")
+    elif not entry.get("default_bucket"):
+        problems.append("need column_map.status (+status_to_bucket) or default_bucket")
     # Anti-fabrication: an entry must be able to produce a URL some way, or every
     # row it yields will quarantine — catch that at load, not per-row at runtime.
     if not (cmap.get("record_url") or entry.get("record_url_template") or entry.get("dataset_url")):
