@@ -119,6 +119,26 @@ Everything here is exposure of data you already compute — their versions are O
 
 ---
 
+## 3a0. To-do — Sourcing: provenance + adapters (HomeSignal patterns; started)
+
+Two patterns borrowed from HomeSignal and wired to run: enforced provenance (anti-fabrication) and registry-driven source adapters. Starter engine committed at `tools/monitorclt_sourcing/` — runs offline against fixtures, 14 governance tests green. Fixes the dead-lettered per-county scrapers by replacing bespoke HTML scraping with generic ArcGIS/Socrata connectors, and stops parse artifacts masquerading as real signals.
+
+**Provenance (built):**
+- [x] `signals` model + anti-fabrication gate: every signal carries `source_url`, `confidence`, `retrieved_at`; unsourceable rows quarantined, never written
+- [x] `data_quality` grade per source (`pass` / `coverage_coming`) + `schema.sql` with provenance constraints and the `source_coverage` view
+- [ ] Apply `schema.sql`; backfill provenance onto existing signal tables
+- [ ] Emit `source_coverage` into the MonitorCLT daily digest (a source dropping to `coverage_coming` = the alert the dead-lettering never gave)
+
+**Adapters (built ArcGIS + Socrata):**
+- [x] Generic ArcGIS + Socrata adapters, registry-driven (add a county = one JSON entry, no code); five governance rules enforced in a shared normalizer; CLI dry-run + live modes
+- [ ] Build the real `jurisdictions.prod.json` — start with Mecklenburg + Iredell permits/tax/code endpoints
+- [ ] Convert the flakiest dead-lettered scrapers (`rod_lending_ocr`, `stlco_taxsale`, `ncua_distress`) to registry entries where the county exposes ArcGIS/Socrata
+- [ ] Add CSV / CKAN / RSS / EPA adapters behind the same interface as needed
+- [ ] Register each source as a MonitorCLT pipeline (nightly) with its own success metric
+
+**Entity resolution (next; not yet built):**
+- [ ] Resolve parcels → beneficial owner (LLC/person) so portfolio/repeat-seller signals surface — the edge neither HomeSignal nor LandConnect has
+
 ## 3a. To-do — Contact enrichment (Phase 0 core; started)
 
 Two-step: parcel join (free, own data) → skip trace (paid, only on what survives). Starter engine committed at `tools/monitorclt_enrichment/` — runs, tested, CSV-driven; wire to the live DB.
