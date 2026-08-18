@@ -283,10 +283,11 @@
     },
     {
       "registry_id": "union-permits-code-evolve",
-      "platform": "html",
-      "source_name": "Union County NC permits/code (CentralSquare Evolve) -- portal only",
-      "blocked_by": "no_open_api",
-      "note": "Permits/code via Evolve Public (ucinspect.unioncountync.gov/evolvepublic). Discover its backend before choosing json_api vs browser_api. Parcels + zoning ARE open (see parcel_sources)."
+      "platform": "browser_api",
+      "source_name": "Union County NC permits/code (CentralSquare Evolve)",
+      "blocked_by": "viewstate_webfarm",
+      "url": "https://ucinspect.unioncountync.gov/evolvepublic/",
+      "note": "VERIFIED dead-end for clean ingestion: ASP.NET WebForms, no JSON/api, and ViewState-replay fails with 'Validation of viewstate MAC failed' (web-farm with per-instance auto machineKeys + no session affinity). Permit Search IS anonymous but reachable only by browser_api holding ONE live session and clicking through (still fights the cluster). No ArcGIS permit layer exists. BEST PATH = Rung 3 records request: Union County Building Code Enforcement, ucinspections@unioncountync.gov / (704) 283-3816 -- ask if CentralSquare can export a feed. NOTE: City of Monroe (not the county) runs Harris CityView with an anonymous JSON endpoint (cvportal.monroenc.org/Portal/Permit/LocatorResults) but it's city-only, permits-only (no code), and returns HTML inside a JSON 'View' field -- a partial, separate dataset, not wired."
     },
     {
       "registry_id": "gaston-tax-foreclosure-html",

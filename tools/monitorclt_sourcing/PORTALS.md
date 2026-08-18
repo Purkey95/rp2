@@ -100,6 +100,16 @@ Findings from probing the actual portals — what rung each really lands on:
   request the list from the Collector of Revenue. (Post-third is already open via
   ArcGIS.)
 
+- **Union permits/code (Evolve) → rung 3 or 4, both painful.** CentralSquare
+  Evolve is ASP.NET WebForms with a broken web-farm ViewState (per-instance
+  machineKeys, no session affinity) — ViewState-replay 500s with "viewstate MAC
+  failed," and there is no JSON API and no ArcGIS permit layer. Permit search is
+  anonymous but only via a single live browser session (browser_api, still fights
+  the cluster). **Most reliable is a records request** to Union County Building
+  Code Enforcement (ucinspections@unioncountync.gov, 704-283-3816). City of Monroe
+  (separate) has a wireable CityView JSON endpoint, but city-only, permits-only,
+  HTML-in-JSON — a different, partial dataset.
+
 **Environment caveat.** The `browser_api` adapter needs Playwright + real outbound
 networking; it runs on the **MonitorCLT host**, not in the Claude sandbox (headless
 browser egress is blocked here — curl/urllib work, the browser does not). And a
