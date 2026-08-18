@@ -190,6 +190,27 @@
       "column_map": {"native_id": "OBJECTID", "status": "USER_STATUS", "apn": "LOCATOR", "situs_address": "PROP_ADD", "situs_zip": "PROP_ZIP"},
       "status_to_bucket": {"OPEN": "active", "Send to Inspector": "active", "Sent to Vacant Monitor": "active", "Notice of Violation Issued": "active", "NOT QUALIFIED": "resolved"},
       "default_type": "vacancy"
+    },
+    {
+      "registry_id": "union-tax-delinquency-csv",
+      "platform": "csv_export",
+      "source_name": "Union County NC Tax Delinquency (DevNet wEdge CSV)",
+      "request": {
+        "url": "https://unionnc.devnetwedge.com/search/csv",
+        "query": {"pageSize": 10000},
+        "enum_param": "q",
+        "enum_terms": ["a", "e", "i", "o", "u", "n", "r", "s", "t", "l", "c", "d", "m", "p", "b", "h"],
+        "page_param": "p",
+        "page_in": "query",
+        "page_size_param": "pageSize",
+        "page_size": 10000,
+        "dedup_field": "Number"
+      },
+      "record_url_template": "https://unionnc.devnetwedge.com/parcel/view/{Number}/{Year}",
+      "note": "DevNet Wedge has NO JSON API (server-rendered ASP.NET); /search/csv is the machine-readable export (no auth). CSV lacks a dollar amount and separate PIN -- 'Number' is the parcel key; amount is on the per-parcel HTML detail (record_url). enum_terms iterate broad substrings to enumerate the county; dedup by Number. Delinquent = status Unpaid on an older Year. Companion authoritative source: the annual delinquent-tax advertisement PDF (owner+address+amount) -- see sources_pending_adapter (needs pdf adapter).",
+      "column_map": {"native_id": "Number", "status": "Payment Status", "apn": "Number", "situs_address": "Address"},
+      "status_to_bucket": {"Unpaid": "active", "Paid": "resolved", "Not Billed": "informational"},
+      "default_type": "tax_delinquency"
     }
   ],
 
@@ -203,11 +224,19 @@
       "note": "3,142 delinquent parcel polygons, but the layer carries ONLY DELINQ flag + ASOF date -- no PIN/owner/address. Needs a spatial join to TaxSQL_Parcels to attach a subject. Fields: DELINQ='Delinquent Taxes Owed', ASOF."
     },
     {
-      "registry_id": "union-distress-html",
+      "registry_id": "union-delinquent-tax-advertisement-pdf",
+      "platform": "pdf",
+      "source_name": "Union County NC Delinquent Tax Lien Advertisement (annual PDF)",
+      "blocked_by": "needs_pdf_adapter",
+      "url": "https://www.unioncountync.gov/government/departments-r-z/taxes-property/collection-payment/delinquent-tax-lien-advertisement",
+      "note": "Authoritative annual delinquent list under G.S. 105-369 (~2,900 rows: OWNER NAME | DESCRIPTION/situs | AMOUNT DUE). Adds the dollar amount the DevNet CSV lacks. Akamai-protected: needs full browser headers (Sec-Fetch-*, Accept-Language, Referer) -> browser_api/pdf adapter. Tax delinquency itself is already wired via union-tax-delinquency-csv (status + parcel key, no amount)."
+    },
+    {
+      "registry_id": "union-permits-code-evolve",
       "platform": "html",
-      "source_name": "Union County NC distress (permits/tax) -- portals only",
+      "source_name": "Union County NC permits/code (CentralSquare Evolve) -- portal only",
       "blocked_by": "no_open_api",
-      "note": "Union publishes permits via Evolve portal (ucinspect.unioncountync.gov/evolvepublic), tax via DevNet Wedge (unionnc.devnetwedge.com) + PDF lien advertisements. No ArcGIS/Socrata. Needs HTML/PDF adapter. Parcels + zoning ARE open (see parcel_sources)."
+      "note": "Permits/code via Evolve Public (ucinspect.unioncountync.gov/evolvepublic). Discover its backend before choosing json_api vs browser_api. Parcels + zoning ARE open (see parcel_sources)."
     },
     {
       "registry_id": "gaston-tax-foreclosure-html",

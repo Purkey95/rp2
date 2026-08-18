@@ -128,6 +128,37 @@ def main():
                 ["building_permit", "demolition_permit"])
     ok &= check("json_api buckets", sorted(s.bucket for s in jsignals), ["active", "resolved"])
 
+    # ---- CSV-export adapter (DevNet-Wedge-shaped), enum + dedup, offline ----
+    from adapters.csv_export import CsvExportAdapter
+    csv_entry = {
+        "registry_id": "demo-csv", "platform": "csv_export", "source_name": "Demo Tax CSV",
+        "request": {"url": "https://wedge.example/search/csv", "query": {"pageSize": 100},
+                    "enum_param": "q", "enum_terms": ["a", "b"], "dedup_field": "Number"},
+        "record_url_template": "https://wedge.example/parcel/view/{Number}/{Year}",
+        "column_map": {"native_id": "Number", "status": "Payment Status", "type": "Type",
+                       "apn": "Number", "situs_address": "Address"},
+        "status_to_bucket": {"Unpaid": "active", "Paid": "resolved"},
+        "default_type": "tax_delinquency",
+    }
+    csv_a = ("Year,Type,Number,Name,Address,Payment Status\n"
+             "2026,Parcel,01012001A,\"SMITH, N\",0 FISH RD MARSHVILLE NC 28103,Unpaid\n"
+             "2025,Parcel,01057018,\"DOE, J\",608 STAFFORD ST MONROE NC 28110,Paid\n")
+    csv_b = ("Year,Type,Number,Name,Address,Payment Status\n"
+             "2026,Parcel,01012001A,\"SMITH, N\",0 FISH RD MARSHVILLE NC 28103,Unpaid\n"  # dup of a
+             "2026,Parcel,09990001,\"ROE, R\",1 OAK LN WAXHAW NC 28173,Unpaid\n")
+    csv_pages = {"a": csv_a, "b": csv_b}
+
+    def fake_csv(url):
+        # crude: pick the fixture by the q= term present in the URL
+        return csv_pages["b"] if "q=b" in url else csv_pages["a"]
+
+    csv_adapter = CsvExportAdapter(fetch_json=fake_csv)
+    csig, cq2, crep2 = csv_adapter.run(csv_entry)
+    ok &= check("csv emitted (deduped across terms)", crep2.emitted, 3)  # 2 from a + 1 new from b
+    ok &= check("csv delinquent bucket", sum(1 for s in csig if s.bucket == "active"), 2)
+    ok &= check("csv record url from template",
+                any(s.source_url == "https://wedge.example/parcel/view/01012001A/2026" for s in csig), True)
+
     # ---- Registry validation catches an unsourceable entry ----
     bad = {"registry_id": "x", "platform": "socrata", "source_name": "X",
            "domain": "d", "dataset_id": "i",
