@@ -296,11 +296,23 @@
       "note": "gastongov.com/668 + Kania Law Firm foreclosure listings. HTML, needs adapter."
     },
     {
-      "registry_id": "stlouis-tax-sale-123-html",
-      "platform": "html",
-      "source_name": "St. Louis County MO 1st/2nd/3rd sale + Accela permits -- HTML only",
-      "blocked_by": "no_open_api",
-      "note": "1st/2nd/3rd-year sale lists on Collector pages (bot-protected 403); permits on Accela (aca-prod.accela.com/SLC). Only Post-Third is an open API (in 'sources'). Needs HTML/browser adapter."
+      "registry_id": "stlouis-tax-sale-123",
+      "platform": "browser_api",
+      "source_name": "St. Louis County MO 1st/2nd/3rd-year tax sale (Collector)",
+      "blocked_by": "cloudflare_challenge",
+      "urls": [
+        "https://stlouiscountymo.gov/st-louis-county-departments/revenue/collector-of-revenue/post-third-sale-offerings/",
+        "https://stlouiscountymo.gov/st-louis-county-departments/revenue/collector-of-revenue/real-property-tax-sale/",
+        "https://stlouiscountymo.gov/st-louis-county-departments/revenue/collector-of-revenue/1st-and-2nd-sale-listings/"
+      ],
+      "note": "Verified: HTTP 403 Cloudflare managed challenge (cf-mitigated: challenge, __cf_bm) even with full browser headers -- only a real browser that solves the JS challenge reaches the body; payload format (HTML table vs PDF/CSV) undetermined until then. Needs browser_api with a cf_clearance cookie, OR (more reliable) Rung 3: request the sale list from the Collector of Revenue. Post-third IS already wired via stlouis-tax-sale-post-third (ArcGIS)."
+    },
+    {
+      "registry_id": "stlouis-permits-accela",
+      "platform": "json_api_or_browser",
+      "source_name": "St. Louis County MO permits (Accela)",
+      "blocked_by": "auth_or_browser",
+      "note": "Two paths. PREFERRED (no browser): Accela Construct API v4 -- GET https://apis.accela.com/v4/records with headers x-accela-appid + x-accela-agency: SLC (records at result[]); verified live that the API exists (400 'App ID required' without one). Requires registering an App ID at developer.accela.com AND the county having enabled public API access for agency SLC (unconfirmed). If enabled, wire as a json_api entry. FALLBACK: browser_api against ACA WebForms -- entry https://aca-prod.accela.com/SLC/Default.aspx then Cap/GeneralSearch.aspx?module=PublicWorks&TabName=PublicWorks, submit date range, page the results grid."
     }
   ],
 

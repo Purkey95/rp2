@@ -75,6 +75,37 @@ is one registry entry once you've discovered its JSON call. Rung 3 lands as a
 adapter (not yet built). Every rung ends in the same `signals` table with full
 provenance, so where the data came from is always recorded.
 
+## Verified access notes (2026-08-18)
+
+Findings from probing the actual portals — what rung each really lands on:
+
+- **Union tax delinquency → SOLVED, no browser.** DevNet Wedge has no JSON API
+  but exposes `/search/csv` (rung 2/3, wired via `csv_export`); the statutory
+  delinquent-tax advertisement PDF (rung 3) parses cleanly and passed Akamai with
+  browser headers alone (wired via `pdf`). Amounts come from the PDF, status +
+  parcel from the CSV.
+- **Iredell permits/code → SOLVED, rung 2.** Tyler EnerGov CSS exposes an
+  anonymous JSON backend (`/energov_prod/selfservice/api/energov/search/search`,
+  tenant headers required) — wired via `json_api`.
+- **St. Louis permits → rung 2 (preferred) or rung 4.** Accela **Construct API v4**
+  is live (`GET https://apis.accela.com/v4/records`, `x-accela-agency: SLC`,
+  records at `result[]`) but needs an **App ID** (register at developer.accela.com)
+  AND the county to have enabled public API access (unconfirmed). If enabled it's a
+  `json_api` entry — no browser. Otherwise rung 4: ACA is ASP.NET WebForms
+  (module `PublicWorks`), driven by `browser_api` table mode.
+- **St. Louis 1st/2nd/3rd tax sale → rung 4, Cloudflare-gated.** The Collector
+  pages return `HTTP 403 cf-mitigated: challenge` even with full browser headers —
+  only a real browser that solves the JS challenge reaches the body. Use
+  `browser_api` with a persisted `cf_clearance` cookie, or (more reliable) rung 3:
+  request the list from the Collector of Revenue. (Post-third is already open via
+  ArcGIS.)
+
+**Environment caveat.** The `browser_api` adapter needs Playwright + real outbound
+networking; it runs on the **MonitorCLT host**, not in the Claude sandbox (headless
+browser egress is blocked here — curl/urllib work, the browser does not). And a
+Cloudflare managed challenge can resist headless automation even on a real host —
+when it does, a bulk-records request beats fighting Turnstile.
+
 ## Priority for our counties (from the coverage research)
 
 | County | Locked signal | Best rung to try |

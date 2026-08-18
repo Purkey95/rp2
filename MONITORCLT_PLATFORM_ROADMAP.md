@@ -140,8 +140,10 @@ Two patterns borrowed from HomeSignal and wired to run: enforced provenance (ant
 - [x] CSV-export adapter built → Union tax delinquency wired live (DevNet Wedge `/search/csv`), previously a total gap
 - [x] Tyler EnerGov CSS wired live via json_api → Iredell permits + code cases (anonymous JSON backend; nested pagination + dotted-path fields supported)
 - [x] PDF-list adapter built → Union delinquent-tax advertisement wired live (2,945 rows with $ amounts; Akamai passes with browser headers, no Playwright)
-- [ ] browser_api (Playwright) adapter → genuinely bot-protected portals (St. Louis Collector, Statesville CSS behind Cloudflare) — build when a source needs it
-- [ ] Discover remaining portal backends (in progress): Union Evolve (permits/code), St. Louis Accela permits + 1st/2nd/3rd tax sale; **spatial-join** adapter (Iredell flag-only delinquency)
+- [x] browser_api (Playwright) adapter built + mapping-tested — HOST-ONLY (headless browser egress is blocked in the sandbox; runs on the MonitorCLT host). json/table extraction modes.
+- [ ] St. Louis permits: register an Accela **App ID** (developer.accela.com, agency SLC) → wire Construct API v4 as a `json_api` entry (no browser); else run ACA via browser_api on the host
+- [ ] St. Louis 1st/2nd/3rd tax sale: Cloudflare-challenge — run browser_api with a cf_clearance cookie on the host, OR request the list from the Collector (more reliable)
+- [ ] Discover remaining: Union Evolve permits/code (in progress); **spatial-join** adapter (Iredell flag-only delinquency); yearly refresh of the Union advertisement PDF url
 - [ ] Add CSV / CKAN / RSS / EPA adapters behind the same interface as needed
 - [ ] Register each source as a MonitorCLT pipeline (nightly) with its own success metric + freshness gate (several layers are stale snapshots)
 

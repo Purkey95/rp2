@@ -5,6 +5,7 @@ from .socrata import SocrataAdapter
 from .json_api import JsonApiAdapter
 from .csv_export import CsvExportAdapter
 from .pdf_list import PdfListAdapter
+from .browser_api import BrowserApiAdapter
 
 ADAPTERS = {
     "arcgis": ArcgisAdapter,
@@ -12,6 +13,7 @@ ADAPTERS = {
     "json_api": JsonApiAdapter,
     "csv_export": CsvExportAdapter,
     "pdf": PdfListAdapter,
+    "browser_api": BrowserApiAdapter,
 }
 
 

@@ -189,6 +189,25 @@ def main():
     ok &= check("pdf situs mapped", psig[1].situs_address, "2411 POTTER DOWNS DR")
     ok &= check("pdf all delinquent (default_bucket)", all(s.bucket == "active" for s in psig), True)
 
+    # ---- browser_api adapter (mapping layer; rows injected, no real browser) ----
+    from adapters.browser_api import BrowserApiAdapter
+    br_entry = {
+        "registry_id": "demo-browser", "platform": "browser_api", "source_name": "Demo Tax Sale (browser)",
+        "browser": {"url": "https://county.example/tax-sale", "mode": "table", "table_selector": "table"},
+        "record_url_template": "https://county.example/parcel/{Locator}",
+        "column_map": {"native_id": "Locator", "apn": "Locator", "situs_address": "Address"},
+        "default_bucket": "active", "default_type": "tax_sale",
+    }
+    scraped = [
+        {"Locator": "12F-230877", "Owner": "DOE J", "Address": "1 MAIN ST", "Amount": "500.00"},
+        {"Locator": "13G-110044", "Owner": "ROE R", "Address": "2 OAK AVE", "Amount": "750.00"},
+    ]
+    br_adapter = BrowserApiAdapter(fetch_json=lambda e: scraped)
+    bsig, bq, brep = br_adapter.run(br_entry)
+    ok &= check("browser_api rows normalized", brep.emitted, 2)
+    ok &= check("browser_api record url", bsig[0].source_url, "https://county.example/parcel/12F-230877")
+    ok &= check("browser_api default type", all(s.signal_type == "tax_sale" for s in bsig), True)
+
     # ---- Registry validation catches an unsourceable entry ----
     bad = {"registry_id": "x", "platform": "socrata", "source_name": "X",
            "domain": "d", "dataset_id": "i",
