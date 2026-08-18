@@ -211,6 +211,48 @@
       "column_map": {"native_id": "Number", "status": "Payment Status", "apn": "Number", "situs_address": "Address"},
       "status_to_bucket": {"Unpaid": "active", "Paid": "resolved", "Not Billed": "informational"},
       "default_type": "tax_delinquency"
+    },
+    {
+      "registry_id": "iredell-permits-energov",
+      "platform": "json_api",
+      "source_name": "Iredell County Tyler EnerGov Permits",
+      "request": {
+        "url": "https://selfservice.iredellcountync.gov/energov_prod/selfservice/api/energov/search/search",
+        "method": "POST",
+        "headers": {"Content-Type": "application/json", "Accept": "application/json, text/plain, */*", "X-Requested-With": "XMLHttpRequest", "tenantId": "1", "tenantName": "home", "Tyler-TenantUrl": "home", "Tyler-Tenant-Culture": "en-US"},
+        "body": {"Keyword": "", "ExactMatch": false, "SearchModule": 2, "FilterModule": 1, "SearchMainAddress": false, "PlanCriteria": {}, "InspectionCriteria": {}, "CodeCaseCriteria": {}, "RequestCriteria": {}, "BusinessLicenseCriteria": {}, "ProfessionalLicenseCriteria": {}, "LicenseCriteria": {}, "ProjectCriteria": {}, "PermitCriteria": {"PermitTypeId": "none", "PermitStatusId": "none", "IssueDateFrom": "2025-01-01", "IssueDateTo": "2025-12-31", "SortBy": "IssueDate", "SortAscending": false, "PageNumber": 1, "PageSize": 100}, "ExcludeCases": null, "PageNumber": 1, "PageSize": 100, "SortBy": "IssueDate", "SortAscending": false},
+        "page_paths": ["PageNumber", "PermitCriteria.PageNumber"],
+        "page_size_paths": ["PageSize", "PermitCriteria.PageSize"],
+        "page_size": 100
+      },
+      "records_path": "Result.EntityResults",
+      "record_url_template": "https://selfservice.iredellcountync.gov/energov_prod/selfservice/#/permit/{CaseId}",
+      "note": "Tyler EnerGov CSS anonymous JSON backend (live-verified). Tenant headers required. Date window in PermitCriteria IssueDateFrom/To -- widen/roll forward per run. No lat/lng in records (Address only). record_url is a hash route (browser to render). type_map covers observed CaseTypes; 126 exist -> long tail is 'unclassified' by design.",
+      "column_map": {"native_id": "CaseNumber", "status": "CaseStatus", "type": "CaseType", "apn": "MainParcel", "situs_address": "Address.FullAddress", "situs_zip": "Address.PostalCode"},
+      "status_to_bucket": {"Issued": "active", "In Progress": "active", "Complete": "resolved", "Finaled": "resolved", "Expired": "resolved", "Revoked": "resolved", "Withdrawn": "resolved"},
+      "type_map": {"New Single Family Dwelling": "new_single_family", "New Residential Pool or Spa": "pool_spa", "New Commercial Pool / Spa": "pool_spa", "Renovation Upfit": "renovation_permit", "Cell Tower": "cell_tower", "OSWP - Septic Permit": "septic_permit", "Residential Install/Repair Plumbing": "plumbing_permit", "Changeout/Install - HVAC": "mechanical_permit", "Erosion Control - Major": "erosion_control"},
+      "default_type": "permit"
+    },
+    {
+      "registry_id": "iredell-code-cases-energov",
+      "platform": "json_api",
+      "source_name": "Iredell County Tyler EnerGov Code Cases",
+      "request": {
+        "url": "https://selfservice.iredellcountync.gov/energov_prod/selfservice/api/energov/search/search",
+        "method": "POST",
+        "headers": {"Content-Type": "application/json", "Accept": "application/json, text/plain, */*", "X-Requested-With": "XMLHttpRequest", "tenantId": "1", "tenantName": "home", "Tyler-TenantUrl": "home", "Tyler-Tenant-Culture": "en-US"},
+        "body": {"Keyword": "", "ExactMatch": false, "SearchModule": 5, "FilterModule": 3, "SearchMainAddress": false, "PlanCriteria": {}, "InspectionCriteria": {}, "PermitCriteria": {}, "RequestCriteria": {}, "BusinessLicenseCriteria": {}, "ProfessionalLicenseCriteria": {}, "LicenseCriteria": {}, "ProjectCriteria": {}, "CodeCaseCriteria": {"CodeCaseTypeId": "none", "CodeCaseStatusId": "none", "OpenedDateFrom": "2022-01-01", "OpenedDateTo": "2025-12-31", "SortBy": "OpenedDate", "SortAscending": false, "PageNumber": 1, "PageSize": 100}, "ExcludeCases": null, "PageNumber": 1, "PageSize": 100, "SortBy": "OpenedDate", "SortAscending": false},
+        "page_paths": ["PageNumber", "CodeCaseCriteria.PageNumber"],
+        "page_size_paths": ["PageSize", "CodeCaseCriteria.PageSize"],
+        "page_size": 100
+      },
+      "records_path": "Result.EntityResults",
+      "record_url_template": "https://selfservice.iredellcountync.gov/energov_prod/selfservice/#/code/{CaseId}",
+      "note": "Same EnerGov CSS backend, CodeCase module (SearchModule 5 / FilterModule 3).",
+      "column_map": {"native_id": "CaseNumber", "status": "CaseStatus", "type": "CaseType", "apn": "MainParcel", "situs_address": "Address.FullAddress", "situs_zip": "Address.PostalCode"},
+      "status_to_bucket": {"In Progress": "active", "On Hold": "active", "Fees Paid": "active", "Closed - Resolved": "resolved", "Closed - Unfounded": "resolved"},
+      "type_map": {"Minimum Housing": "housing_violation", "Work Without Permit": "unpermitted_work", "On-Site Water Protection": "environmental", "Vector": "nuisance", "Erosion Control": "erosion_control"},
+      "default_type": "code_case"
     }
   ],
 

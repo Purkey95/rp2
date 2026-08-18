@@ -137,8 +137,10 @@ Two patterns borrowed from HomeSignal and wired to run: enforced provenance (ant
 - [ ] Convert the dead-lettered scrapers: `stlco_taxsale` → St. Louis Post_Third (DONE as registry entry); `rod_lending_ocr`/`rod_match` → Mecklenburg foreclosure deeds + parcels; `iredell_delinquent` → Iredell delinquency (needs spatial-join adapter)
 - [x] ArcGIS **groupBy** mode built + live-verified → Mecklenburg permits (184k) now a live source with point coords
 - [x] Generic **json_api** adapter built (Tyler CSS / DevNet Wedge / Evolve / Accela backends are config-driven registry entries; fixture-tested) + `PORTALS.md` access playbook
-- [ ] Discover + wire real portal endpoints (in progress): Union tax delinquency (DevNet Wedge / delinquent-tax advertisement), Iredell Tyler EnerGov CSS permits/code
-- [ ] Build remaining pending adapters: **spatial-join** (Iredell/flag-only delinquency) and **browser_api** (Playwright, for bot-protected portals like St. Louis Collector)
+- [x] CSV-export adapter built → Union tax delinquency wired live (DevNet Wedge `/search/csv`), previously a total gap
+- [x] Tyler EnerGov CSS wired live via json_api → Iredell permits + code cases (anonymous JSON backend; nested pagination + dotted-path fields supported)
+- [ ] PDF adapter → Union delinquent-tax advertisement (adds $ amounts the CSV lacks); browser_api (Playwright) → bot-protected portals (St. Louis Collector, Statesville CSS behind Cloudflare)
+- [ ] Discover remaining portal backends: Union Evolve (permits/code), St. Louis Accela; **spatial-join** adapter (Iredell flag-only delinquency)
 - [ ] Add CSV / CKAN / RSS / EPA adapters behind the same interface as needed
 - [ ] Register each source as a MonitorCLT pipeline (nightly) with its own success metric + freshness gate (several layers are stale snapshots)
 

@@ -57,6 +57,15 @@ def _dig(obj, dotted):
     return cur
 
 
+def _set_dotted(obj, dotted, value):
+    """Set a dotted path inside a nested dict, creating intermediate dicts."""
+    parts = dotted.split(".")
+    cur = obj
+    for part in parts[:-1]:
+        cur = cur.setdefault(part, {})
+    cur[parts[-1]] = value
+
+
 def default_fetch_json(request):
     """Live fetch honoring the registry's request spec (GET or POST JSON)."""
     method = request.get("method", "GET").upper()
@@ -79,21 +88,37 @@ class JsonApiAdapter(SourceAdapter):
         # injection point serves fixtures (tests) and live portal calls.
         super().__init__(fetch_json or default_fetch_json)
 
+    def _paginates(self, request):
+        return bool(request.get("page_paths") or request.get("page_param"))
+
     def _paged_requests(self, request, zip_code):
-        """Yield request specs, one per page, bumping the page param each time."""
+        """Yield request specs, one per page, bumping the page number each time.
+
+        Two paging shapes:
+          - page_paths: a list of dotted locations in the body where the page
+            number must be set (Tyler CSS wants it BOTH top-level and inside
+            PermitCriteria); page_size_paths likewise. This is the general form.
+          - page_param/page_in: the simple single-location form.
+        """
         page = request.get("page_start", 1)
         size = request.get("page_size")
         while True:
             spec = _json.loads(_json.dumps(request))  # deep copy
-            if request.get("page_param"):
+            if request.get("page_paths"):
+                body = spec.setdefault("body", {})
+                for path in request["page_paths"]:
+                    _set_dotted(body, path, page)
+                if size:
+                    for path in request.get("page_size_paths", []):
+                        _set_dotted(body, path, size)
+            elif request.get("page_param"):
                 target = spec["body"] if request.get("page_in") == "body" else \
                     spec.setdefault("query", {})
                 target[request["page_param"]] = page
                 if size and request.get("page_size_param"):
                     target[request["page_size_param"]] = size
-            # zip filter is portal-specific; the registry bakes it into body/url.
             yield spec, page
-            if not request.get("page_param"):
+            if not self._paginates(request):
                 break
             page += 1
 
@@ -111,7 +136,7 @@ class JsonApiAdapter(SourceAdapter):
                 yield row
             # Stop on a short/empty page or the page bound.
             size = request.get("page_size")
-            if not request.get("page_param"):
+            if not self._paginates(request):
                 break
             if not rows or (size and len(rows) < size) or seen_pages >= max_pages:
                 break

@@ -20,10 +20,24 @@ from provenance import (
 
 
 def _get(row, ref):
-    """Read a possibly-dotted column reference from a row; '' if absent/None."""
+    """Read a column reference from a row; '' if absent/None.
+
+    Supports a dotted path into nested JSON (e.g. 'Address.FullAddress' for a
+    Tyler CSS record) — but a flat key that exists wins first, so ordinary
+    column names still work unchanged.
+    """
     if ref is None:
         return ""
-    val = row.get(ref)
+    if isinstance(row, dict) and ref in row:
+        val = row.get(ref)
+    elif "." in ref:
+        val = row
+        for part in ref.split("."):
+            val = val.get(part) if isinstance(val, dict) else None
+            if val is None:
+                break
+    else:
+        val = None
     return "" if val is None else str(val).strip()
 
 

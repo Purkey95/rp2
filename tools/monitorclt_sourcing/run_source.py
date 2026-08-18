@@ -70,7 +70,10 @@ def main():
         rows = rows_from_fixture(entry, args.fixture)
         signals, quarantines, report = normalize_rows(entry, rows)
     else:
-        adapter = get_adapter(entry["platform"], fetch_json=live_fetch_json)
+        # ArcGIS/Socrata fetch by URL (inject the URL fetcher); json_api/csv_export
+        # carry their own request-aware/text fetchers, so don't override those.
+        fj = live_fetch_json if entry["platform"] in ("arcgis", "socrata") else None
+        adapter = get_adapter(entry["platform"], fetch_json=fj)
         if args.limit:
             import itertools
             rows = list(itertools.islice(adapter.fetch_rows(entry, args.zip), args.limit))

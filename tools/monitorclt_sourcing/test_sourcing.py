@@ -93,6 +93,12 @@ def main():
     ok &= check("statusless bucket=active", all(s.bucket == "active" for s in lsig), True)
     ok &= check("statusless type", all(s.signal_type == "tax_sale" for s in lsig), True)
 
+    # ---- dotted-path field access (Tyler CSS nests Address.FullAddress) ----
+    from adapters.base import _get as _bget
+    ok &= check("dotted _get nested", _bget({"Address": {"FullAddress": "1 Main St"}}, "Address.FullAddress"), "1 Main St")
+    ok &= check("dotted _get missing", _bget({"Address": {}}, "Address.PostalCode"), "")
+    ok &= check("flat _get still works", _bget({"flat": "x"}, "flat"), "x")
+
     # ---- JSON-API portal adapter (Tyler-CSS-shaped), paginated, offline ----
     from adapters.json_api import JsonApiAdapter
     css_entry = {
