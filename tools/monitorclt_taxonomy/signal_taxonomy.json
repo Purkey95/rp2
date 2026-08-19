@@ -29,6 +29,7 @@
     "relationship_value",
     "embedded_rights",
     "catalyst",
+    "valuation",
     "data_quality"
   ],
   "signals": [
@@ -1105,6 +1106,34 @@
       "status": "built"
     },
 
+    {
+      "id": "records_avm",
+      "family": "valuation",
+      "dimension": "meta",
+      "arbitrage_class": "meta",
+      "source": "recorded deed sales + assessor characteristics (comp adjustment grid)",
+      "availability": "derived",
+      "cadence": "on-demand",
+      "value": 5,
+      "reliability": 4,
+      "effort": 3,
+      "legality": "ok",
+      "status": "built"
+    },
+    {
+      "id": "mls_cma",
+      "family": "valuation",
+      "dimension": "meta",
+      "arbitrage_class": "meta",
+      "source": "MLS sold comps + photos/condition (retail CMA, same engine)",
+      "availability": "mls-paid",
+      "cadence": "on-demand",
+      "value": 5,
+      "reliability": 5,
+      "effort": 3,
+      "legality": "ok",
+      "status": "config-ready"
+    },
     {
       "id": "signal_confidence_model",
       "family": "data_quality",

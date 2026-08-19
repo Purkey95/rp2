@@ -281,8 +281,21 @@ geometry, which is the honest blocker there.
 | `monitorclt_derive` | Tax staging (multi-year), 311 velocity, stalled subdivision | timing |
 | `monitorclt_geometry` | Controlled-access value, hidden-density mismatch, assemblage adjacency | relationship/development |
 | `monitorclt_info` | Tax-lot/legal-lot mismatch, address/permit multi-unit anomaly | information |
+| `monitorclt_valuation` | **Records ARV/AVM + CMA** — comp grid → value → offer band | (enabler) |
 | `monitorclt_market` | Macro timing (FRED) — when/where, kept separate from parcel score | timing |
 | `monitorclt_voice` | Twilio inbound caller-ID → parcel → score screen-pop | (ops) |
+
+### Valuation — from lead to offer
+
+`monitorclt_valuation` is the acquisition-side answer to MLS CMA tools (ListingBeast
+/ "CMAs With Claude"): the same select-comps → adjustment-grid → reconcile → value
+engine, pointed at the *offer* instead of the listing. Tier 1 runs on recorded deed
+sales + assessor characteristics (free/records data we hold) to produce an as-is
+AVM and offer band — the number that sets the max offer on an off-market lead. Tier
+2 is the identical engine on MLS sold comps for a retail CMA; MLS is a drop-in paid
+upgrade. `score` says *pursue this owner*; `valuation` says *it's worth ~$X, offer
+$Y*. Adjustment coefficients ship as Charlotte-SFR placeholders — calibrate per
+submarket before trusting the dollars; the method is sound, the constants are yours.
 
 ### The discipline
 
