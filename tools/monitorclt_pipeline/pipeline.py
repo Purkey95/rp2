@@ -31,7 +31,8 @@ TOOLS = os.path.dirname(HERE)
 # import their functions into a shared namespace).
 for _d in ("monitorclt_derive", "monitorclt_geometry", "monitorclt_info",
            "monitorclt_network", "monitorclt_catalyst", "monitorclt_lifecycle",
-           "monitorclt_score", "monitorclt_valuation", "monitorclt_timeline"):
+           "monitorclt_score", "monitorclt_valuation", "monitorclt_timeline",
+           "monitorclt_market"):
     p = os.path.join(TOOLS, _d)
     if p not in sys.path:
         sys.path.insert(0, p)
@@ -45,6 +46,7 @@ import lifecycle       # noqa: E402
 import score as score_mod   # noqa: E402
 import valuation       # noqa: E402
 import timeline        # noqa: E402
+import market          # noqa: E402
 
 
 def load_default_configs():
@@ -112,8 +114,28 @@ def _why_now_by_apn(raw_signals, cfgs, today):
     return out
 
 
+def apply_market_overlay(rows, market_report, exit_haircut=0.95):
+    """Macro WHEN/WHERE gate. Attaches the market posture and, when the exit is
+    soft (>=2 exit cautions), a CONSERVATIVE market-adjusted offer high -- the
+    original band is untouched, and the parcel SCORE is never modulated. Returns
+    the posture (or None)."""
+    if not market_report:
+        return None
+    posture = market.timing_posture(market_report)
+    soft_exit = posture["exit_cautions"] >= 2
+    for r in rows:
+        r["market_stance"] = posture["stance"]
+        v = r.get("valuation")
+        if soft_exit and v and v.get("status") == "valued":
+            ob = v["offer_band"]
+            ob["market_adjusted_high"] = round(ob["as_is_high"] * exit_haircut)
+            ob["market_note"] = (f"exit-caution haircut {round((1 - exit_haircut) * 100)}% "
+                                 f"applied ({posture['stance']})")
+    return posture
+
+
 def run(raw_signals, parcels, comps, today, year, cfgs, inputs=None,
-        value_threshold=21, repairs_by_apn=None):
+        value_threshold=21, repairs_by_apn=None, market_report=None):
     """Orchestrate the full flow, returning ranked offer-sheet rows."""
     inputs = inputs or {}
     repairs_by_apn = repairs_by_apn or {}
@@ -147,9 +169,11 @@ def run(raw_signals, parcels, comps, today, year, cfgs, inputs=None,
                 row["valuation"] = val
         rows.append(row)
 
+    posture = apply_market_overlay(rows, market_report)
+
     return {"offer_sheet": rows, "augment_counts": aug_counts,
             "signals_live": len(live), "signals_dropped": len(dropped),
-            "leads": len(leads)}
+            "leads": len(leads), "market_context": posture}
 
 
 # ---- file/CLI plumbing ----
@@ -189,11 +213,22 @@ def main():
     ap.add_argument("--today", required=True, help="YYYY-MM-DD")
     ap.add_argument("--year", type=int, required=True)
     ap.add_argument("--value-threshold", type=int, default=21, help="min score to run a valuation")
+    ap.add_argument("--market-offline", help="dir of cached FRED <id>.csv -> build the market posture gate")
+    ap.add_argument("--dsn", help="Postgres DSN -> upsert the offer sheet into the leads table")
     ap.add_argument("--outdir", default="out")
     args = ap.parse_args()
 
     today = timeline._date(args.today)
     cfgs = load_default_configs()
+
+    market_report = None
+    if args.market_offline:
+        series_cfg = json.load(open(os.path.join(TOOLS, "monitorclt_market", "series.json"), encoding="utf-8"))
+
+        def _fetch(url):
+            sid = url.split("id=")[1].split("&")[0]
+            return open(os.path.join(args.market_offline, f"{sid}.csv"), encoding="utf-8").read()
+        market_report = market.build_report(series_cfg, fetch=_fetch)
     inputs = {
         "tax_history": _load_jsonl(args.tax_history),
         "complaints": _load_jsonl(args.complaints),
@@ -203,13 +238,24 @@ def main():
         "catalyst_events": _load_jsonl(args.catalyst_events),
     }
     result = run(_load_jsonl(args.signals), _load_parcels(args.parcels), _load_jsonl(args.comps),
-                 today, args.year, cfgs, inputs=inputs, value_threshold=args.value_threshold)
+                 today, args.year, cfgs, inputs=inputs, value_threshold=args.value_threshold,
+                 market_report=market_report)
 
     os.makedirs(args.outdir, exist_ok=True)
     with open(os.path.join(args.outdir, "offer_sheet.jsonl"), "w", encoding="utf-8") as f:
         for r in result["offer_sheet"]:
             f.write(json.dumps(r) + "\n")
 
+    if args.dsn:
+        from offer_db import write_offer_sheet_db
+        print(f"Upserted {write_offer_sheet_db(args.dsn, result['offer_sheet'])} offer-sheet rows into leads.")
+
+    mc = result.get("market_context")
+    if mc:
+        print(f"MARKET POSTURE: {mc['stance']}  (sourcing {mc['sourcing_tailwinds']}, "
+              f"exit-caution {mc['exit_cautions']})")
+        for n in mc["notes"]:
+            print(f"  • {n}")
     print(f"Augmented signals: {result['augment_counts']}")
     print(f"Signals live/dropped: {result['signals_live']}/{result['signals_dropped']}  "
           f"Leads: {result['leads']}")
@@ -220,7 +266,10 @@ def main():
         band = ""
         if val and val.get("status") == "valued":
             ob = val["offer_band"]
-            band = f"  offer ${ob['as_is_low']:,}-${ob['as_is_high']:,}"
+            hi = ob.get("market_adjusted_high", ob["as_is_high"])
+            band = f"  offer ${ob['as_is_low']:,}-${hi:,}"
+            if "market_adjusted_high" in ob:
+                band += "*"
         wn = f" why-now {r['why_now']}" if r["why_now"] is not None else ""
         print(f"  {r['situs_address'] or r['apn']:<22} score {r['seller_opportunity_score']:>3} "
               f"[{r['band']}] conf {r['confidence']}{wn}  est {est}{band}")

@@ -6,7 +6,7 @@ on the network.
 """
 
 import fred
-from market import build_report, synthesis
+from market import build_report, synthesis, timing_posture
 
 
 def check(label, got, want):
@@ -87,6 +87,18 @@ def main():
                 any("tighten" in n or "widening" in n for n in notes), True)
     ok &= check("synthesis flags distress supply",
                 any("delinquency" in n for n in notes), True)
+
+    # ---- timing posture (the pipeline's when/where gate) ----
+    # this scenario: delinquency rising + credit tightening -> sourcing tailwinds AND
+    # exit cautions -> the "source aggressively, underwrite conservatively" stance
+    posture = timing_posture(report)
+    ok &= check("posture has sourcing tailwinds", posture["sourcing_tailwinds"] >= 1, True)
+    ok &= check("posture has exit cautions", posture["exit_cautions"] >= 2, True)
+    ok &= check("posture stance is source-aggressively",
+                posture["stance"], "source_aggressively_underwrite_conservatively")
+    # a flat/quiet market yields a neutral stance
+    quiet = {"indicators": [{"id": "DGS10", "layer": "leading", "direction_6m": "flat"}], "derived": []}
+    ok &= check("quiet market is neutral", timing_posture(quiet)["stance"], "neutral")
 
     # lagging series present but never drives synthesis (confirmation only)
     ok &= check("indicators carry layer", report["indicators"][0]["layer"], "leading")

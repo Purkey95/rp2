@@ -49,9 +49,32 @@ dropped anything resolved. That's a signal turned into a deal, end to end.
 run stats (augment counts, live/dropped, lead count), so the flow is unit-tested
 without touching the filesystem. `main()` is just files/CLI around it.
 
+## Market overlay (when/where gate)
+
+Pass `--market-offline DIR` (a folder of cached FRED `<id>.csv`) and the pipeline
+builds the market posture and applies it as a **macro gate**:
+
+- attaches `market_context` (stance + reasons) to the run and `market_stance` to
+  every row;
+- in a soft-exit market (≥2 exit cautions) adds a **conservative
+  `market_adjusted_high`** to each offer band — the original band is untouched, and
+  the parcel **score is never modulated** (the discipline: market moves the *offer*
+  and the *read*, never the *score*).
+
+Stances: `lean_in`, `caution`, `source_aggressively_underwrite_conservatively`,
+`neutral`.
+
+## Persistence
+
+Pass `--dsn "postgresql://…"` to upsert the offer sheet into the `leads` table so
+the CRM, daily digest, and mail/SMS lanes read one canonical **`offer_queue`** view
+(priority leads that already carry a valuation + offer band). Apply
+`../monitorclt_score/schema.sql` then this module's `schema.sql` first;
+`offer_db.py` does the upsert (psycopg lazy — file mode needs no database).
+
 ## Next
 
-- Persist the offer sheet to the `leads` table (the score module's DB mode) so the
-  CRM and mail/SMS lanes consume it directly.
-- Add the market-timing overlay (`monitorclt_market`) as a when/where gate on top of
-  the per-parcel ranking.
+- Feed the market gate from a live `monitorclt_market` run on the host (it already
+  fetches FRED); cache the CSVs so pipeline runs stay deterministic.
+- Wire the `leads.offer_queue` view into the CRM lead list and the daily digest
+  metrics (`pipeline.offer_ready`, `pipeline.priority_offers`).

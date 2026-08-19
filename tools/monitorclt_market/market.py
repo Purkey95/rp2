@@ -110,6 +110,51 @@ def synthesis(report):
     return notes or ["no strong directional signals in the current window"]
 
 
+def timing_posture(report):
+    """Collapse the report into a WHEN/WHERE posture the pipeline can use as a gate.
+    Macro, region-level -- it modulates the OFFER and the read, never the parcel
+    score. Two axes: sourcing tailwinds (conditions that create/expose distressed
+    supply and thin the competing-buyer pool) and exit cautions (conditions that
+    soften resale). Returns a stance plus the reasons."""
+    idx = {i["id"]: i for i in report["indicators"]}
+    der = {d["name"]: d for d in report["derived"]}
+    sourcing, exit_caution, notes = 0, 0, []
+
+    if idx.get("DRSFRMACBS", {}).get("direction_6m") == "rising" or \
+            idx.get("DRCRELEXFACBS", {}).get("direction_6m") == "rising":
+        sourcing += 1
+        exit_caution += 1
+        notes.append("delinquency rising: more distressed supply to source, softer exit")
+
+    sp = der.get("mortgage_spread")
+    if (sp and sp.get("direction_6m") == "widening") or idx.get("DRTSCLCC", {}).get("direction_6m") == "rising":
+        sourcing += 1
+        exit_caution += 1
+        notes.append("credit tightening: fewer competing buyers, but stress-test debt and exit")
+
+    jp = der.get("jobs_to_permits")
+    if idx.get("CHAR737BPPRIV", {}).get("direction_6m") == "rising" or \
+            (jp and jp.get("latest") is not None and jp["latest"] < 1.0):
+        exit_caution += 1
+        notes.append("local supply rising / oversupply risk: discount appreciation and exit assumptions")
+
+    if idx.get("CHAR737URN", {}).get("direction_6m") == "rising":
+        exit_caution += 1
+        notes.append("local unemployment rising: demand engine cooling")
+
+    if sourcing >= 1 and exit_caution >= 2:
+        stance = "source_aggressively_underwrite_conservatively"
+    elif sourcing >= 1:
+        stance = "lean_in"
+    elif exit_caution >= 2:
+        stance = "caution"
+    else:
+        stance = "neutral"
+
+    return {"stance": stance, "sourcing_tailwinds": sourcing, "exit_cautions": exit_caution,
+            "notes": notes or ["no strong directional signals in the current window"]}
+
+
 def main():
     ap = argparse.ArgumentParser(description="MonitorCLT Market Timing model")
     ap.add_argument("--series", default=os.path.join(HERE, "series.json"))
@@ -126,6 +171,7 @@ def main():
 
     report = build_report(cfg, fetch=fetch)
     report["synthesis"] = synthesis(report)
+    report["posture"] = timing_posture(report)
 
     os.makedirs(args.outdir, exist_ok=True)
     with open(os.path.join(args.outdir, "market_signals.json"), "w", encoding="utf-8") as f:
@@ -149,6 +195,9 @@ def main():
     print("\nREAD (WHEN/WHERE — modulates distress leads, not mixed into the score):")
     for n in report["synthesis"]:
         print(f"  • {n}")
+    p = report["posture"]
+    print(f"\nPOSTURE: {p['stance']}  (sourcing tailwinds {p['sourcing_tailwinds']}, "
+          f"exit cautions {p['exit_cautions']})")
     print(f"\nWrote {args.outdir}/market_signals.json")
 
 

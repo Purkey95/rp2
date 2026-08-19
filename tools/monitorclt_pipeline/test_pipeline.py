@@ -2,7 +2,8 @@
 
 from datetime import datetime
 
-from pipeline import load_default_configs, run
+from pipeline import load_default_configs, run, apply_market_overlay
+from offer_db import _offer_fields
 
 TODAY = datetime(2026, 8, 19)
 YEAR = 2026
@@ -75,6 +76,38 @@ def main():
 
     # dropped count reflects the resolved signal
     ok &= check("at least one signal dropped by lifecycle", result["signals_dropped"] >= 1, True)
+
+    # --- market overlay (when/where gate) ---
+    # a soft-exit market (>=2 exit cautions) attaches a conservative offer high,
+    # leaves the original band intact, and never touches the score.
+    soft_market = {
+        "indicators": [
+            {"id": "DRSFRMACBS", "direction_6m": "rising"},   # delinquency rising
+            {"id": "CHAR737URN", "direction_6m": "rising"},   # unemployment rising
+        ],
+        "derived": [{"name": "mortgage_spread", "direction_6m": "widening"}],
+    }
+    score_before = p1["seller_opportunity_score"]
+    rows2 = [dict(r, valuation=dict(r["valuation"])) if r.get("valuation") else dict(r)
+             for r in sheet]
+    posture = apply_market_overlay(rows2, soft_market)
+    ok &= check("posture surfaced", posture["stance"], "source_aggressively_underwrite_conservatively")
+    v = [r for r in rows2 if r["apn"] == "P-1"][0]["valuation"]
+    ok &= check("market-adjusted high added", "market_adjusted_high" in v["offer_band"], True)
+    ok &= check("adjusted high <= as-is high", v["offer_band"]["market_adjusted_high"] <= v["offer_band"]["as_is_high"], True)
+    # a full run with the market report attaches market_context and per-row stance
+    rmk = run(raw_signals, parcels, comps, TODAY, YEAR, cfgs, market_report=soft_market)
+    ok &= check("run attaches market_context", rmk["market_context"]["stance"],
+                "source_aggressively_underwrite_conservatively")
+    p1mk = [r for r in rmk["offer_sheet"] if r["apn"] == "P-1"][0]
+    ok &= check("score unchanged by market overlay", p1mk["seller_opportunity_score"], score_before)
+
+    # --- db flattening (pure, no psycopg) ---
+    flat = _offer_fields(p1mk)
+    ok &= check("db flatten pulls estimated_value", flat["estimated_value"] == p1mk["valuation"]["estimated_value"], True)
+    ok &= check("db flatten pulls offer_low", flat["offer_low"] == p1mk["valuation"]["offer_band"]["as_is_low"], True)
+    ok &= check("db flatten unvalued -> None",
+                _offer_fields({"valuation": {"status": "insufficient_comps"}})["estimated_value"], None)
 
     print("\n" + ("ALL PASSED" if ok else "SOME TESTS FAILED"))
     return 0 if ok else 1
