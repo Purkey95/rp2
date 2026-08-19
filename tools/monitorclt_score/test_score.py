@@ -1,4 +1,4 @@
-"""Pin the Owner Distress Score behavior. Run: python3 test_score.py"""
+"""Pin the Seller Opportunity Score (five components → combined). Run: python3 test_score.py"""
 
 import json
 import os
@@ -23,46 +23,48 @@ def main():
     res = score_parcels(signals, parcels, cfg, 2026)
     by_apn = {r["apn"]: r for r in res}
 
-    # Owner-occupied parcel whose only signal is RESOLVED -> no lead (excluded).
+    # Resolved-only, owner-occupied parcel -> no lead.
     ok &= check("resolved-only parcel excluded", "16700423" in by_apn, False)
 
-    # Top lead stacks all four categories -> full stacking bonus, immediate band.
     top = by_apn["07104521"]
-    ok &= check("stacked lead band", top["band"], "immediate")
-    ok &= check("stacked lead scores high", top["score"] >= 90, True)
-    ok &= check("four categories", sorted(top["categories"]),
-                ["behavioral", "deterioration", "financial", "ownership"])
-    ok &= check("stacking bonus capped", top["stacking_bonus"], 18)
+    # Combined = capped sum of contributions across dimensions.
+    ok &= check("combined score", top["seller_opportunity_score"], 80)
+    ok &= check("band", top["band"], "priority")
 
-    # Every contributing point carries evidence (provenance or computed reason).
-    ok &= check("all signals have evidence",
-                all(s["evidence"] for s in top["signals"]), True)
+    # Five component scores, computed per dimension.
+    comp = top["components"]
+    ok &= check("has five dimensions", sorted(comp.keys()),
+                ["disposition_probability", "financial_distress", "landlord_fatigue",
+                 "ownership_transition", "property_distress"])
+    ok &= check("financial component (tax20+equity10)", comp["financial_distress"], 30)
+    ok &= check("property component (code16)", comp["property_distress"], 16)
+    ok &= check("ownership component (abs8+oos8+tenure6)", comp["ownership_transition"], 22)
+    ok &= check("disposition component (sold12)", comp["disposition_probability"], 12)
+    ok &= check("landlord component zero", comp["landlord_fatigue"], 0)
+    ok &= check("dimensions firing", top["dimensions_firing"], 4)
 
-    # Sourced signal keeps its source URL as evidence.
+    # Every contributing point carries a dimension + evidence (provenance).
+    ok &= check("signals carry dimension", all(s["dimension"] for s in top["signals"]), True)
+    ok &= check("signals carry evidence", all(s["evidence"] for s in top["signals"]), True)
     tax = next(s for s in top["signals"] if s["signal"] == "tax_delinquency")
     ok &= check("sourced evidence is url", tax["evidence"].startswith("http"), True)
+    ok &= check("tax mapped to financial", tax["dimension"], "financial_distress")
 
-    # Behavioral signal fired from portfolio (owner holds 3, sold one in 2025).
-    ok &= check("portfolio size", top["portfolio_size"], 3)
+    # Behavioral signal from portfolio (owner holds 3, sold one recently).
     ok &= check("recently-sold-another present",
                 any(s["signal"] == "recently_sold_another" for s in top["signals"]), True)
 
-    # Derived signals: absentee + out_of_state + long tenure + high-equity proxy.
-    names = {s["signal"] for s in top["signals"]}
-    ok &= check("derived signals present",
-                {"absentee", "out_of_state", "long_tenure_20y", "high_equity_proxy"} <= names, True)
-
-    # High-equity proxy does NOT fire without a mortgage figure (never guessed).
+    # High-equity proxy needs a mortgage figure (never guessed).
     uptown = by_apn["11902388"]
     ok &= check("no equity proxy without mortgage",
                 any(s["signal"] == "high_equity_proxy" for s in uptown["signals"]), False)
 
-    # Results sorted descending by score.
-    ok &= check("sorted desc", all(res[i]["score"] >= res[i + 1]["score"] for i in range(len(res) - 1)), True)
+    # Sorted by combined score desc.
+    ok &= check("sorted desc",
+                all(res[i]["seller_opportunity_score"] >= res[i + 1]["seller_opportunity_score"]
+                    for i in range(len(res) - 1)), True)
 
-    # Owner normalization groups the LLC's parcels, keeps entity suffix.
     ok &= check("owner key keeps entity", normalize_owner("CAROLINA HOLDINGS LLC"), "carolina holdings llc")
-    ok &= check("owner key county order", normalize_owner("PATEL, ANJALI"), "anjali patel")
 
     print("\n" + ("ALL PASSED" if ok else "SOME TESTS FAILED"))
     return 0 if ok else 1

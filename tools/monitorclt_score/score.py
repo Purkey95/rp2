@@ -1,27 +1,20 @@
 #!/usr/bin/env python3
-"""Owner Distress Score — turn wired signals into ranked, traceable leads.
+"""Seller Opportunity Score — five component scores → one combined lead score.
 
-Joins the sourcing system's `signals` (provenance-enforced distress evidence) to
-the parcel/enrichment layer, computes the derived and behavioral signals we can
-compute from owned data, sums configurable weights, adds a stacking bonus for
-signals spanning multiple categories (the "stack them" thesis), and emits a
-0-100 score per parcel with EVERY contributing point traced back to its source.
+Instead of 50 lists, maintain five scores per parcel/owner and compose them:
 
-Inputs:
-  --signals   JSONL of signals (the sourcing adapters' signals.jsonl). Only
-              ACTIVE-bucket signals count (resolved = the problem cleared).
-  --parcels   CSV of parcels (the enrichment parcels table): apn, owner, situs_*,
-              mail_*, property_state, sale_year, assessed_value, mortgage_balance,
-              vacant.
-  --weights   weights.json (default alongside this file).
-  --year      current year (Date is unavailable in this runtime; pass it).
+    Financial Distress · Property Distress · Ownership Transition ·
+    Landlord Fatigue · Disposition Probability   →   Seller Opportunity Score 0-100
 
-Outputs (in --outdir):
-  scored_leads.jsonl   full detail incl. contributing signals + source URLs
-  scored_leads.csv     flat ranked table
-  summary.json         counts by band + MonitorCLT-style metrics
+Every signal maps to one dimension (weights.json `dimension_of`). Each dimension
+is its own 0-100 component; the combined score is the capped sum of all
+contributions, and `dimensions_firing` shows breadth (a lead lit across three
+dimensions is more robust than one dimension maxed). Every point traces to its
+source. Config-ready signal types score automatically once a source emits them
+(see signals_catalog.md), so wiring ROD liens / court records / MLS later needs
+no scoring change.
 
-Pure stdlib. Wire load_* to Postgres on the host (signals table + parcels view).
+Inputs / outputs / DB wiring: see README.md. Pure stdlib.
 """
 
 import argparse
@@ -60,7 +53,7 @@ def _norm_addr(s):
     return " ".join((s or "").lower().replace(".", " ").replace(",", " ").split())
 
 
-def derived_signals(parcel, portfolio, current_year, cfg):
+def derived_signals(parcel, portfolio, current_year):
     """Signals computable from the parcel/owner alone. Returns [(name, why)]."""
     found = []
     mail_st, situs_st = _norm_addr(parcel.get("mail_street")), _norm_addr(parcel.get("situs_street"))
@@ -73,9 +66,6 @@ def derived_signals(parcel, portfolio, current_year, cfg):
     sy = _num(parcel.get("sale_year"))
     if sy and (current_year - int(sy)) >= 20:
         found.append(("long_tenure_20y", f"owned {current_year - int(sy)} years"))
-    # High-equity PROXY: only computable when a mortgage/lien figure is present.
-    # Parcel layers give value but NOT mortgage balance, so this fires only if the
-    # enrichment supplied mortgage_balance (else omitted -- never guessed).
     val = _num(parcel.get("assessed_value") or parcel.get("market_value"))
     mort = _num(parcel.get("mortgage_balance"))
     if val and mort is not None and val > 0 and (val - mort) / val >= 0.70:
@@ -89,11 +79,9 @@ def derived_signals(parcel, portfolio, current_year, cfg):
 
 
 def score_parcels(signals, parcels, cfg, current_year):
-    sig_w = cfg["signal_weights"]
-    der_w = cfg["derived_weights"]
-    cat_of = cfg["category_of"]
+    sig_w, der_w = cfg["signal_weights"], cfg["derived_weights"]
+    dim_of, dims = cfg["dimension_of"], list(cfg["dimensions"].keys())
 
-    # Index ACTIVE signals by APN (resolved signals = problem cleared, excluded).
     by_apn = {}
     for s in signals:
         if s.get("bucket") != "active":
@@ -103,59 +91,50 @@ def score_parcels(signals, parcels, cfg, current_year):
             by_apn.setdefault(apn, []).append(s)
 
     portfolios = build_portfolios(parcels, current_year)
-    owner_pf = {k: v for k, v in portfolios.items()}
 
     results = []
     for p in parcels:
         apn = (p.get("apn") or "").strip()
-        owner_key = normalize_owner(p.get("owner") or p.get("owner_name") or "")
-        pf = owner_pf.get(owner_key)
+        pf = portfolios.get(normalize_owner(p.get("owner") or p.get("owner_name") or ""))
 
-        contributors = []       # (signal, points, category, source_url)
-        seen_types = set()
-
-        # 1) sourced signals on this parcel
+        contributors, seen = [], set()
         for s in by_apn.get(apn, []):
             st = s.get("signal_type", "")
-            pts = sig_w.get(st)
-            if pts is None or st in seen_types:
-                continue
-            seen_types.add(st)
-            contributors.append((st, pts, cat_of.get(st, "other"), s.get("source_url", "")))
-
-        # 2) derived + behavioral signals
-        for name, why in derived_signals(p, pf, current_year, cfg):
-            pts = der_w.get(name)
-            if pts is None or name in seen_types:
-                continue
-            seen_types.add(name)
-            contributors.append((name, pts, cat_of.get(name, "ownership"), why))
+            if st in sig_w and st not in seen:
+                seen.add(st)
+                contributors.append((st, sig_w[st], dim_of.get(st, "financial_distress"),
+                                     s.get("source_url", "")))
+        for name, why in derived_signals(p, pf, current_year):
+            if name in der_w and name not in seen:
+                seen.add(name)
+                contributors.append((name, der_w[name], dim_of.get(name, "ownership_transition"), why))
 
         if not contributors:
             continue
 
-        base = sum(pts for _, pts, _, _ in contributors)
-        categories = {c for _, _, c, _ in contributors}
-        stack_bonus = min((len(categories) - 1) * cfg["stacking_bonus_per_extra_category"],
-                          cfg["stacking_bonus_cap"]) if len(categories) > 1 else 0
-        score = min(base + stack_bonus, 100)
+        components = {d: 0 for d in dims}
+        for _, pts, dim, _ in contributors:
+            components[dim] = components.get(dim, 0) + pts
+        components = {d: min(v, 100) for d, v in components.items()}
+        seller_opportunity = min(sum(pts for _, pts, _, _ in contributors), 100)
+        firing = sum(1 for v in components.values() if v > 0)
 
         results.append({
             "apn": apn,
             "owner": p.get("owner") or p.get("owner_name") or "",
             "situs_address": p.get("situs_street") or p.get("situs_address") or "",
-            "score": score,
-            "band": _band(score, cfg),
-            "categories": sorted(categories),
-            "stacking_bonus": stack_bonus,
+            "seller_opportunity_score": seller_opportunity,
+            "band": _band(seller_opportunity, cfg),
+            "components": components,
+            "dimensions_firing": firing,
             "portfolio_size": pf["size"] if pf else 1,
             "signals": [
-                {"signal": n, "points": pt, "category": c, "evidence": src}
-                for n, pt, c, src in sorted(contributors, key=lambda x: -x[1])
+                {"signal": n, "points": pt, "dimension": dim, "evidence": src}
+                for n, pt, dim, src in sorted(contributors, key=lambda x: -x[1])
             ],
         })
 
-    results.sort(key=lambda r: -r["score"])
+    results.sort(key=lambda r: (-r["seller_opportunity_score"], -r["dimensions_firing"]))
     return results
 
 
@@ -167,12 +146,12 @@ def _band(score, cfg):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Owner Distress Score")
-    ap.add_argument("--dsn", help="Postgres DSN: read live signals+parcels, upsert leads (host)")
-    ap.add_argument("--signals", help="signals JSONL (CSV/file mode; not needed with --dsn)")
-    ap.add_argument("--parcels", help="parcels CSV (CSV/file mode; not needed with --dsn)")
+    ap = argparse.ArgumentParser(description="Seller Opportunity Score")
+    ap.add_argument("--dsn", help="Postgres DSN: read live signals+parcels, upsert leads")
+    ap.add_argument("--signals", help="signals JSONL (file mode)")
+    ap.add_argument("--parcels", help="parcels CSV (file mode)")
     ap.add_argument("--weights", default=os.path.join(HERE, "weights.json"))
-    ap.add_argument("--year", type=int, required=True, help="current year (e.g. 2026)")
+    ap.add_argument("--year", type=int, required=True)
     ap.add_argument("--outdir", default="out")
     args = ap.parse_args()
 
@@ -189,43 +168,31 @@ def main():
 
     if args.dsn:
         from db import write_leads_db
-        n = write_leads_db(args.dsn, results)
-        print(f"Upserted {n} leads into the database.")
+        print(f"Upserted {write_leads_db(args.dsn, results)} leads into the database.")
 
     os.makedirs(args.outdir, exist_ok=True)
     with open(os.path.join(args.outdir, "scored_leads.jsonl"), "w", encoding="utf-8") as f:
         for r in results:
             f.write(json.dumps(r) + "\n")
-    flat_fields = ["score", "band", "apn", "owner", "situs_address", "portfolio_size",
-                   "categories", "stacking_bonus"]
-    with open(os.path.join(args.outdir, "scored_leads.csv"), "w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f)
-        w.writerow(flat_fields + ["top_signals"])
-        for r in results:
-            w.writerow([r["score"], r["band"], r["apn"], r["owner"], r["situs_address"],
-                        r["portfolio_size"], "|".join(r["categories"]), r["stacking_bonus"],
-                        "; ".join(f"{s['signal']}(+{s['points']})" for s in r["signals"])])
 
     bands = {}
     for r in results:
         bands[r["band"]] = bands.get(r["band"], 0) + 1
-    summary = {
-        "scored_parcels": len(results),
-        "by_band": bands,
-        "score.leads_priority_plus": sum(1 for r in results if r["score"] >= 61),
-    }
+    summary = {"scored_parcels": len(results), "by_band": bands,
+               "score.leads_priority_plus": sum(1 for r in results if r["seller_opportunity_score"] >= 61)}
     with open(os.path.join(args.outdir, "summary.json"), "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
 
-    print(f"Scored parcels : {len(results)}")
-    print(f"By band        : {bands}")
+    print(f"Scored parcels : {len(results)}   by band: {bands}")
     print(f"Priority+ (>=61): {summary['score.leads_priority_plus']}")
-    if results:
-        top = results[0]
-        print(f"Top lead       : {top['score']} [{top['band']}] {top['owner']} @ {top['situs_address']}")
-        print(f"                 signals: {', '.join(s['signal'] for s in top['signals'])}"
-              f" (+{top['stacking_bonus']} stack)")
-    print(f"Wrote          : {args.outdir}/scored_leads.jsonl, scored_leads.csv, summary.json")
+    for r in results[:5]:
+        print(f"\n{r['situs_address'] or r['apn']}   Seller Opportunity Score: {r['seller_opportunity_score']} "
+              f"[{r['band']}]  ({r['dimensions_firing']} dimensions)")
+        comps = ", ".join(f"{d.split('_')[0]}:{v}" for d, v in r["components"].items() if v)
+        print(f"  components -> {comps}")
+        for s in r["signals"]:
+            print(f"  +{s['points']:>2} {s['signal']}")
+    print(f"\nWrote {args.outdir}/scored_leads.jsonl, summary.json")
 
 
 if __name__ == "__main__":

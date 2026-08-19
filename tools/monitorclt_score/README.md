@@ -1,14 +1,27 @@
-# MonitorCLT Owner Distress Score
+# MonitorCLT Seller Opportunity Score
 
-Turns the wired signals into **ranked, traceable acquisition leads**. This is the
-synthesis layer: it joins the sourcing system's `signals` to the parcel/owner
-layer, computes the derived and behavioral signals we can compute from owned
-data, stacks them, and emits a 0-100 score per parcel where every point traces
-back to its source.
+Turns the wired signals into **ranked, traceable acquisition leads** — not 50
+lists, but **five component scores that compose into one Seller Opportunity
+Score**:
 
-It's the "stack them" thesis as code: one signal rarely means much; a signal
-from two or three *categories* (financial + deterioration + ownership +
-behavioral) is where the probability of a real problem jumps.
+```
+Financial Distress · Property Distress · Ownership Transition ·
+Landlord Fatigue · Disposition Probability   →   Seller Opportunity Score 0-100
+```
+
+Every signal maps to one dimension (`weights.json` → `dimension_of`). Each
+dimension is its own 0-100 component; the combined score is the capped sum of all
+contributions; and `dimensions_firing` shows breadth — a lead lit across three
+dimensions is more robust than one dimension maxed. Every point traces back to
+its source. Instead of *"12,480 absentee owners,"* the output is *"147 parcels
+scoring 80+, and here's why each one scored high."*
+
+The full signal taxonomy (150+ signals across the five dimensions) and where each
+one's data comes from — wired now / derived / free-to-add / Secretary-of-State /
+Register-of-Deeds-browser / court-browser / paid MLS / not-obtainable — is in
+`signals_catalog.md`. Config-ready signals score automatically the moment a
+source emits them, so adding ROD liens or court records later is a data task, not
+a scoring change.
 
 ## Run it
 
@@ -25,34 +38,38 @@ Outputs: `scored_leads.jsonl` (full detail + evidence), `scored_leads.csv`
 
 1. **Sourced signals** (from the adapters' `signals.jsonl`) — only **active**-bucket
    signals count; a `resolved` signal means the problem cleared, so it's excluded.
-   Each contributes its weight and keeps its `source_url` as evidence.
-2. **Derived signals** (computed from the parcel/owner, no new source):
-   `absentee` (mailing ≠ situs), `out_of_state`, `long_tenure_20y`,
-   `high_equity_proxy` (only when a mortgage figure is present — parcel value alone
-   can't prove equity, so it's never guessed), `large_portfolio`,
-   `recently_sold_another` (the behavioral edge — owner disposed of a parcel while
-   holding others; from entity resolution over owner name).
-3. **Stacking bonus** — `+6` per extra category beyond the first (capped `+18`),
-   because cross-category signals compound.
-4. **Bands** — 81-100 immediate · 61-80 priority · 41-60 mail+call ·
+   Each contributes its weight to its dimension and keeps its `source_url`.
+2. **Derived signals** (from the parcel/owner, no new source): `absentee`,
+   `out_of_state`, `long_tenure_20y`, `high_equity_proxy` (only when a mortgage
+   figure is present — parcel value alone can't prove equity, so never guessed),
+   `large_portfolio`, `recently_sold_another` (the behavioral edge — from entity
+   resolution over the owner's portfolio).
+3. **Five component scores** — each = capped sum of its dimension's contributions.
+4. **Combined Seller Opportunity Score** = capped sum of all contributions;
+   `dimensions_firing` = how many of the five lit up.
+5. **Bands** — 81-100 immediate · 61-80 priority · 41-60 mail+call ·
    21-40 digital · 0-20 skip.
 
-Weights, categories, and bands all live in `weights.json` — tune freely.
+Weights, the `dimension_of` map, and bands live in `weights.json` — tune freely.
 
-## What actually feeds it today vs. what's config-ready
+## Output shape
 
-The score is honest: it scores what's present. From the 17 live sources you can
-feed it **now**: tax delinquency, tax sale, foreclosure, code violations /
-nuisance / housing, demolition, vacancy, unpermitted work, environmental, plus
-the derived absentee / out-of-state / tenure / portfolio / behavioral signals.
+```
+123 N Main St   Seller Opportunity Score: 80 [priority]  (4 dimensions)
+  components -> financial:30, property:16, ownership:22, disposition:12
+  +20 tax_delinquency   +16 code_violation   +12 recently_sold_another
+  +10 high_equity_proxy  +8 absentee  +8 out_of_state  +6 long_tenure_20y
+```
 
-`weights.json` also carries **config-ready** weights for signals not yet wired to
-a source — HOA/municipal/judgment/mechanic's liens, probate/inherited, divorce,
-bankruptcy, eviction/repeat-eviction, failed inspection, expired MLS, utility
-inactive, fire/storm damage. They score automatically the moment a source emits
-that `signal_type`, so wiring Register-of-Deeds liens or court records later is a
-data task, not a scoring change. (MLS, utilities, and insurance need paid/licensed
-data — see the roadmap.)
+Each `signals[]` entry carries its `dimension` and `evidence` (source URL or the
+computed reason), so a lead's score is fully explainable and auditable.
+
+## Coverage
+
+The score is honest — it scores what's present and shows which dimensions have no
+data for a parcel (never a silent zero). What feeds each of the 150+ signal types
+today vs. what's a data task away (ROD/court browser, SoS, MLS, etc.) is laid out
+in `signals_catalog.md`.
 
 ## Data contract
 
