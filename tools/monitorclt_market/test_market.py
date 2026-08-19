@@ -91,6 +91,18 @@ def main():
     # lagging series present but never drives synthesis (confirmation only)
     ok &= check("indicators carry layer", report["indicators"][0]["layer"], "leading")
 
+    # ---- permit type-mix (from our own permit signals) ----
+    from permit_mix import permit_mix
+    sigs = ([{"signal_type": "new_single_family"}] * 2 +
+            [{"signal_type": "renovation_permit"}] * 5 +
+            [{"signal_type": "mechanical_permit"}] * 3 +
+            [{"signal_type": "demolition_permit"}] * 1 +
+            [{"signal_type": "tax_delinquency"}] * 4)   # non-permit ignored
+    mix = permit_mix(sigs)
+    ok &= check("permit_mix ignores non-permits", mix["total"], 11)
+    ok &= check("permit_mix defensive read", "defensive" in mix["read"], True)
+    ok &= check("permit_mix demo counted", mix["counts"].get("demo"), 1)
+
     print("\n" + ("ALL PASSED" if ok else "SOME TESTS FAILED"))
     return 0 if ok else 1
 
