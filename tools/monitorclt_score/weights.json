@@ -11,6 +11,7 @@
 
   "signal_weights": {
     "tax_delinquency": 20, "tax_sale": 20, "foreclosure": 20, "notice_of_default": 20,
+    "tax_delinquency_multiyear": 18,
     "lis_pendens": 18, "forced_sale": 18, "hoa_lien": 18, "tax_lien": 16, "municipal_lien": 16,
     "mechanics_lien": 16, "judgment_lien": 15, "multiple_liens": 15, "bankruptcy": 14,
     "balloon_maturity": 14, "hard_money_maturity": 14, "high_ltv": 12, "judgment_after_mortgage": 12,
@@ -19,6 +20,7 @@
     "assignment_of_dot": 6, "demo_sale": 16,
 
     "unsafe_structure": 20, "boarding_order": 20, "demolition_permit": 20, "fire_damage": 20,
+    "complaint_velocity_311": 12,
     "code_violation": 16, "nuisance": 16, "housing_violation": 16, "vacancy": 16, "stop_work_order": 16,
     "failed_inspection": 15, "repeat_code_inspection": 15, "septic_major_repair": 15,
     "illegal_occupancy": 14, "foundation_complaint": 14, "fire_marshal_violation": 14,
@@ -52,7 +54,8 @@
     "estate_cleanout": 12, "interior_renovation_after_long_ownership": 10, "listed_180d": 10,
     "utilities_activated_after_vacancy": 10, "dumpster_permit": 8, "new_roof_presale": 8,
     "mortgage_payoff": 8, "tax_foreclosure_redeemed": 8, "development_case": 4, "rezoning": 3,
-    "owner_network_distress": 10, "neighborhood_contagion": 6, "catalyst_horizon": 8
+    "owner_network_distress": 10, "neighborhood_contagion": 6, "catalyst_horizon": 8,
+    "stalled_subdivision": 10, "relationship_value_access": 10, "hidden_density_zoning_mismatch": 10
   },
 
   "derived_weights": {
@@ -74,7 +77,7 @@
     "cash_out_refi_recent": "financial_distress", "second_mortgage": "financial_distress",
     "heloc_investment": "financial_distress", "seller_financed": "financial_distress",
     "assignment_of_dot": "financial_distress", "demo_sale": "financial_distress",
-    "high_equity_proxy": "financial_distress",
+    "high_equity_proxy": "financial_distress", "tax_delinquency_multiyear": "financial_distress",
 
     "unsafe_structure": "property_distress", "boarding_order": "property_distress",
     "demolition_permit": "property_distress", "fire_damage": "property_distress",
@@ -95,6 +98,7 @@
     "plumbing_violation": "property_distress", "hvac_violation": "property_distress",
     "backflow_violation": "property_distress", "stream_buffer_violation": "property_distress",
     "erosion_control": "property_distress", "renovation_permit": "property_distress",
+    "complaint_velocity_311": "property_distress",
 
     "partition_action": "ownership_transition", "estate_low_cash": "ownership_transition",
     "guardianship_sale": "ownership_transition", "estate_owner_after_death": "ownership_transition",
@@ -137,7 +141,9 @@
     "recently_sold_another": "disposition_probability",
     "development_case": "disposition_probability", "rezoning": "disposition_probability",
     "owner_network_distress": "disposition_probability", "neighborhood_contagion": "property_distress",
-    "catalyst_horizon": "disposition_probability", "complexity_arbitrage": "disposition_probability"
+    "catalyst_horizon": "disposition_probability", "complexity_arbitrage": "disposition_probability",
+    "stalled_subdivision": "disposition_probability", "relationship_value_access": "disposition_probability",
+    "hidden_density_zoning_mismatch": "disposition_probability"
   },
 
   "_combination_note": "Combination rules fire on the INTERACTION of signals, not any single one -- the arbitrage that others miss. complexity_arbitrage answers two of the four questions at once: 'which bad property has a SOLVABLE problem' (a fixable constraint a capable buyer can clear) AND 'who is more likely to SELL' (a motivated/transitioning owner). A clean parcel with a motivated owner is a normal lead; a fixable-problem parcel with a motivated owner is one most buyers walk past -- which is exactly the edge. Emitted as a disposition-dimension lift; lower reliability since it's a derived inference, not a record.",
@@ -170,7 +176,10 @@
     "owner_network_distress": 4,
     "permit_trouble_score_notes": 3,
     "catalyst_horizon": 4,
-    "complexity_arbitrage": 3
+    "complexity_arbitrage": 3,
+    "stalled_subdivision": 3,
+    "relationship_value_access": 3,
+    "hidden_density_zoning_mismatch": 4
   },
 
   "bands": [

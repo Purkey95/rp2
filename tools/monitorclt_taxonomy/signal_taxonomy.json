@@ -72,7 +72,7 @@
       "reliability": 5,
       "effort": 2,
       "legality": "ok",
-      "status": "not-started"
+      "status": "built"
     },
     {
       "id": "foreclosure",
@@ -170,7 +170,7 @@
       "reliability": 3,
       "effort": 2,
       "legality": "ok",
-      "status": "not-started"
+      "status": "built"
     },
     {
       "id": "unsafe_structure",
@@ -618,7 +618,7 @@
       "reliability": 4,
       "effort": 3,
       "legality": "ok",
-      "status": "not-started"
+      "status": "built"
     },
     {
       "id": "lot_split_opportunity",
@@ -829,7 +829,7 @@
       "reliability": 3,
       "effort": 3,
       "legality": "ok",
-      "status": "not-started"
+      "status": "built"
     },
     {
       "id": "affordable_restriction_expiration",
@@ -944,7 +944,7 @@
       "reliability": 3,
       "effort": 4,
       "legality": "ok",
-      "status": "not-started"
+      "status": "built"
     },
     {
       "id": "assemblage_adjacency_value",

@@ -1,0 +1,22 @@
+{
+  "_comment": "Derived-history signals. These are the cheapest, highest-leverage builds we have: nothing new to ingest, just deriving stronger signals from the record HISTORY of data we already pull. A single year of tax delinquency is a signal; three consecutive years with a rising balance is a story (and in NC, foreclosure-eligible). One 311 complaint is noise; five in a year up from one is a property visibly deteriorating. A recorded plat with no houses going up is a stalled subdivision. Tune freely.",
+
+  "tax_staging": {
+    "min_consecutive_years": 2,
+    "hot_consecutive_years": 3,
+    "note": "NC tax foreclosure becomes available ~2yr after delinquency; 3+ consecutive years is foreclosure-ripe"
+  },
+
+  "complaint_velocity": {
+    "window_days": 365,
+    "min_recent": 3,
+    "rising_ratio": 1.5,
+    "note": "count in trailing window vs the prior equal window; rising = accelerating deterioration"
+  },
+
+  "stalled_subdivision": {
+    "min_plat_age_days": 540,
+    "max_vertical_permits": 0,
+    "note": "plat recorded but effectively no vertical (building) permits since = a subdivision that stalled after paper approval"
+  }
+}

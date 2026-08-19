@@ -259,10 +259,12 @@ ways to make money from information**, and every signal is classified into one:
 7. **Catalyst** — a known property event is approaching.
 
 `tools/monitorclt_taxonomy/` carries `arbitrage_class` on every signal, and
-`prioritize.py` now reports **coverage by arbitrage** — the strategic view. Today
-it's honest about the shape: deep in distress/information, thin (0 built) in
-**development** and **relationship**, which is where the differentiated, harder-to-
-copy value lives and where gated data (ROD, planning, geometry) is the blocker.
+`prioritize.py` now reports **coverage by arbitrage** — the strategic view. All
+seven classes are now represented (distress 6/24, timing 6/9, complexity 1/11,
+development 1/5, relationship 1/4, information 5/13, catalyst 1/10). Every 0-built
+class has been moved off zero; the remaining depth to add in development,
+relationship, and catalyst is mostly gated behind ROD / planning / richer parcel
+geometry, which is the honest blocker there.
 
 ### Built modules (tested, pure stdlib)
 
@@ -276,6 +278,8 @@ copy value lives and where gated data (ROD, planning, geometry) is the blocker.
 | `monitorclt_catalyst` | **What's about to happen** — projects dated events forward | catalyst |
 | `monitorclt_lifecycle` | **Opportunity decay** — resolve / decay / expire stale leads | (meta) |
 | `monitorclt_score` (combo rule) | **Complexity arbitrage** — fixable problem + motivated owner | complexity |
+| `monitorclt_derive` | Tax staging (multi-year), 311 velocity, stalled subdivision | timing |
+| `monitorclt_geometry` | Controlled-access value + hidden-density mismatch (parcel layer only) | relationship/development |
 | `monitorclt_market` | Macro timing (FRED) — when/where, kept separate from parcel score | timing |
 | `monitorclt_voice` | Twilio inbound caller-ID → parcel → score screen-pop | (ops) |
 
@@ -290,11 +294,16 @@ build the cheap ones, refuse to sprawl into paywalls.
 
 ### Next (still cheap / derived, prioritizer-ranked)
 
-- **multi-year tax staging** + **311 complaint velocity** (top free wins)
-- **development** wedges from parcel geometry: `landlocked_flag_lot`,
-  `hidden_density_zoning_mismatch`, `stalled_subdivision` (negative-space)
-- **relationship** wedge: `relationship_value_access` (one parcel controls another's
-  access) — the one geometry-derivable slice of Relationship Value
+Built since: multi-year tax staging, 311 velocity, stalled subdivision
+(`monitorclt_derive`); controlled-access value + hidden-density mismatch
+(`monitorclt_geometry`). Remaining cheap/derived work:
+
+- **`assemblage_adjacency_value`** — same adjacency graph as controlled-access, but
+  keyed on an active assemblage buyer (owner acquiring contiguous parcels)
+- compute `neighbors` / `road_frontage` from real parcel polygons on the host so
+  the geometry wedges run against live data, not pre-computed fields
+- **`tax_lot_legal_lot_mismatch`** and **`address_anomaly_multiunit`** (information
+  arbitrage, both derivable from records we hold)
 - feed **real recorded dates** into the catalyst calendar and **resolution events**
   into the lifecycle engine as those sources come online (ROD, planning, tax status)
 
