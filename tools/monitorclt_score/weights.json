@@ -52,7 +52,7 @@
     "estate_cleanout": 12, "interior_renovation_after_long_ownership": 10, "listed_180d": 10,
     "utilities_activated_after_vacancy": 10, "dumpster_permit": 8, "new_roof_presale": 8,
     "mortgage_payoff": 8, "tax_foreclosure_redeemed": 8, "development_case": 4, "rezoning": 3,
-    "owner_network_distress": 10, "neighborhood_contagion": 6
+    "owner_network_distress": 10, "neighborhood_contagion": 6, "catalyst_horizon": 8
   },
 
   "derived_weights": {
@@ -136,7 +136,25 @@
     "mortgage_payoff": "disposition_probability", "tax_foreclosure_redeemed": "disposition_probability",
     "recently_sold_another": "disposition_probability",
     "development_case": "disposition_probability", "rezoning": "disposition_probability",
-    "owner_network_distress": "disposition_probability", "neighborhood_contagion": "property_distress"
+    "owner_network_distress": "disposition_probability", "neighborhood_contagion": "property_distress",
+    "catalyst_horizon": "disposition_probability", "complexity_arbitrage": "disposition_probability"
+  },
+
+  "_combination_note": "Combination rules fire on the INTERACTION of signals, not any single one -- the arbitrage that others miss. complexity_arbitrage answers two of the four questions at once: 'which bad property has a SOLVABLE problem' (a fixable constraint a capable buyer can clear) AND 'who is more likely to SELL' (a motivated/transitioning owner). A clean parcel with a motivated owner is a normal lead; a fixable-problem parcel with a motivated owner is one most buyers walk past -- which is exactly the edge. Emitted as a disposition-dimension lift; lower reliability since it's a derived inference, not a record.",
+  "combination_rules": {
+    "complexity_arbitrage": {
+      "points": 10,
+      "solvable_constraints": [
+        "failed_septic", "septic_major_repair", "sewer_lateral", "brownfield", "ust_issue",
+        "contaminated_site", "environmental", "fema_repetitive_loss", "co_hold_tco_expired",
+        "unpermitted_work", "expired_stalled_permit", "stalled_subdivision", "stop_work_order",
+        "foundation_complaint", "retaining_wall_failure", "unsafe_structure", "boarding_order",
+        "failed_inspection"
+      ],
+      "motivation_dimensions": [
+        "financial_distress", "ownership_transition", "landlord_fatigue", "disposition_probability"
+      ]
+    }
   },
 
   "_reliability_note": "Signal confidence (#15): reliability 1-5 per signal. Public-record signals are trustworthy (default 5); proxies/estimates and inferred/AI signals are lower. The score POINTS are not discounted (no double-counting); instead each lead gets a confidence 0-100 = points-weighted avg reliability, so a high score built on shaky signals is visible and filterable. Verified/deterministic signals stay at the default; only softer ones are overridden here.",
@@ -150,7 +168,9 @@
     "complaint_velocity_311": 3,
     "neighborhood_contagion": 3,
     "owner_network_distress": 4,
-    "permit_trouble_score_notes": 3
+    "permit_trouble_score_notes": 3,
+    "catalyst_horizon": 4,
+    "complexity_arbitrage": 3
   },
 
   "bands": [

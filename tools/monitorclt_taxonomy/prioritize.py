@@ -81,6 +81,26 @@ def main():
     for f, c in sorted(fam.items()):
         print(f"  {c['built']}/{c['total']:<3} {f}")
 
+    # The strategic view: how deep are we in each of the seven arbitrages? A pile
+    # of distress signals with zero relationship/catalyst coverage is a lopsided
+    # product, which counting signals hides but this makes obvious.
+    order = tax.get("arbitrage_classes", [])
+    arb = {}
+    for s in signals:
+        cls = s.get("arbitrage_class", "unclassified")
+        arb.setdefault(cls, {"built": 0, "total": 0})
+        arb[cls]["total"] += 1
+        if s["status"] == "built":
+            arb[cls]["built"] += 1
+    ranked = sorted(arb.items(), key=lambda kv: (order.index(kv[0]) if kv[0] in order else 99, kv[0]))
+    print("\n=== COVERAGE BY ARBITRAGE (the seven ways we make money from information) ===")
+    for cls, c in ranked:
+        bar = "#" * c["built"] + "." * (c["total"] - c["built"])
+        print(f"  {c['built']}/{c['total']:<3} {cls:<13} {bar}")
+    thin = [cls for cls, c in arb.items() if cls not in ("meta",) and c["built"] == 0]
+    if thin:
+        print(f"\n  thin/undeveloped arbitrages (0 built): {', '.join(sorted(thin))}")
+
 
 if __name__ == "__main__":
     main()

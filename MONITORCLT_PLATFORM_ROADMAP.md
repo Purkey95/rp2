@@ -244,4 +244,60 @@ Sequencing rule: nothing in Phases 2–5 before Phase 0 is green. Distributing b
 
 ---
 
+## 6. Opportunity-detection engine — the seven arbitrages
+
+The lead-*sourcing* and lead-*scoring* work (the `tools/monitorclt_*` modules) has
+grown past "a collection of distress lists." The organizing frame is now **seven
+ways to make money from information**, and every signal is classified into one:
+
+1. **Distress** — owner/property needs a solution.
+2. **Timing** — we recognize the situation earlier.
+3. **Complexity** — we understand a solvable problem other buyers avoid.
+4. **Development** — the property can support a more valuable use.
+5. **Relationship** — the property is worth disproportionately more to a specific buyer.
+6. **Information** — multiple public records reveal something individually invisible.
+7. **Catalyst** — a known property event is approaching.
+
+`tools/monitorclt_taxonomy/` carries `arbitrage_class` on every signal, and
+`prioritize.py` now reports **coverage by arbitrage** — the strategic view. Today
+it's honest about the shape: deep in distress/information, thin (0 built) in
+**development** and **relationship**, which is where the differentiated, harder-to-
+copy value lives and where gated data (ROD, planning, geometry) is the blocker.
+
+### Built modules (tested, pure stdlib)
+
+| Module | What it does | Arbitrage |
+|---|---|---|
+| `monitorclt_sourcing` | Provenance-enforced, registry-driven source adapters | (ingest) |
+| `monitorclt_enrichment` | Parcel-join → mailable / skip-trace queue | (ingest) |
+| `monitorclt_score` | Five-component Seller Opportunity Score + confidence | distress |
+| `monitorclt_network` | Owner-network distress + neighborhood contagion | information/timing |
+| `monitorclt_timeline` | Why-now: recency, velocity, escalation, negative-space | timing |
+| `monitorclt_catalyst` | **What's about to happen** — projects dated events forward | catalyst |
+| `monitorclt_lifecycle` | **Opportunity decay** — resolve / decay / expire stale leads | (meta) |
+| `monitorclt_score` (combo rule) | **Complexity arbitrage** — fixable problem + motivated owner | complexity |
+| `monitorclt_market` | Macro timing (FRED) — when/where, kept separate from parcel score | timing |
+| `monitorclt_voice` | Twilio inbound caller-ID → parcel → score screen-pop | (ops) |
+
+### The discipline
+
+We can find obscure signals indefinitely; the value is not in wiring 150 gated
+sources. It's in **derived/free leverage** (multi-year tax staging, 311 velocity,
+owner-network, contagion, catalyst calendar, lifecycle decay, complexity
+combination) plus a **catalog** of the gated ones so the prioritizer tracks
+coverage and we build each only when its data comes online. Catalog everything,
+build the cheap ones, refuse to sprawl into paywalls.
+
+### Next (still cheap / derived, prioritizer-ranked)
+
+- **multi-year tax staging** + **311 complaint velocity** (top free wins)
+- **development** wedges from parcel geometry: `landlocked_flag_lot`,
+  `hidden_density_zoning_mismatch`, `stalled_subdivision` (negative-space)
+- **relationship** wedge: `relationship_value_access` (one parcel controls another's
+  access) — the one geometry-derivable slice of Relationship Value
+- feed **real recorded dates** into the catalyst calendar and **resolution events**
+  into the lifecycle engine as those sources come online (ROD, planning, tax status)
+
+---
+
 *Note: this document lives in the rp2 repo for persistence only — implementation happens in the MonitorCLT codebase, which is not on GitHub. To build any phase with Claude's help, either run Claude Code on the MonitorCLT host or push that codebase to a repo this account can attach.*

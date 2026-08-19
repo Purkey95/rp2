@@ -1,0 +1,44 @@
+{
+  "_comment": "Opportunity-Decay config. A lead is not a fact, it's a LIFECYCLE: it strengthens, weakens, resolves, or expires. Everything else in MonitorCLT *detects* opportunity; this is the only piece that *retires* it -- so a parcel that scored 80 on a tax delinquency that's since been paid, or one that sold last month, stops sitting at 80 forever. Three mechanisms: (1) RESOLUTION -- a resolving event cancels the matching open signal (tax paid, lien released, code case closed, or a sale that resolves the whole parcel). (2) DECAY -- a signal's weight halves every half_life_days, so a 2-week-old code case outweighs a 2-year-old one. (3) EXPIRY -- a signal with no refresh in expire_after_days is stale and drops out. Resolution and expiry remove a signal from 'active'; decay just scales it. Tune freely.",
+
+  "resolves": {
+    "tax_delinquency": ["tax_paid", "tax_foreclosure_redeemed", "tax_current"],
+    "tax_sale": ["tax_foreclosure_redeemed", "tax_paid"],
+    "foreclosure": ["foreclosure_cancelled", "reinstatement", "mortgage_payoff"],
+    "notice_of_default": ["reinstatement", "foreclosure_cancelled", "mortgage_payoff"],
+    "lis_pendens": ["lis_pendens_cancelled", "case_dismissed"],
+    "mechanics_lien": ["lien_release", "lien_satisfied"],
+    "judgment_lien": ["lien_release", "judgment_satisfied"],
+    "municipal_lien": ["lien_release", "lien_satisfied"],
+    "code_violation": ["code_case_closed", "code_compliance"],
+    "unsafe_structure": ["code_case_closed", "demolition_permit", "occupancy_permit"],
+    "nuisance": ["code_case_closed", "code_compliance"],
+    "vacancy": ["utilities_activated_after_vacancy", "occupancy_permit"],
+    "eviction": ["rental_advertised_repeatedly", "occupancy_permit"],
+    "co_hold_tco_expired": ["occupancy_permit", "co_granted"],
+    "*": ["sold", "deed_transfer", "under_contract", "closed_sale"]
+  },
+
+  "_wildcard_note": "'*' resolvers fire against ANY open signal on the parcel: a sale/transfer/under-contract means the opportunity is gone or has moved to a new owner -- the lead is stale regardless of what distress was open.",
+
+  "half_life_days": {
+    "default": 540,
+    "code_violation": 365,
+    "complaint_velocity_311": 180,
+    "vacancy": 365,
+    "tax_delinquency": 900,
+    "foreclosure": 270,
+    "notice_of_default": 270,
+    "eviction": 365,
+    "neighborhood_contagion": 365,
+    "catalyst_horizon": 365
+  },
+
+  "expire_after_days": {
+    "default": 1095,
+    "complaint_velocity_311": 540,
+    "code_violation": 730,
+    "vacancy": 730,
+    "foreclosure": 730
+  }
+}

@@ -3,7 +3,7 @@
 import json
 import os
 
-from score import score_parcels, load_signals, load_parcels
+from score import score_parcels, load_signals, load_parcels, combination_signals
 from entity import normalize_owner
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -73,6 +73,25 @@ def main():
                     for i in range(len(res) - 1)), True)
 
     ok &= check("owner key keeps entity", normalize_owner("CAROLINA HOLDINGS LLC"), "carolina holdings llc")
+
+    # Complexity-Arbitrage combination rule: fixable problem + motivated owner.
+    # (name, points, dimension, evidence, reliability) contributor tuples.
+    solvable_plus_motivated = [
+        ("failed_septic", 15, "property_distress", "http://x", 4),      # the fixable problem
+        ("probate", 14, "ownership_transition", "http://y", 4),          # the motivated owner
+    ]
+    combo = combination_signals(solvable_plus_motivated, cfg)
+    ok &= check("complexity_arbitrage fires on constraint+motivation",
+                combo and combo[0][0] == "complexity_arbitrage", True)
+    ok &= check("complexity_arbitrage is a disposition lift", combo[0][2], "disposition_probability")
+    ok &= check("complexity_arbitrage lower reliability (derived)", combo[0][4] < 5, True)
+
+    # A fixable problem with NO motivated owner does not fire (just a bad property).
+    constraint_only = [("failed_septic", 15, "property_distress", "http://x", 4)]
+    ok &= check("no arbitrage without motivation", combination_signals(constraint_only, cfg), [])
+    # A motivated owner with NO fixable problem does not fire (an ordinary lead).
+    motivation_only = [("probate", 14, "ownership_transition", "http://y", 4)]
+    ok &= check("no arbitrage without a solvable problem", combination_signals(motivation_only, cfg), [])
 
     print("\n" + ("ALL PASSED" if ok else "SOME TESTS FAILED"))
     return 0 if ok else 1

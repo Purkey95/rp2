@@ -34,6 +34,17 @@ def main():
     ok &= check("every signal has attributes",
                 all(all(k in s for k in ("value", "reliability", "effort", "availability", "dimension", "family"))
                     for s in tax["signals"]), True)
+    # every signal is placed in one of the seven arbitrages, and that class is declared
+    classes = set(tax["arbitrage_classes"])
+    ok &= check("every signal has an arbitrage_class",
+                all("arbitrage_class" in s for s in tax["signals"]), True)
+    ok &= check("every arbitrage_class is declared",
+                all(s["arbitrage_class"] in classes for s in tax["signals"]), True)
+    # the strategic point: all seven money-making classes are represented, not just distress
+    covered = {s["arbitrage_class"] for s in tax["signals"]}
+    ok &= check("all seven arbitrages represented",
+                {"distress", "timing", "complexity", "development", "relationship", "information", "catalyst"} <= covered,
+                True)
     # the top build-next signal is free/derived, not a paid/browser one (the whole thesis)
     todo = [s for s in tax["signals"] if s["status"] != "built" and s["availability"] != "not-obtainable"]
     for s in todo:

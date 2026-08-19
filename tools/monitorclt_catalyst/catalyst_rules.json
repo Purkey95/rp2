@@ -1,0 +1,40 @@
+{
+  "_comment": "Catalyst Calendar config. Where the five-score model says WHAT is wrong now and the timeline says WHY NOW, this says WHAT'S ABOUT TO HAPPEN. Almost everything we ingest carries a date; a catalyst is a FUTURE-dated event that will move a parcel (a loan maturing, a hearing, foreclosure eligibility, an entitlement expiring). Two ways a catalyst enters: (1) EXPLICIT -- a record already carries a real future date (rezoning hearing date, ground-lease expiration); pass it straight through. (2) DERIVED -- a present-dated signal implies a future milestone at a known offset (tax delinquency -> foreclosure eligibility ~2yr later). Derived offsets are approximations and carry a note; explicit dates always win. imminence: closer catalysts weigh more (a maturity in 20 days beats one in 300).",
+
+  "horizon_buckets_days": [[30, 1.0], [60, 0.8], [90, 0.6], [180, 0.4], [365, 0.2]],
+  "horizon_floor": 0.05,
+  "default_horizon_days": 365,
+
+  "catalyst_weights": {
+    "foreclosure_sale_date": 20,
+    "auction_date": 18,
+    "loan_maturity": 20,
+    "balloon_maturity": 20,
+    "hard_money_maturity": 20,
+    "redemption_deadline": 16,
+    "tax_foreclosure_eligibility": 18,
+    "entitlement_expiration": 16,
+    "subdivision_approval_expiration": 16,
+    "ground_lease_expiration": 16,
+    "affordable_restriction_expiration": 14,
+    "special_assessment_effective": 14,
+    "co_expiration": 14,
+    "rezoning_hearing": 12,
+    "lease_expiration": 12,
+    "tax_incentive_expiration": 12,
+    "permit_expiration": 10,
+    "infrastructure_completion": 8,
+    "school_boundary_effective": 6
+  },
+
+  "derived_catalysts": [
+    {"from": "tax_delinquency", "catalyst": "tax_foreclosure_eligibility", "offset_days": 730,
+     "note": "NC tax foreclosure becomes available ~2yr after delinquency"},
+    {"from": "notice_of_default", "catalyst": "foreclosure_sale_date", "offset_days": 120,
+     "note": "NC power-of-sale timeline from NOD to sale, approx"},
+    {"from": "demolition_permit", "catalyst": "permit_expiration", "offset_days": 180,
+     "note": "permit lapses without inspection activity"},
+    {"from": "renovation_permit", "catalyst": "permit_expiration", "offset_days": 365,
+     "note": "building permit typical validity"}
+  ]
+}

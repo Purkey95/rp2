@@ -78,6 +78,28 @@ def derived_signals(parcel, portfolio, current_year):
     return found
 
 
+def combination_signals(contributors, cfg):
+    """Signals that fire on the INTERACTION of others, not any single one -- the
+    arbitrage other buyers miss. complexity_arbitrage: a parcel that has BOTH a
+    SOLVABLE constraint (a fixable problem most buyers avoid) AND a MOTIVATED owner
+    (a signal from a transition/distress dimension) is the edge case worth surfacing.
+    Returns extra contributor tuples (name, points, dimension, evidence, reliability)."""
+    rule = cfg.get("combination_rules", {}).get("complexity_arbitrage")
+    if not rule:
+        return []
+    solvable = set(rule["solvable_constraints"])
+    motiv_dims = set(rule["motivation_dimensions"])
+    constraint_hits = sorted({name for name, _, _, _, _ in contributors if name in solvable})
+    motivation_hits = sorted({name for name, _, dim, _, _ in contributors
+                              if dim in motiv_dims and name not in solvable})
+    if constraint_hits and motivation_hits:
+        why = f"solvable problem ({constraint_hits[0]}) + motivated owner ({motivation_hits[0]})"
+        rel = cfg.get("reliability", {}).get("complexity_arbitrage", cfg.get("default_reliability", 5))
+        return [("complexity_arbitrage", rule["points"],
+                 cfg["dimension_of"].get("complexity_arbitrage", "disposition_probability"), why, rel)]
+    return []
+
+
 def score_parcels(signals, parcels, cfg, current_year):
     sig_w, der_w = cfg["signal_weights"], cfg["derived_weights"]
     dim_of, dims = cfg["dimension_of"], list(cfg["dimensions"].keys())
@@ -111,6 +133,14 @@ def score_parcels(signals, parcels, cfg, current_year):
                 seen.add(name)
                 contributors.append((name, der_w[name], dim_of.get(name, "ownership_transition"),
                                      why, rel_map.get(name, rel_default)))
+
+        # Combination signals fire on the interaction of the above (e.g. a fixable
+        # problem + a motivated owner = complexity arbitrage). Computed last so it
+        # sees every base + derived contributor.
+        for name, pts, dim, why, rel in combination_signals(contributors, cfg):
+            if name not in seen:
+                seen.add(name)
+                contributors.append((name, pts, dim, why, rel))
 
         if not contributors:
             continue
