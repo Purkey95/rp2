@@ -47,18 +47,19 @@ def write_leads_db(dsn, results):
     lead's score rises as its problems stack. Requires schema.sql applied."""
     from psycopg.types.json import Json
     rows = [(
-        r["apn"], r["owner"], r["situs_address"], r["seller_opportunity_score"], r["band"],
-        r["dimensions_firing"], r["portfolio_size"], Json(r["components"]), Json(r["signals"]),
+        r["apn"], r["owner"], r["situs_address"], r["seller_opportunity_score"], r["confidence"],
+        r["band"], r["dimensions_firing"], r["portfolio_size"], Json(r["components"]), Json(r["signals"]),
     ) for r in results]
     with _connect(dsn) as conn, conn.cursor() as cur:
         cur.executemany("""
-            INSERT INTO leads (apn, owner, situs_address, seller_opportunity_score, band,
+            INSERT INTO leads (apn, owner, situs_address, seller_opportunity_score, confidence, band,
                                dimensions_firing, portfolio_size, components, signals, scored_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, now())
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, now())
             ON CONFLICT (apn) DO UPDATE SET
                 owner = EXCLUDED.owner,
                 situs_address = EXCLUDED.situs_address,
                 seller_opportunity_score = EXCLUDED.seller_opportunity_score,
+                confidence = EXCLUDED.confidence,
                 band = EXCLUDED.band,
                 dimensions_firing = EXCLUDED.dimensions_firing,
                 portfolio_size = EXCLUDED.portfolio_size,

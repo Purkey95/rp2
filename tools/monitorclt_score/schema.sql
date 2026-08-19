@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS leads (
     owner                     text,
     situs_address             text,
     seller_opportunity_score  integer NOT NULL,
+    confidence                integer NOT NULL DEFAULT 100,  -- 0-100: points-weighted signal reliability
     band                      text NOT NULL,            -- immediate|priority|mail_call|digital|skip
     dimensions_firing         integer NOT NULL DEFAULT 0,
     portfolio_size            integer NOT NULL DEFAULT 1,

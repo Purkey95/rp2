@@ -166,6 +166,8 @@ The capstone that turns sourced signals into ranked leads. Starter engine at `to
 - [x] Live DB mode: `score.py --dsn` reads signals+parcels, upserts `leads` (schema.sql), CSV mode preserved
 - [ ] ROD liens (mechanic's/judgment/HOA/municipal/tax/lis-pendens): VERIFIED browser-only in all 8 counties (no API). Build a `browser_api` job on the host, starting with Gaston CCS (no Cloudflare); capture the doc-type vocab to build the type_map. Feeds the score's financial category.
 - [ ] Add entity-resolution depth (portfolio-shrinking over time, quitclaim/LLC-transfer events) once ROD deed data is wired
+- [x] Signal confidence model (#15): reliability 1-5 per signal → per-lead `confidence` 0-100 (points-weighted); high score + low confidence is now visible/filterable, not hidden. Score points not double-penalized.
+- [x] Network intelligence (derived, no new data): owner_network_distress (≥2 distressed parcels in an owner's portfolio flags the whole portfolio) + neighborhood_contagion (ZIP-level distress density flags turning blocks).
 - [ ] Tune weights against real closed-deal outcomes
 
 ## 3a. To-do — Contact enrichment (Phase 0 core; started)

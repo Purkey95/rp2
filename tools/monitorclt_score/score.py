@@ -81,6 +81,7 @@ def derived_signals(parcel, portfolio, current_year):
 def score_parcels(signals, parcels, cfg, current_year):
     sig_w, der_w = cfg["signal_weights"], cfg["derived_weights"]
     dim_of, dims = cfg["dimension_of"], list(cfg["dimensions"].keys())
+    rel_map, rel_default = cfg.get("reliability", {}), cfg.get("default_reliability", 5)
 
     by_apn = {}
     for s in signals:
@@ -102,35 +103,42 @@ def score_parcels(signals, parcels, cfg, current_year):
             st = s.get("signal_type", "")
             if st in sig_w and st not in seen:
                 seen.add(st)
+                rel = s.get("reliability", rel_map.get(st, rel_default))
                 contributors.append((st, sig_w[st], dim_of.get(st, "financial_distress"),
-                                     s.get("source_url", "")))
+                                     s.get("source_url", ""), rel))
         for name, why in derived_signals(p, pf, current_year):
             if name in der_w and name not in seen:
                 seen.add(name)
-                contributors.append((name, der_w[name], dim_of.get(name, "ownership_transition"), why))
+                contributors.append((name, der_w[name], dim_of.get(name, "ownership_transition"),
+                                     why, rel_map.get(name, rel_default)))
 
         if not contributors:
             continue
 
         components = {d: 0 for d in dims}
-        for _, pts, dim, _ in contributors:
+        for _, pts, dim, _, _ in contributors:
             components[dim] = components.get(dim, 0) + pts
         components = {d: min(v, 100) for d, v in components.items()}
-        seller_opportunity = min(sum(pts for _, pts, _, _ in contributors), 100)
+        seller_opportunity = min(sum(pts for _, pts, _, _, _ in contributors), 100)
         firing = sum(1 for v in components.values() if v > 0)
+        # Confidence (#15): points-weighted average reliability, 0-100. High score
+        # + low confidence = a lead built on soft signals -> visible and filterable.
+        pts_total = sum(pts for _, pts, _, _, _ in contributors)
+        confidence = round(sum(pts * rel for _, pts, _, _, rel in contributors) / pts_total / 5 * 100) if pts_total else 0
 
         results.append({
             "apn": apn,
             "owner": p.get("owner") or p.get("owner_name") or "",
             "situs_address": p.get("situs_street") or p.get("situs_address") or "",
             "seller_opportunity_score": seller_opportunity,
+            "confidence": confidence,
             "band": _band(seller_opportunity, cfg),
             "components": components,
             "dimensions_firing": firing,
             "portfolio_size": pf["size"] if pf else 1,
             "signals": [
-                {"signal": n, "points": pt, "dimension": dim, "evidence": src}
-                for n, pt, dim, src in sorted(contributors, key=lambda x: -x[1])
+                {"signal": n, "points": pt, "dimension": dim, "reliability": rel, "evidence": src}
+                for n, pt, dim, src, rel in sorted(contributors, key=lambda x: -x[1])
             ],
         })
 
@@ -187,7 +195,7 @@ def main():
     print(f"Priority+ (>=61): {summary['score.leads_priority_plus']}")
     for r in results[:5]:
         print(f"\n{r['situs_address'] or r['apn']}   Seller Opportunity Score: {r['seller_opportunity_score']} "
-              f"[{r['band']}]  ({r['dimensions_firing']} dimensions)")
+              f"[{r['band']}]  confidence {r['confidence']}  ({r['dimensions_firing']} dimensions)")
         comps = ", ".join(f"{d.split('_')[0]}:{v}" for d, v in r["components"].items() if v)
         print(f"  components -> {comps}")
         for s in r["signals"]:

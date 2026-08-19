@@ -43,6 +43,14 @@ def main():
     ok &= check("landlord component zero", comp["landlord_fatigue"], 0)
     ok &= check("dimensions firing", top["dimensions_firing"], 4)
 
+    # Signal confidence (#15): points-weighted reliability, 0-100. This lead is
+    # mostly verified public-record + deterministic signals, so confidence is high.
+    ok &= check("confidence present + high", top["confidence"] >= 85, True)
+    ok &= check("each signal carries reliability", all("reliability" in s for s in top["signals"]), True)
+    # the equity PROXY is lower-reliability than the tax record.
+    eq = next(s for s in top["signals"] if s["signal"] == "high_equity_proxy")
+    ok &= check("proxy reliability below verified", eq["reliability"] < 5, True)
+
     # Every contributing point carries a dimension + evidence (provenance).
     ok &= check("signals carry dimension", all(s["dimension"] for s in top["signals"]), True)
     ok &= check("signals carry evidence", all(s["evidence"] for s in top["signals"]), True)

@@ -51,7 +51,8 @@
     "foreclosure_postponed_repeatedly": 12, "probate_sale_fell_through": 12, "rental_to_sale_listing": 12,
     "estate_cleanout": 12, "interior_renovation_after_long_ownership": 10, "listed_180d": 10,
     "utilities_activated_after_vacancy": 10, "dumpster_permit": 8, "new_roof_presale": 8,
-    "mortgage_payoff": 8, "tax_foreclosure_redeemed": 8, "development_case": 4, "rezoning": 3
+    "mortgage_payoff": 8, "tax_foreclosure_redeemed": 8, "development_case": 4, "rezoning": 3,
+    "owner_network_distress": 10, "neighborhood_contagion": 6
   },
 
   "derived_weights": {
@@ -134,7 +135,22 @@
     "dumpster_permit": "disposition_probability", "new_roof_presale": "disposition_probability",
     "mortgage_payoff": "disposition_probability", "tax_foreclosure_redeemed": "disposition_probability",
     "recently_sold_another": "disposition_probability",
-    "development_case": "disposition_probability", "rezoning": "disposition_probability"
+    "development_case": "disposition_probability", "rezoning": "disposition_probability",
+    "owner_network_distress": "disposition_probability", "neighborhood_contagion": "property_distress"
+  },
+
+  "_reliability_note": "Signal confidence (#15): reliability 1-5 per signal. Public-record signals are trustworthy (default 5); proxies/estimates and inferred/AI signals are lower. The score POINTS are not discounted (no double-counting); instead each lead gets a confidence 0-100 = points-weighted avg reliability, so a high score built on shaky signals is visible and filterable. Verified/deterministic signals stay at the default; only softer ones are overridden here.",
+  "default_reliability": 5,
+  "reliability": {
+    "high_equity_proxy": 3,
+    "recently_sold_another": 4,
+    "large_portfolio": 4,
+    "portfolio_liquidation": 4,
+    "vacancy": 4,
+    "complaint_velocity_311": 3,
+    "neighborhood_contagion": 3,
+    "owner_network_distress": 4,
+    "permit_trouble_score_notes": 3
   },
 
   "bands": [
