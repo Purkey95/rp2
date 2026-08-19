@@ -144,6 +144,9 @@ Two patterns borrowed from HomeSignal and wired to run: enforced provenance (ant
 - [ ] St. Louis permits: register an Accela **App ID** (developer.accela.com, agency SLC) → wire Construct API v4 as a `json_api` entry (no browser); else run ACA via browser_api on the host
 - [ ] St. Louis 1st/2nd/3rd tax sale: Cloudflare-challenge — run browser_api with a cf_clearance cookie on the host, OR request the list from the Collector (more reliable)
 - [ ] Discover remaining: Union Evolve permits/code (in progress); **spatial-join** adapter (Iredell flag-only delinquency); yearly refresh of the Union advertisement PDF url
+- [x] Secretary of State entity-distress: entity->parcel join framework built + status map set to real NC SoS vocabulary. Data itself is PAID ($2k/yr + $750 FTP bulk; no free API, search Cloudflare/ToS-blocked) — framework plug-in-ready on subscription. Added `annual_report_delinquent` signal.
+- [x] Environmental (FREE, verified live): 6 NC DEQ + EPA ArcGIS layers registered (brownfields, UST/LUST 3.7k Meck, inactive-hazardous, dry-cleaning, EPA FRS 7.2k Meck) → `site_signals.py` address->parcel resolver → property_distress. FEMA repetitive-loss noted ZIP-level-only (redacted, not parcel). Brownfields proven live end-to-end.
+- [ ] Env precision upgrade: point-in-parcel spatial join on the layers' lat/lng (vs address match); run env layers on the host + resolve to APN + upsert to signals
 - [ ] Add CSV / CKAN / RSS / EPA adapters behind the same interface as needed
 - [ ] Register each source as a MonitorCLT pipeline (nightly) with its own success metric + freshness gate (several layers are stale snapshots)
 

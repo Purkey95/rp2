@@ -36,7 +36,7 @@
     "spouse_removed_title": 10, "heir_interest_transfer": 10, "quitclaim_relatives": 10,
     "trust_transfer_out": 10, "llc_to_member": 10, "mailing_address_changed": 8, "po_box_other_state": 8,
     "registered_agent_resignation": 8, "corporate_ownership_change": 8, "related_llc_transfer": 8,
-    "ownership_pct_change": 8, "fractional_owners": 8, "trust_transfer_in": 6,
+    "ownership_pct_change": 8, "fractional_owners": 8, "annual_report_delinquent": 6, "trust_transfer_in": 6,
 
     "repeat_eviction": 16, "selling_sequential": 15, "rental_license_suspended": 15,
     "failed_rental_inspection": 15, "eviction": 12, "rental_vacancy_90d": 12, "pm_termination": 12,

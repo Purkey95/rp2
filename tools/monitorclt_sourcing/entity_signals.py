@@ -20,17 +20,29 @@ import csv
 import json
 import re
 
-# SoS status -> our signal_type. Refined from the live status vocabulary; an
-# unmapped status yields no signal (an active entity is not a signal).
+# NC Secretary of State CorpStatus.StatusDesc -> our signal_type. Values verified
+# against the SoS status vocabulary (data dictionary + status FAQ). An unmapped or
+# healthy status ("Current-Active", "Converted", "Merged", ...) yields no signal.
+# Confirm exact strings against the delivered CorpStatus.txt (max 25 chars).
 DEFAULT_STATUS_MAP = {
     "admin. dissolved": "llc_admin_dissolution",
-    "administratively dissolved": "llc_admin_dissolution",
+    "admin dissolved": "llc_admin_dissolution",
+    "auto dissolve": "llc_admin_dissolution",
     "dissolved": "business_dissolution",
-    "voluntarily dissolved": "business_dissolution",
-    "revoked": "business_dissolution",
-    "suspended": "business_dissolution",
+    "judicial dissolution": "business_dissolution",
+    "court ordered dissolution": "business_dissolution",
+    "admin. cancelled": "business_dissolution",
+    "admin cancelled": "business_dissolution",
+    "revoked licensing board": "business_dissolution",
+    "pa suspended": "business_dissolution",
+    "expired": "business_dissolution",
     "withdrawn": "foreign_llc_withdrawal",
-    "foreign entity withdrawal": "foreign_llc_withdrawal",
+    "applied to withdraw": "foreign_llc_withdrawal",
+    "withdrawn by merger": "foreign_llc_withdrawal",
+    # Leading indicator: active but delinquent on required filings.
+    "active/not current": "annual_report_delinquent",
+    "active/failure to pay fee": "annual_report_delinquent",
+    "failure to pay fee": "annual_report_delinquent",
 }
 
 
