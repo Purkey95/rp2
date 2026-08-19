@@ -282,6 +282,7 @@ geometry, which is the honest blocker there.
 | `monitorclt_geometry` | Controlled-access value, hidden-density mismatch, assemblage adjacency | relationship/development |
 | `monitorclt_info` | Tax-lot/legal-lot mismatch, address/permit multi-unit anomaly | information |
 | `monitorclt_valuation` | **Records ARV/AVM + CMA** — comp grid → value → offer band | (enabler) |
+| `monitorclt_pipeline` | **End-to-end**: augment → lifecycle → score → why-now → value → offer sheet | (orchestrator) |
 | `monitorclt_market` | Macro timing (FRED) — when/where, kept separate from parcel score | timing |
 | `monitorclt_voice` | Twilio inbound caller-ID → parcel → score screen-pop | (ops) |
 
