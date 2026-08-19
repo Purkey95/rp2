@@ -168,17 +168,29 @@ def _band(score, cfg):
 
 def main():
     ap = argparse.ArgumentParser(description="Owner Distress Score")
-    ap.add_argument("--signals", required=True)
-    ap.add_argument("--parcels", required=True)
+    ap.add_argument("--dsn", help="Postgres DSN: read live signals+parcels, upsert leads (host)")
+    ap.add_argument("--signals", help="signals JSONL (CSV/file mode; not needed with --dsn)")
+    ap.add_argument("--parcels", help="parcels CSV (CSV/file mode; not needed with --dsn)")
     ap.add_argument("--weights", default=os.path.join(HERE, "weights.json"))
     ap.add_argument("--year", type=int, required=True, help="current year (e.g. 2026)")
     ap.add_argument("--outdir", default="out")
     args = ap.parse_args()
 
     cfg = json.load(open(args.weights, encoding="utf-8"))
-    signals = load_signals(args.signals)
-    parcels = load_parcels(args.parcels)
+    if args.dsn:
+        from db import load_signals_db, load_parcels_db, write_leads_db
+        signals, parcels = load_signals_db(args.dsn), load_parcels_db(args.dsn)
+    else:
+        if not (args.signals and args.parcels):
+            ap.error("provide --dsn, or both --signals and --parcels")
+        signals, parcels = load_signals(args.signals), load_parcels(args.parcels)
+
     results = score_parcels(signals, parcels, cfg, args.year)
+
+    if args.dsn:
+        from db import write_leads_db
+        n = write_leads_db(args.dsn, results)
+        print(f"Upserted {n} leads into the database.")
 
     os.makedirs(args.outdir, exist_ok=True)
     with open(os.path.join(args.outdir, "scored_leads.jsonl"), "w", encoding="utf-8") as f:

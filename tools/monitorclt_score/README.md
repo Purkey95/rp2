@@ -62,10 +62,18 @@ data — see the roadmap.)
   `situs_street`, `mail_street`/`mail_state`, `property_state`, `sale_year`,
   `assessed_value`, `mortgage_balance` (optional), `vacant`.
 
-## Wiring to the live database
+## Live database mode (built)
 
-Replace `load_signals`/`load_parcels` with Postgres queries (`signals` table +
-the enrichment `parcels` view), write `scored_leads` back to a `leads` table, and
-register `score.leads_priority_plus` (and band counts) as MonitorCLT metrics so
-the daily digest shows how many priority+ leads exist. The score is recomputed
-whenever new signals land — a lead's score rises as its problems stack.
+Apply `schema.sql` (creates `leads` + the `priority_leads` view), install the
+driver (`pip install "psycopg[binary]"`), then run against the live tables:
+
+```bash
+python3 score.py --dsn "postgresql://user:pass@host/monitorclt" --year 2026
+```
+
+With `--dsn` it reads active `signals` (from the sourcing adapters) + `parcels`
+(from enrichment), scores, and **upserts into `leads`** (idempotent — recomputed
+each run, so a lead's score rises as problems stack). `db.py` holds the queries;
+adjust the `SELECT` column names to your live schema. Emit
+`score.leads_priority_plus` and `score.leads_immediate` (see `schema.sql`) into
+the daily digest. Without `--dsn` it runs CSV/JSONL as above.
