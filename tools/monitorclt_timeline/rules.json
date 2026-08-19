@@ -1,0 +1,32 @@
+{
+  "_comment": "Temporal Signal Engine config. The static five-score model says HOW distressed a parcel is; this says WHY NOW. Recency-weights events (recent > old), rewards clustering (velocity), detects escalation SEQUENCES and NEGATIVE SPACE (an expected follow-up that never happened). Tune freely; add chains/rules as sources come online.",
+
+  "recency_tiers_days": [[90, 1.0], [365, 0.6], [730, 0.3]],
+  "recency_floor": 0.1,
+
+  "velocity_window_days": 180,
+  "cluster_threshold": 3,
+  "cluster_bonus": 15,
+
+  "escalation_chains": [
+    {"name": "code_to_demolition", "sequence": ["code_violation", "failed_inspection", "demolition_permit"], "window_days": 365, "bonus": 20,
+     "why": "code case escalating toward demolition"},
+    {"name": "failed_flip", "sequence": ["renovation_permit", "mechanics_lien"], "window_days": 540, "bonus": 18,
+     "why": "renovation then contractor lien -> stalled flip"},
+    {"name": "tax_escalation", "sequence": ["tax_delinquency", "tax_lien", "foreclosure"], "window_days": 1095, "bonus": 18,
+     "why": "tax distress progressing to foreclosure"},
+    {"name": "landlord_exit", "sequence": ["eviction", "rental_price_reduced", "rental_to_sale_listing"], "window_days": 365, "bonus": 14,
+     "why": "eviction -> can't re-rent -> converting to sale"}
+  ],
+
+  "negative_space_rules": [
+    {"name": "fire_no_repair", "trigger": "fire_damage", "expected": "renovation_permit", "within_days": 180, "bonus": 15,
+     "flag": "fire with no repair permit"},
+    {"name": "purchase_no_reno", "trigger": "recent_purchase", "expected": "renovation_permit", "within_days": 365, "bonus": 8,
+     "flag": "investor bought, no renovation started"},
+    {"name": "permit_no_inspection", "trigger": "demolition_permit", "expected": "failed_inspection", "within_days": 180, "bonus": 6,
+     "flag": "permit issued, no inspection activity"},
+    {"name": "eviction_no_relist", "trigger": "eviction", "expected": "rental_advertised_repeatedly", "within_days": 120, "bonus": 10,
+     "flag": "eviction completed, unit not re-advertised (vacant/giving up)"}
+  ]
+}
