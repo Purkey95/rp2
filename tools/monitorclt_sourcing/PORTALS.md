@@ -110,6 +110,19 @@ Findings from probing the actual portals — what rung each really lands on:
   (separate) has a wireable CityView JSON endpoint, but city-only, permits-only,
   HTML-in-JSON — a different, partial dataset.
 
+- **Register of Deeds liens (all 8 counties) → rung 4, browser-only.** VERIFIED:
+  no county exposes a callable API or ArcGIS layer for lien/document-index data —
+  ROD sits on browser-only stacks (Manatron WebForms, Logan Blazor/SignalR, CCS
+  MVC, Cott eSearch login, Cloudflare). The distress doc-types (mechanic's/claim
+  of lien, judgment, HOA/COA lien, tax/municipal lien, lis pendens, foreclosure)
+  are in the Real Property Index. Best automation target is **Gaston CCS**
+  (`gastonnc.courthousecomputersystems.com`, no Cloudflare/login) — a session +
+  disclaimer POST + form scrape of `/LRSearch/LRIndex` returns parseable grids;
+  the pattern ports to Iredell/Lincoln CCS once Cloudflare is cleared. Mecklenburg
+  meckrod needs a ViewState driver; Cabarrus/Union need headless (Blazor); St.
+  Louis is best via a licensed Fidlar bulk feed. The score is already lien-ready —
+  those `signal_type`s are weighted and will score the moment a job emits them.
+
 **Environment caveat.** The `browser_api` adapter needs Playwright + real outbound
 networking; it runs on the **MonitorCLT host**, not in the Claude sandbox (headless
 browser egress is blocked here — curl/urllib work, the browser does not). And a

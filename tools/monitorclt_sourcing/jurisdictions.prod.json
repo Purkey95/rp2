@@ -290,6 +290,20 @@
       "note": "VERIFIED dead-end for clean ingestion: ASP.NET WebForms, no JSON/api, and ViewState-replay fails with 'Validation of viewstate MAC failed' (web-farm with per-instance auto machineKeys + no session affinity). Permit Search IS anonymous but reachable only by browser_api holding ONE live session and clicking through (still fights the cluster). No ArcGIS permit layer exists. BEST PATH = Rung 3 records request: Union County Building Code Enforcement, ucinspections@unioncountync.gov / (704) 283-3816 -- ask if CentralSquare can export a feed. NOTE: City of Monroe (not the county) runs Harris CityView with an anonymous JSON endpoint (cvportal.monroenc.org/Portal/Permit/LocatorResults) but it's city-only, permits-only (no code), and returns HTML inside a JSON 'View' field -- a partial, separate dataset, not wired."
     },
     {
+      "registry_id": "rod-liens-ALL-COUNTIES",
+      "platform": "browser_api",
+      "source_name": "Register of Deeds liens (mechanic's / judgment / HOA / municipal / tax / lis pendens)",
+      "blocked_by": "browser_only_no_api",
+      "note": "VERIFIED across all 8 counties: NO callable JSON API and NO ArcGIS lien layer anywhere. Every ROD lien/document index is browser-only. Distress doc-types (claim of lien, mechanic's, judgment lien, HOA/COA claim of lien, tax/municipal lien, lis pendens, substitute-trustee foreclosure) live inside the Real Property Index and must be captured by driving a portal. Highest-yield automation target FIRST: Gaston CCS (loads with no Cloudflare/login). Score is already lien-ready: weights.json has hoa_lien/municipal_lien/mechanics_lien/judgment_lien/tax_lien/lis_pendens -- these score automatically once a browser_api job emits them. Capture the live doc-type vocabulary from Gaston CCS to build the type_map (agent did not enumerate it -- not fabricated here).",
+      "sources_by_vendor": {
+        "gaston_ccs": {"platform_family": "Courthouse Computer Systems (ASP.NET MVC)", "url": "https://gastonnc.courthousecomputersystems.com/", "routes": ["/LRSearch/LRIndex", "/UCCSearch/UCCIndex"], "access": "disclaimer POST + session cookie, HTML result grid (instrument#, date, doc_type, grantor, grantee, book, page). No Cloudflare/login -- BEST target.", "counties": ["Gaston", "Iredell (behind Cloudflare)", "Lincoln (behind Cloudflare)"]},
+        "mecklenburg_meckrod": {"platform_family": "Harris/Manatron-Aumentum (ASP.NET WebForms)", "url": "https://meckrod.manatron.com/", "access": "ViewState-aware WebForms driver (browser_api).", "counties": ["Mecklenburg"]},
+        "logan_blazor": {"platform_family": "Logan Systems (Blazor Server / SignalR)", "urls": ["https://www.cabarrusncrod.org/", "https://www.unionconcrod.org/"], "access": "Headless browser required (SignalR websocket, no REST). Union: deeds/plats only, no mortgages online.", "counties": ["Cabarrus", "Union"]},
+        "rowan_cott": {"platform_family": "Cott/Kofile eSearch (WebForms)", "url": "https://rod.rowancountync.gov/", "access": "Login required.", "counties": ["Rowan", "Iredell (legacy)"]},
+        "stlouis_fidlar": {"platform_family": "Fidlar", "url": "https://stlouiscountymo.gov (Recorder deed-search, Cloudflare)", "access": "Free search Cloudflare-gated; pursue licensed bulk feed (Fidlar Monarch/Laredo) instead of scraping.", "counties": ["St. Louis MO"]}
+      }
+    },
+    {
       "registry_id": "gaston-tax-foreclosure-html",
       "platform": "html",
       "source_name": "Gaston County Tax Foreclosures -- HTML only",

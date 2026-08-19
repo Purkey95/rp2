@@ -158,6 +158,9 @@ The capstone that turns sourced signals into ranked leads. Starter engine at `to
 - [x] Configurable `weights.json` (point weights + category map + bands); config-ready weights for not-yet-wired signals (liens, probate, eviction, MLS, fire/utility) that score automatically once a source emits them
 - [x] Full provenance: each contributing point carries its `source_url` or computed reason
 - [ ] Wire `load_*` to Postgres (`signals` + enrichment `parcels`); write to a `leads` table; emit `score.leads_priority_plus` + band counts to the digest
+- [x] Weights tuned to the seller-motivation x competition matrix; lien signal_types pre-weighted (score consumes them automatically once emitted)
+- [x] Live DB mode: `score.py --dsn` reads signals+parcels, upserts `leads` (schema.sql), CSV mode preserved
+- [ ] ROD liens (mechanic's/judgment/HOA/municipal/tax/lis-pendens): VERIFIED browser-only in all 8 counties (no API). Build a `browser_api` job on the host, starting with Gaston CCS (no Cloudflare); capture the doc-type vocab to build the type_map. Feeds the score's financial category.
 - [ ] Add entity-resolution depth (portfolio-shrinking over time, quitclaim/LLC-transfer events) once ROD deed data is wired
 - [ ] Tune weights against real closed-deal outcomes
 
