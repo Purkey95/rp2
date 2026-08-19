@@ -3,7 +3,8 @@
 import json
 import os
 
-from geometry import relationship_value_access, hidden_density_zoning_mismatch, zoning_max_units
+from geometry import (relationship_value_access, hidden_density_zoning_mismatch,
+                      zoning_max_units, assemblage_adjacency_value)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 RULES = json.load(open(os.path.join(HERE, "geometry_rules.json"), encoding="utf-8"))
@@ -55,6 +56,25 @@ def main():
     hd_apns = sorted(s["apn"] for s in hd)
     ok &= check("only UP shows hidden density", hd_apns, ["UP"])
     ok &= check("UP reports the unit upside", hd[0]["extra_units"], 21)
+
+    # --- assemblage adjacency ---
+    aparcels = [
+        # ACME owns P1+P2 (adjacent), P1 a recent acquisition -> active assembler
+        {"apn": "P1", "owner": "ACME LLC", "neighbors": ["P2", "T1"], "recent_acquisition": "yes"},
+        {"apn": "P2", "owner": "ACME LLC", "neighbors": ["P1", "T2"], "recent_acquisition": "no"},
+        {"apn": "T1", "owner": "SMITH", "neighbors": ["P1"]},   # target (independent neighbor)
+        {"apn": "T2", "owner": "JONES", "neighbors": ["P2"]},   # target
+        # LONE owns Q1+Q2 adjacent but NO recent acquisition -> not an active assembler
+        {"apn": "Q1", "owner": "LONE LLC", "neighbors": ["Q2", "Z1"], "recent_acquisition": "no"},
+        {"apn": "Q2", "owner": "LONE LLC", "neighbors": ["Q1"], "recent_acquisition": "no"},
+        {"apn": "Z1", "owner": "WEST", "neighbors": ["Q1"]},
+    ]
+    aa = assemblage_adjacency_value(aparcels, RULES)
+    aa_apns = sorted(s["apn"] for s in aa)
+    ok &= check("assemblage flags the two independent neighbors of ACME's block", aa_apns, ["T1", "T2"])
+    ok &= check("assemblage names the assembler", aa[0]["assembler"], "ACME LLC")
+    ok &= check("LONE (no recent acq) does not create targets", all(s["apn"] != "Z1" for s in aa), True)
+    ok &= check("assembler's own parcels are not targets", all(s["apn"] not in ("P1", "P2") for s in aa), True)
 
     print("\n" + ("ALL PASSED" if ok else "SOME TESTS FAILED"))
     return 0 if ok else 1

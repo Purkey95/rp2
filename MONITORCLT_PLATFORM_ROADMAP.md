@@ -279,7 +279,8 @@ geometry, which is the honest blocker there.
 | `monitorclt_lifecycle` | **Opportunity decay** — resolve / decay / expire stale leads | (meta) |
 | `monitorclt_score` (combo rule) | **Complexity arbitrage** — fixable problem + motivated owner | complexity |
 | `monitorclt_derive` | Tax staging (multi-year), 311 velocity, stalled subdivision | timing |
-| `monitorclt_geometry` | Controlled-access value + hidden-density mismatch (parcel layer only) | relationship/development |
+| `monitorclt_geometry` | Controlled-access value, hidden-density mismatch, assemblage adjacency | relationship/development |
+| `monitorclt_info` | Tax-lot/legal-lot mismatch, address/permit multi-unit anomaly | information |
 | `monitorclt_market` | Macro timing (FRED) — when/where, kept separate from parcel score | timing |
 | `monitorclt_voice` | Twilio inbound caller-ID → parcel → score screen-pop | (ops) |
 

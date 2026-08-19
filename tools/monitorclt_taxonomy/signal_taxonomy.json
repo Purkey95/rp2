@@ -958,7 +958,7 @@
       "reliability": 3,
       "effort": 4,
       "legality": "ok",
-      "status": "not-started"
+      "status": "built"
     },
     {
       "id": "relationship_value_score",
@@ -1073,7 +1073,7 @@
       "reliability": 3,
       "effort": 4,
       "legality": "ok",
-      "status": "not-started"
+      "status": "built"
     },
     {
       "id": "address_anomaly_multiunit",
@@ -1087,7 +1087,7 @@
       "reliability": 3,
       "effort": 3,
       "legality": "ok",
-      "status": "not-started"
+      "status": "built"
     },
 
     {

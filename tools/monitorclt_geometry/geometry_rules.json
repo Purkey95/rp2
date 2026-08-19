@@ -6,6 +6,13 @@
     "note": "a parcel with no road frontage whose access crosses a specific neighbor is worth far more to that neighbor than to the open market -- a natural buyer exists, so a deal is unusually doable"
   },
 
+  "assemblage": {
+    "min_owned_adjacent": 2,
+    "require_recent": true,
+    "recent_true_values": ["1", "true", "yes", "y", "t"],
+    "note": "an owner buying up contiguous parcels (>=2 adjacent, at least one a recent acquisition) is an active assembler; the still-independent parcels touching that block are the natural next targets -- worth more to that specific buyer (relationship) and part of a redevelopment play (development)"
+  },
+
   "hidden_density": {
     "min_extra_units": 3,
     "units_per_acre": {

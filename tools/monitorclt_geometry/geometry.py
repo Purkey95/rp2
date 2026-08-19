@@ -27,6 +27,15 @@ import argparse
 import csv
 import json
 import os
+import re
+
+
+def _norm_owner(name):
+    if not name:
+        return ""
+    n = re.sub(r"[.,&/']", " ", str(name).lower())
+    n = re.sub(r"\s+", " ", n).strip()
+    return " ".join(sorted(t for t in n.split(" ") if t and t != "the"))
 
 
 def _truthy(v, true_values):
@@ -80,6 +89,55 @@ def relationship_value_access(parcels, rules):
                           + ("  [sole controller -- strongest leverage]" if sole else ""),
             "controllers": controllers, "sole_controller": sole,
         })
+    return out
+
+
+def assemblage_adjacency_value(parcels, rules):
+    """An owner assembling contiguous parcels (>= min_owned_adjacent adjacent, at
+    least one a recent acquisition when require_recent) is an active assembler. The
+    still-independent parcels touching that block are the natural next targets --
+    worth more to that specific buyer. Emit on each target, naming the assembler."""
+    cfg = rules["assemblage"]
+    tv = set(cfg["recent_true_values"])
+    index = {(p.get("apn") or "").strip(): p for p in parcels if (p.get("apn") or "").strip()}
+    owner_of = {a: _norm_owner(p.get("owner") or p.get("owner_name") or "") for a, p in index.items()}
+
+    owned = {}
+    for a, o in owner_of.items():
+        if o:
+            owned.setdefault(o, set()).add(a)
+
+    out, seen = [], set()
+    for owner, apns in owned.items():
+        # the owner's parcels that are adjacent to another parcel of the SAME owner
+        contiguous = set()
+        for a in apns:
+            for nb in _neighbors(index[a]):
+                if nb in apns:
+                    contiguous.add(a)
+                    contiguous.add(nb)
+        if len(contiguous) < cfg["min_owned_adjacent"]:
+            continue
+        if cfg.get("require_recent") and not any(
+                _truthy(index[a].get("recent_acquisition", ""), tv) for a in contiguous):
+            continue
+        # targets: parcels adjacent to the contiguous block but owned by someone else
+        for a in contiguous:
+            for nb in _neighbors(index[a]):
+                npar = index.get(nb)
+                if npar is None or owner_of.get(nb) == owner:
+                    continue
+                if nb in seen:
+                    continue
+                seen.add(nb)
+                display_owner = index[a].get("owner") or index[a].get("owner_name") or owner
+                out.append({
+                    "apn": nb, "signal_type": "assemblage_adjacency_value", "bucket": "active",
+                    "source_name": "MonitorCLT geometry: assemblage adjacency (derived)",
+                    "source_url": f"adjacent to {display_owner}'s assemblage of {len(contiguous)} "
+                                  f"contiguous parcels (recent acquisitions) -- natural next target",
+                    "assembler": display_owner, "block_size": len(contiguous),
+                })
     return out
 
 
@@ -149,7 +207,9 @@ def main():
     rules = json.load(open(args.rules, encoding="utf-8"))
     parcels = load_parcels(args.parcels)
 
-    sigs = relationship_value_access(parcels, rules) + hidden_density_zoning_mismatch(parcels, rules)
+    sigs = (relationship_value_access(parcels, rules)
+            + hidden_density_zoning_mismatch(parcels, rules)
+            + assemblage_adjacency_value(parcels, rules))
     with open(args.out, "w", encoding="utf-8") as f:
         for s in sigs:
             f.write(json.dumps(s) + "\n")

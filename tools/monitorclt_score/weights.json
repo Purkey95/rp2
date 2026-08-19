@@ -55,7 +55,8 @@
     "utilities_activated_after_vacancy": 10, "dumpster_permit": 8, "new_roof_presale": 8,
     "mortgage_payoff": 8, "tax_foreclosure_redeemed": 8, "development_case": 4, "rezoning": 3,
     "owner_network_distress": 10, "neighborhood_contagion": 6, "catalyst_horizon": 8,
-    "stalled_subdivision": 10, "relationship_value_access": 10, "hidden_density_zoning_mismatch": 10
+    "stalled_subdivision": 10, "relationship_value_access": 10, "hidden_density_zoning_mismatch": 10,
+    "assemblage_adjacency_value": 10, "tax_lot_legal_lot_mismatch": 8, "address_anomaly_multiunit": 8
   },
 
   "derived_weights": {
@@ -143,7 +144,10 @@
     "owner_network_distress": "disposition_probability", "neighborhood_contagion": "property_distress",
     "catalyst_horizon": "disposition_probability", "complexity_arbitrage": "disposition_probability",
     "stalled_subdivision": "disposition_probability", "relationship_value_access": "disposition_probability",
-    "hidden_density_zoning_mismatch": "disposition_probability"
+    "hidden_density_zoning_mismatch": "disposition_probability",
+    "assemblage_adjacency_value": "disposition_probability",
+    "tax_lot_legal_lot_mismatch": "disposition_probability",
+    "address_anomaly_multiunit": "disposition_probability"
   },
 
   "_combination_note": "Combination rules fire on the INTERACTION of signals, not any single one -- the arbitrage that others miss. complexity_arbitrage answers two of the four questions at once: 'which bad property has a SOLVABLE problem' (a fixable constraint a capable buyer can clear) AND 'who is more likely to SELL' (a motivated/transitioning owner). A clean parcel with a motivated owner is a normal lead; a fixable-problem parcel with a motivated owner is one most buyers walk past -- which is exactly the edge. Emitted as a disposition-dimension lift; lower reliability since it's a derived inference, not a record.",
@@ -179,7 +183,10 @@
     "complexity_arbitrage": 3,
     "stalled_subdivision": 3,
     "relationship_value_access": 3,
-    "hidden_density_zoning_mismatch": 4
+    "hidden_density_zoning_mismatch": 4,
+    "assemblage_adjacency_value": 3,
+    "tax_lot_legal_lot_mismatch": 3,
+    "address_anomaly_multiunit": 3
   },
 
   "bands": [
