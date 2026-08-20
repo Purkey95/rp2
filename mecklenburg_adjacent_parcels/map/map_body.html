@@ -1,0 +1,476 @@
+<div class="app">
+  <header class="bar">
+    <div class="brand">
+      <h1>Parcels touching Mecklenburg County land</h1>
+      <p>Every tax parcel that shares a boundary with property owned by the County or one of its affiliated bodies</p>
+    </div>
+    <div class="tally">
+      <div><b id="tTouch">—</b><span>Touching parcels</span></div>
+      <div><b id="tOutside">—</b><span>Not county-owned</span></div>
+      <div><b id="tCounty">—</b><span>County properties</span></div>
+      <div><b id="tShown">—</b><span>Matching filters</span></div>
+    </div>
+  </header>
+
+  <div class="body">
+    <aside id="rail">
+      <div class="panel">
+        <h2>Search</h2>
+        <div class="search">
+          <input id="q" type="search" placeholder="Address, owner, or parcel ID" aria-label="Search parcels">
+          <button id="qclear" type="button" aria-label="Clear search">✕</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Touches land owned by</h2>
+        <div class="checks" id="groupChecks"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Neighbour ownership</h2>
+        <div class="seg" role="group" aria-label="Neighbour ownership">
+          <button type="button" data-own="all" aria-pressed="true">All parcels</button>
+          <button type="button" data-own="outside" aria-pressed="false">Not county-owned</button>
+        </div>
+        <h2 style="margin-top:4px">Type of contact</h2>
+        <select id="rel" aria-label="Type of contact">
+          <option value="-1">Any contact</option>
+        </select>
+        <h2 style="margin-top:4px">Jurisdiction</h2>
+        <select id="muni" aria-label="Jurisdiction"><option value="-1">All jurisdictions</option></select>
+      </div>
+
+      <div class="listhead"><strong id="listCount">—</strong><span>parcels listed</span></div>
+      <div class="listwrap" id="listwrap"><div class="rows" id="rows"></div></div>
+      <div class="foot">
+        Parcel geometry, ownership and CAMA values from Mecklenburg County GIS, pulled 20 Aug 2026.
+        Contact tested at a <code>1 ft</code> tolerance to absorb slivers in the parcel fabric.
+      </div>
+    </aside>
+
+    <div class="map" id="map">
+      <canvas id="cv"></canvas>
+      <div class="overlay zoom">
+        <button type="button" id="zin" aria-label="Zoom in">+</button>
+        <button type="button" id="zout" aria-label="Zoom out">−</button>
+        <button type="button" id="zfit" class="wide" aria-label="Zoom to full county">FIT</button>
+      </div>
+      <div class="overlay legend">
+        <div class="t">Map key</div>
+        <div id="legendKeys"></div>
+        <div class="k"><span class="swatch" style="background:var(--touch-fill);border-color:var(--touch-line)"></span> Touching parcel</div>
+      </div>
+      <div class="overlay scalebar" id="scalebar"><div class="b" style="width:80px"></div><span>—</span></div>
+      <div class="overlay hint" id="hint">Drag to pan · scroll to zoom · click a parcel for detail</div>
+      <div class="loading" id="loading"><div><div class="lb">Unpacking 23,000 parcels…</div><p id="loadMsg">a moment</p></div></div>
+      <div class="detail" id="detail" aria-live="polite"></div>
+    </div>
+  </div>
+</div>
+
+<script id="payload" type="application/octet-stream">__PAYLOAD__</script>
+<script>
+(async function(){
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => n.toLocaleString('en-US');
+  const acres = (v) => (v/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const money = (v) => v ? '$' + Math.round(v).toLocaleString('en-US') : '—';
+
+  let D;
+  try {
+    const b64 = $('payload').textContent.trim();
+    if (!('DecompressionStream' in window)) throw new Error('needs-ds');
+    const bin = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+    const stream = new Blob([bin]).stream().pipeThrough(new DecompressionStream('gzip'));
+    D = JSON.parse(await new Response(stream).text());
+  } catch (err) {
+    $('loadMsg').textContent = 'This browser could not unpack the map data. Try a recent Chrome, Safari or Firefox.';
+    return;
+  }
+
+  const Q = D.q, P = D.parcels, C = D.county, DICT = D.dicts;
+  const GROUP_VARS = ['--g0','--g1','--g2','--g3'];
+  const css = getComputedStyle(document.documentElement);
+  const col = (v) => css.getPropertyValue(v).trim();
+
+  // ---- geometry decode -------------------------------------------------
+  function build(rings){
+    const path = new Path2D();
+    let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+    for (const r of rings){
+      let ix = r[0], iy = r[1];
+      let x = ix/Q, y = iy/Q;
+      path.moveTo(x, y);
+      if (x<minx) minx=x; if (x>maxx) maxx=x; if (y<miny) miny=y; if (y>maxy) maxy=y;
+      for (let i=2;i<r.length;i+=2){
+        ix += r[i]; iy += r[i+1];
+        x = ix/Q; y = iy/Q;
+        path.lineTo(x, y);
+        if (x<minx) minx=x; if (x>maxx) maxx=x; if (y<miny) miny=y; if (y>maxy) maxy=y;
+      }
+      path.closePath();
+    }
+    return {path, bb:[minx,miny,maxx,maxy]};
+  }
+  function buildLine(r){
+    const path = new Path2D();
+    let ix = r[0], iy = r[1];
+    path.moveTo(ix/Q, iy/Q);
+    let minx=ix/Q, miny=iy/Q, maxx=minx, maxy=miny;
+    for (let i=2;i<r.length;i+=2){
+      ix += r[i]; iy += r[i+1];
+      const x = ix/Q, y = iy/Q;
+      path.lineTo(x, y);
+      if (x<minx) minx=x; if (x>maxx) maxx=x; if (y<miny) miny=y; if (y>maxy) maxy=y;
+    }
+    return {path, bb:[minx,miny,maxx,maxy]};
+  }
+
+  const NP = P.pid.length, NC = C.pid.length;
+  const pGeo = new Array(NP), cGeo = new Array(NC);
+  for (let i=0;i<NP;i++) pGeo[i] = build(P.geo[i]);
+  for (let i=0;i<NC;i++) cGeo[i] = build(C.geo[i]);
+  const streets = D.streets.map(buildLine);
+  const bounds = D.boundaries.map(r => build([r]));
+  P.geo = null; C.geo = null; D.streets = null; D.boundaries = null;
+
+  const searchKey = new Array(NP);
+  for (let i=0;i<NP;i++)
+    searchKey[i] = (P.addr[i] + ' ' + DICT.own[P.own[i]] + ' ' + P.pid[i]).toLowerCase();
+
+  // ---- spatial index ---------------------------------------------------
+  const CELL = 400;
+  const grid = new Map();
+  const key = (a,b) => a + ':' + b;
+  function index(list, tag){
+    list.forEach((g,i) => {
+      const [x0,y0,x1,y1] = g.bb;
+      for (let cx = Math.floor(x0/CELL); cx <= Math.floor(x1/CELL); cx++)
+        for (let cy = Math.floor(y0/CELL); cy <= Math.floor(y1/CELL); cy++){
+          const k = key(cx,cy);
+          let arr = grid.get(k); if (!arr) grid.set(k, arr = []);
+          arr.push([tag,i]);
+        }
+    });
+  }
+  index(pGeo,'p'); index(cGeo,'c');
+
+  // ---- view ------------------------------------------------------------
+  const cv = $('cv'), ctx = cv.getContext('2d');
+  let W = 0, H = 0, dpr = 1, k = 0.02, cx = 0, cy = 0;
+  let full = null;
+  (function extent(){
+    let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+    for (const g of cGeo.concat(pGeo)){
+      x0=Math.min(x0,g.bb[0]); y0=Math.min(y0,g.bb[1]);
+      x1=Math.max(x1,g.bb[2]); y1=Math.max(y1,g.bb[3]);
+    }
+    full = [x0,y0,x1,y1];
+  })();
+
+  function resize(){
+    const r = $('map').getBoundingClientRect();
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = r.width; H = r.height;
+    cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
+    draw();
+  }
+  function fitTo(bb, pad){
+    pad = pad || 40;
+    const w = Math.max(bb[2]-bb[0], 1), h = Math.max(bb[3]-bb[1], 1);
+    k = Math.min((W-2*pad)/w, (H-2*pad)/h);
+    cx = (bb[0]+bb[2])/2; cy = (bb[1]+bb[3])/2;
+    draw();
+  }
+  const toWorld = (px,py) => [cx + (px - W/2)/k, cy - (py - H/2)/k];
+
+  // ---- filters ---------------------------------------------------------
+  const state = {groups:[true,true,true,true], own:'all', rel:-1, muni:-1, q:'', sel:null};
+  let results = [];
+  const visible = new Uint8Array(NP);
+
+  function applyFilters(){
+    const mask = state.groups.reduce((m,on,i) => on ? (m | (1<<i)) : m, 0);
+    const q = state.q.trim().toLowerCase();
+    results.length = 0;
+    for (let i=0;i<NP;i++){
+      let ok = (P.grp[i] & mask) !== 0;
+      if (ok && state.own === 'outside') ok = P.self[i] < 0;
+      if (ok && state.rel >= 0) ok = P.rel[i] === state.rel;
+      if (ok && state.muni >= 0) ok = P.muni[i] === state.muni;
+      if (ok && q) ok = searchKey[i].indexOf(q) !== -1;
+      visible[i] = ok ? 1 : 0;
+      if (ok) results.push(i);
+    }
+    results.sort((a,b) => (P.addr[a] || 'zzz').localeCompare(P.addr[b] || 'zzz'));
+    $('tShown').textContent = fmt(results.length);
+    $('listCount').textContent = fmt(results.length);
+    renderList(true);
+    draw();
+  }
+
+  // ---- drawing ---------------------------------------------------------
+  let raf = 0, fast = false, zoomIdle = 0;
+  function draw(){ if (!raf) raf = requestAnimationFrame(paint); }
+  function paint(){
+    raf = 0;
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.fillStyle = col('--map-bg');
+    ctx.fillRect(0,0,cv.width,cv.height);
+    const s = k*dpr;
+    ctx.setTransform(s,0,0,-s, W*dpr/2 - cx*s, H*dpr/2 + cy*s);
+    const [vx0,vy1] = toWorld(0,0), [vx1,vy0] = toWorld(W,H);
+    const hit = (bb) => bb[2] >= vx0 && bb[0] <= vx1 && bb[3] >= vy0 && bb[1] <= vy1;
+    const px = 1/k;
+
+    ctx.fillStyle = col('--map-land');
+    ctx.strokeStyle = col('--boundary');
+    ctx.lineWidth = px;
+    for (const g of bounds){ if (!hit(g.bb)) continue; ctx.fill(g.path); }
+    for (const g of bounds){ if (!hit(g.bb)) continue; ctx.stroke(g.path); }
+
+    if (k > 0.012 && !fast){
+      ctx.strokeStyle = col('--street');
+      ctx.lineWidth = (k > 0.06 ? 1.6 : 1)*px;
+      for (const g of streets){ if (hit(g.bb)) ctx.stroke(g.path); }
+    }
+
+    for (let gi=0; gi<4; gi++){
+      if (!state.groups[gi]) continue;
+      const c = col(GROUP_VARS[gi]);
+      ctx.fillStyle = c; ctx.strokeStyle = c; ctx.lineWidth = px;
+      ctx.globalAlpha = 0.30;
+      for (let i=0;i<NC;i++){ if (C.grp[i] === gi && hit(cGeo[i].bb)) ctx.fill(cGeo[i].path); }
+      if (!fast){
+        ctx.globalAlpha = 0.95;
+        for (let i=0;i<NC;i++){ if (C.grp[i] === gi && hit(cGeo[i].bb)) ctx.stroke(cGeo[i].path); }
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    ctx.fillStyle = col('--touch-fill');
+    // county-owned neighbours keep their owner colour underneath; they get the amber outline only
+    for (let i=0;i<NP;i++){ if (visible[i] && P.self[i] < 0 && hit(pGeo[i].bb)) ctx.fill(pGeo[i].path); }
+    if (!fast){
+      ctx.strokeStyle = col('--touch-line'); ctx.lineWidth = px;
+      for (let i=0;i<NP;i++){ if (visible[i] && hit(pGeo[i].bb)) ctx.stroke(pGeo[i].path); }
+    }
+
+    if (state.sel){
+      const g = state.sel[0] === 'p' ? pGeo[state.sel[1]] : cGeo[state.sel[1]];
+      ctx.strokeStyle = col('--sel-halo'); ctx.lineWidth = 5*px; ctx.stroke(g.path);
+      ctx.strokeStyle = col('--sel'); ctx.lineWidth = 2.2*px; ctx.stroke(g.path);
+    }
+    ctx.setTransform(1,0,0,1,0,0);
+    scalebar();
+  }
+
+  function scalebar(){
+    const lat = Math.atan(Math.sinh(cy/6378137)) ;
+    const groundPerWorld = Math.cos(lat);
+    const feetPerPx = (1/k) * groundPerWorld * 3.28084;
+    const targets = [50,100,250,500,1000,2000,5280,10560,26400,52800,105600];
+    let best = targets[0];
+    for (const t of targets) if (t/feetPerPx <= 150) best = t;
+    const label = best >= 5280 ? (best/5280) + ' mi' : best + ' ft';
+    const bar = $('scalebar');
+    bar.firstElementChild.style.width = Math.round(best/feetPerPx) + 'px';
+    bar.lastElementChild.textContent = label;
+  }
+
+  // ---- interaction -----------------------------------------------------
+  let dragging = false, moved = false, lx = 0, ly = 0;
+  cv.addEventListener('pointerdown', e => {
+    dragging = true; moved = false; lx = e.clientX; ly = e.clientY;
+    cv.setPointerCapture(e.pointerId); cv.classList.add('drag');
+  });
+  cv.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    const dx = e.clientX - lx, dy = e.clientY - ly;
+    if (Math.abs(dx) + Math.abs(dy) > 3) { moved = true; fast = true; }
+    cx -= dx/k; cy += dy/k; lx = e.clientX; ly = e.clientY;
+    draw();
+  });
+  cv.addEventListener('pointerup', e => {
+    dragging = false; cv.classList.remove('drag');
+    if (fast){ fast = false; draw(); }
+    if (!moved) pick(e);
+  });
+  cv.addEventListener('wheel', e => {
+    e.preventDefault();
+    const r = cv.getBoundingClientRect();
+    const mx = e.clientX - r.left, my = e.clientY - r.top;
+    const [wx,wy] = toWorld(mx,my);
+    fast = true; clearTimeout(zoomIdle);
+    zoomIdle = setTimeout(() => { fast = false; draw(); }, 180);
+    const f = Math.exp(-e.deltaY * 0.0016);
+    const nk = Math.min(Math.max(k*f, 0.004), 6);
+    cx = wx - (mx - W/2)/nk; cy = wy + (my - H/2)/nk; k = nk;
+    draw();
+  }, {passive:false});
+
+  function pick(e){
+    const r = cv.getBoundingClientRect();
+    const mx = (e.clientX - r.left), my = (e.clientY - r.top);
+    const [wx,wy] = toWorld(mx,my);
+    const cand = grid.get(key(Math.floor(wx/CELL), Math.floor(wy/CELL))) || [];
+    const s = k*dpr;
+    ctx.setTransform(s,0,0,-s, W*dpr/2 - cx*s, H*dpr/2 + cy*s);
+    let found = null;
+    for (const [tag,i] of cand){
+      if (tag === 'p' && !visible[i]) continue;
+      if (tag === 'c' && !state.groups[C.grp[i]]) continue;
+      const g = tag === 'p' ? pGeo[i] : cGeo[i];
+      if (ctx.isPointInPath(g.path, mx*dpr, my*dpr)){
+        found = [tag,i];
+        if (tag === 'p') break;           // prefer the neighbour parcel over county land beneath
+      }
+    }
+    ctx.setTransform(1,0,0,1,0,0);
+    select(found);
+  }
+
+  function select(sel){
+    state.sel = sel;
+    renderDetail();
+    renderList(false);
+    draw();
+  }
+
+  // ---- list ------------------------------------------------------------
+  const ROW = 64, wrap = $('listwrap'), rowsEl = $('rows');
+  function renderList(reset){
+    if (reset) wrap.scrollTop = 0;
+    rowsEl.style.height = (results.length * ROW) + 'px';
+    const top = wrap.scrollTop, vis = wrap.clientHeight;
+    const a = Math.max(0, Math.floor(top/ROW) - 4);
+    const b = Math.min(results.length, Math.ceil((top+vis)/ROW) + 4);
+    let html = '';
+    for (let n=a;n<b;n++){
+      const i = results[n];
+      const selected = state.sel && state.sel[0] === 'p' && state.sel[1] === i;
+      const groups = [];
+      for (let gi=0;gi<4;gi++) if (P.grp[i] & (1<<gi)) groups.push(GROUP_VARS[gi]);
+      html += '<div class="row" role="option" aria-selected="' + (selected?'true':'false') +
+        '" data-i="' + i + '" style="top:' + (n*ROW) + 'px;height:' + ROW + 'px">' +
+        '<div class="a">' + (esc(P.addr[i]) || '<span style="color:var(--muted)">No situs address</span>') + '</div>' +
+        '<div class="o">' + esc(DICT.own[P.own[i]]) + '</div>' +
+        '<div class="m">' + groups.map(v => '<span class="dot" style="background:var(--' + v.slice(2) + ')"></span>').join('') +
+        '<span>' + P.pid[i] + '</span><span>' + acres(P.ac[i]) + ' ac</span><span>' + D.rels[P.rel[i]] + '</span></div>' +
+        '</div>';
+    }
+    rowsEl.innerHTML = html;
+  }
+  wrap.addEventListener('scroll', () => renderList(false));
+  rowsEl.addEventListener('click', e => {
+    const row = e.target.closest('.row'); if (!row) return;
+    const i = +row.dataset.i;
+    select(['p', i]);
+    fitTo(pGeo[i].bb, Math.min(W,H)*0.32);
+  });
+
+  function esc(s){ return (s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+  // ---- detail ----------------------------------------------------------
+  function renderDetail(){
+    const d = $('detail');
+    if (!state.sel){ d.classList.remove('open'); d.innerHTML = ''; return; }
+    const [tag,i] = state.sel;
+    let html = '<div class="top"><button class="close" id="dclose" aria-label="Close">✕</button>';
+    if (tag === 'p'){
+      const groups = [];
+      for (let gi=0;gi<4;gi++) if (P.grp[i] & (1<<gi)) groups.push(gi);
+      html += '<h3>' + (esc(P.addr[i]) || 'Parcel ' + P.pid[i]) + '</h3>' +
+        '<p class="sub">' + esc(DICT.own[P.own[i]]) + '</p></div>' +
+        '<div class="kv">' +
+        row('Parcel ID', P.pid[i], true) +
+        row('Owner type', P.self[i] < 0 ? 'Private / other owner' : D.groups[P.self[i]]) +
+        row('Jurisdiction', DICT.muni[P.muni[i]] || '—') +
+        row('Property use', DICT.use[P.use[i]] || '—') +
+        row('Area', acres(P.ac[i]) + ' acres') +
+        row('Assessed value', money(P.val[i])) +
+        row('Contact', D.rels[P.rel[i]]) +
+        row('Shared line', P.sft[i] ? fmt(P.sft[i]) + ' ft' : 'corner only') +
+        row('County parcels', fmt(P.nct[i])) +
+        '<dt>Touches</dt><dd><div class="chips">' + groups.map(gi =>
+          '<span class="chip"><span class="dot" style="background:var(' + GROUP_VARS[gi] + ')"></span>' +
+          esc(D.groups[gi]) + '</span>').join('') + '</div></dd>' +
+        '</div>' +
+        '<div class="sect"><h4>County owners on the other side</h4><ul>' +
+        P.cown[i].map(ci => '<li>' + esc(DICT.cown[ci]) + '</li>').join('') + '</ul>' +
+        '<h4>County parcel IDs</h4><ul><li style="font-family:\'IBM Plex Mono\',monospace">' +
+        P.cpid[i].join(', ') + (P.nct[i] > P.cpid[i].length ? ' +' + (P.nct[i]-P.cpid[i].length) + ' more' : '') +
+        '</li></ul></div>' +
+        '<a class="ext" target="_blank" rel="noopener" href="https://polaris3g.mecklenburgcountync.gov/?pid=' +
+        encodeURIComponent(P.pid[i]) + '">Open in Polaris ↗</a>';
+    } else {
+      html += '<h3>' + (esc(C.addr[i]) || 'County parcel ' + C.pid[i]) + '</h3>' +
+        '<p class="sub">' + esc(DICT.own[C.own[i]]) + '</p></div>' +
+        '<div class="kv">' +
+        row('Parcel ID', C.pid[i], true) +
+        row('Owner group', D.groups[C.grp[i]]) +
+        row('Jurisdiction', DICT.muni[C.muni[i]] || '—') +
+        row('Property use', DICT.use[C.use[i]] || '—') +
+        row('Area', acres(C.ac[i]) + ' acres') +
+        '</div><div class="sect"><p style="font-size:12.5px;color:var(--muted)">County-owned land. ' +
+        'The amber parcels around it are its touching neighbours.</p></div>' +
+        '<a class="ext" target="_blank" rel="noopener" href="https://polaris3g.mecklenburgcountync.gov/?pid=' +
+        encodeURIComponent(C.pid[i]) + '">Open in Polaris ↗</a>';
+    }
+    d.innerHTML = html;
+    d.classList.add('open');
+    $('dclose').addEventListener('click', () => select(null));
+  }
+  function row(label, value, mono){
+    return '<dt>' + label + '</dt><dd' + (mono ? ' class="mono"' : '') + '>' + esc(String(value)) + '</dd>';
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') select(null); });
+
+  // ---- controls --------------------------------------------------------
+  const counts = [0,0,0,0];
+  for (let i=0;i<NP;i++) for (let gi=0;gi<4;gi++) if (P.grp[i] & (1<<gi)) counts[gi]++;
+  $('groupChecks').innerHTML = D.groups.map((g,gi) =>
+    '<label class="check"><input type="checkbox" data-g="' + gi + '" checked>' +
+    '<span class="swatch" style="background:var(' + GROUP_VARS[gi] + ')"></span>' + esc(g) +
+    '<span class="n">' + fmt(counts[gi]) + '</span></label>').join('');
+  $('legendKeys').innerHTML = D.groups.map((g,gi) =>
+    '<div class="k"><span class="swatch" style="background:var(' + GROUP_VARS[gi] + ')"></span>' + esc(g) + '</div>').join('');
+  $('groupChecks').addEventListener('change', e => {
+    state.groups[+e.target.dataset.g] = e.target.checked; applyFilters();
+  });
+  D.rels.forEach((r,i) => $('rel').insertAdjacentHTML('beforeend',
+    '<option value="' + i + '">' + esc(r[0].toUpperCase() + r.slice(1)) + '</option>'));
+  DICT.muni.map((m,i) => [m,i]).filter(([m]) => m && m !== 'na')
+    .sort((a,b) => a[0].localeCompare(b[0]))
+    .forEach(([m,i]) => $('muni').insertAdjacentHTML('beforeend',
+      '<option value="' + i + '">' + esc(m.replace('MECKLENBURG COUNTY-UNINCORPORATED','Unincorporated county')) + '</option>'));
+  $('rel').addEventListener('change', e => { state.rel = +e.target.value; applyFilters(); });
+  $('muni').addEventListener('change', e => { state.muni = +e.target.value; applyFilters(); });
+  document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.seg button').forEach(o => o.setAttribute('aria-pressed', String(o === b)));
+    state.own = b.dataset.own; applyFilters();
+  }));
+  let qt = 0;
+  $('q').addEventListener('input', e => {
+    clearTimeout(qt); qt = setTimeout(() => { state.q = e.target.value; applyFilters(); }, 160);
+  });
+  $('qclear').addEventListener('click', () => { $('q').value = ''; state.q = ''; applyFilters(); });
+  $('zin').addEventListener('click', () => { k = Math.min(k*1.6, 6); draw(); });
+  $('zout').addEventListener('click', () => { k = Math.max(k/1.6, 0.004); draw(); });
+  $('zfit').addEventListener('click', () => { select(null); fitTo(full, 30); });
+
+  $('tTouch').textContent = fmt(NP);
+  let outside = 0; for (let i=0;i<NP;i++) if (P.self[i] < 0) outside++;
+  $('tOutside').textContent = fmt(outside);
+  $('tCounty').textContent = fmt(NC);
+
+  window.addEventListener('resize', resize);
+  $('loading').remove();
+  resize();
+  fitTo(full, 30);
+  applyFilters();
+  setTimeout(() => { const h = $('hint'); if (h) h.style.opacity = '0'; }, 6000);
+  $('hint').style.transition = 'opacity .6s';
+})();
+</script>
