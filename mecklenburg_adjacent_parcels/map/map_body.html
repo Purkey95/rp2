@@ -14,6 +14,7 @@
 
   <div class="body">
     <aside id="rail">
+      <div class="filters">
       <div class="panel">
         <h2>Search</h2>
         <div class="search">
@@ -23,24 +24,48 @@
       </div>
 
       <div class="panel">
+        <h2>Colour parcels by</h2>
+        <div class="seg" role="group" aria-label="Colour parcels by">
+          <button type="button" data-color="group" aria-pressed="true">County owner</button>
+          <button type="button" data-color="type" aria-pressed="false">Land use</button>
+        </div>
+      </div>
+
+      <div class="panel">
         <h2>Touches land owned by</h2>
         <div class="checks" id="groupChecks"></div>
       </div>
 
-      <div class="panel">
-        <h2>Neighbour ownership</h2>
-        <div class="seg" role="group" aria-label="Neighbour ownership">
-          <button type="button" data-own="all" aria-pressed="true">All parcels</button>
-          <button type="button" data-own="outside" aria-pressed="false">Not county-owned</button>
+      <details class="grp" open>
+        <summary>Type of the touching parcel</summary>
+        <div class="inner">
+          <div class="uses" id="catUses"></div>
+          <p class="note" id="hiNote">Tap a swatch to colour a type on the map — up to three at once.</p>
         </div>
-        <h2 style="margin-top:4px">Type of contact</h2>
-        <select id="rel" aria-label="Type of contact">
-          <option value="-1">Any contact</option>
-        </select>
-        <h2 style="margin-top:4px">Jurisdiction</h2>
-        <select id="muni" aria-label="Jurisdiction"><option value="-1">All jurisdictions</option></select>
-      </div>
+      </details>
 
+      <details class="grp">
+        <summary>Type of the county land it touches</summary>
+        <div class="inner">
+          <div class="uses" id="ccatUses"></div>
+        </div>
+      </details>
+
+      <details class="grp">
+        <summary>Ownership, contact and jurisdiction</summary>
+        <div class="inner">
+          <div class="seg" role="group" aria-label="Neighbour ownership">
+            <button type="button" data-own="all" aria-pressed="true">All parcels</button>
+            <button type="button" data-own="outside" aria-pressed="false">Not county-owned</button>
+          </div>
+          <select id="rel" aria-label="Type of contact" style="margin-top:8px">
+            <option value="-1">Any contact</option>
+          </select>
+          <select id="muni" aria-label="Jurisdiction" style="margin-top:8px"><option value="-1">All jurisdictions</option></select>
+        </div>
+      </details>
+
+      </div>
       <div class="listhead"><strong id="listCount">—</strong><span>parcels listed</span></div>
       <div class="listwrap" id="listwrap"><div class="rows" id="rows"></div></div>
       <div class="foot">
@@ -59,7 +84,6 @@
       <div class="overlay legend">
         <div class="t">Map key</div>
         <div id="legendKeys"></div>
-        <div class="k"><span class="swatch" style="background:var(--touch-fill);border-color:var(--touch-line)"></span> Touching parcel</div>
       </div>
       <div class="overlay scalebar" id="scalebar"><div class="b" style="width:80px"></div><span>—</span></div>
       <div class="overlay hint" id="hint">Drag to pan · scroll to zoom · click a parcel for detail</div>
@@ -90,7 +114,7 @@
   }
 
   const Q = D.q, P = D.parcels, C = D.county, DICT = D.dicts;
-  const GROUP_VARS = ['--g0','--g1','--g2','--g3'];
+  const GROUP_VARS = ['--s1','--s2','--s3','--s3'];   // Library and Hospital share a hue; hospital is dashed
   const css = getComputedStyle(document.documentElement);
   const col = (v) => css.getPropertyValue(v).trim();
 
@@ -186,23 +210,85 @@
   const toWorld = (px,py) => [cx + (px - W/2)/k, cy - (py - H/2)/k];
 
   // ---- filters ---------------------------------------------------------
-  const state = {groups:[true,true,true,true], own:'all', rel:-1, muni:-1, q:'', sel:null};
+  const NCAT = D.classes.length;
+  const state = {
+    groups:[true,true,true,true], own:'all', rel:-1, muni:-1, q:'', sel:null,
+    cats:new Array(NCAT).fill(true), ccats:new Array(NCAT).fill(true),
+    hi:[], color:'group',
+  };
+  const SLOT = ['--s1','--s2','--s3'];
+  const SLOT_FILL = ['--s1-fill','--s2-fill','--s3-fill'];
+  // county groups ordered rarest-first, so a small affiliate is never hidden under the county's colour
+  const GROUP_PRIORITY = [2, 3, 1, 0];
+  const styleOf = new Int8Array(NP);   // 0-2 = colour slot, 3 = folded "other"
+  const dashOf = new Uint8Array(NP);   // hospital authority: same hue, dashed outline
+
+  function countyVisible(i){
+    return state.groups[C.grp[i]] && state.ccats[C.cat[i]];
+  }
+
+  function legend(){
+    let html = '';
+    if (state.color === 'group'){
+      html = D.groups.map((g,gi) =>
+        '<div class="k"><span class="sw' + (gi === 3 ? ' dash' : '') + '" style="background-color:var(' +
+        GROUP_VARS[gi] + ')"></span>' + esc(g) + '</div>').join('');
+    } else if (state.hi.length){
+      html = state.hi.map((c,slot) =>
+        '<div class="k"><span class="sw" style="background-color:var(' + SLOT[slot] + ')"></span>' +
+        esc(D.classes[c]) + '</div>').join('') +
+        '<div class="k"><span class="sw" style="background:var(--touch-fill);border-color:var(--touch-line)"></span>All other types</div>';
+    } else {
+      html = '<div class="k"><span class="sw" style="background:var(--touch-fill);border-color:var(--touch-line)"></span>Touching parcel</div>' +
+        '<div class="k" style="color:var(--muted)">Pick up to three land uses to colour</div>';
+    }
+    $('legendKeys').innerHTML =
+      '<div class="k"><span class="sw" style="background:var(--county-fill);border-color:var(--county-line)"></span>County / affiliate land</div>' + html;
+  }
+
+  function restyle(){
+    for (let i=0;i<NP;i++){
+      let st = 3, dash = 0;
+      if (state.color === 'group'){
+        for (const gi of GROUP_PRIORITY){
+          if (P.grp[i] & (1<<gi)){
+            st = gi === 0 ? 0 : gi === 1 ? 1 : 2;
+            dash = gi === 3 ? 1 : 0;
+            break;
+          }
+        }
+      } else {
+        const at = state.hi.indexOf(P.cat[i]);
+        st = at >= 0 ? at : 3;
+      }
+      styleOf[i] = st; dashOf[i] = dash;
+    }
+    legend();
+  }
   let results = [];
   const visible = new Uint8Array(NP);
 
+  function passes(i, skip){
+    const mask = state.groups.reduce((m,on,g) => on ? (m | (1<<g)) : m, 0);
+    const cmask = state.ccats.reduce((m,on,c) => on ? (m | (1<<c)) : m, 0);
+    if (skip !== 'group' && (P.grp[i] & mask) === 0) return false;
+    if (skip !== 'ccat' && (P.ccat[i] & cmask) === 0) return false;
+    if (skip !== 'cat' && !state.cats[P.cat[i]]) return false;
+    if (state.own === 'outside' && P.self[i] >= 0) return false;
+    if (state.rel >= 0 && P.rel[i] !== state.rel) return false;
+    if (state.muni >= 0 && P.muni[i] !== state.muni) return false;
+    if (state.q && searchKey[i].indexOf(state.q.trim().toLowerCase()) === -1) return false;
+    return true;
+  }
+
   function applyFilters(){
-    const mask = state.groups.reduce((m,on,i) => on ? (m | (1<<i)) : m, 0);
-    const q = state.q.trim().toLowerCase();
     results.length = 0;
     for (let i=0;i<NP;i++){
-      let ok = (P.grp[i] & mask) !== 0;
-      if (ok && state.own === 'outside') ok = P.self[i] < 0;
-      if (ok && state.rel >= 0) ok = P.rel[i] === state.rel;
-      if (ok && state.muni >= 0) ok = P.muni[i] === state.muni;
-      if (ok && q) ok = searchKey[i].indexOf(q) !== -1;
+      const ok = passes(i, null);
       visible[i] = ok ? 1 : 0;
       if (ok) results.push(i);
     }
+    updateUseCounts();
     results.sort((a,b) => (P.addr[a] || 'zzz').localeCompare(P.addr[b] || 'zzz'));
     $('tShown').textContent = fmt(results.length);
     $('listCount').textContent = fmt(results.length);
@@ -236,25 +322,30 @@
       for (const g of streets){ if (hit(g.bb)) ctx.stroke(g.path); }
     }
 
-    for (let gi=0; gi<4; gi++){
-      if (!state.groups[gi]) continue;
-      const c = col(GROUP_VARS[gi]);
-      ctx.fillStyle = c; ctx.strokeStyle = c; ctx.lineWidth = px;
-      ctx.globalAlpha = 0.30;
-      for (let i=0;i<NC;i++){ if (C.grp[i] === gi && hit(cGeo[i].bb)) ctx.fill(cGeo[i].path); }
-      if (!fast){
-        ctx.globalAlpha = 0.95;
-        for (let i=0;i<NC;i++){ if (C.grp[i] === gi && hit(cGeo[i].bb)) ctx.stroke(cGeo[i].path); }
-      }
-      ctx.globalAlpha = 1;
+    ctx.fillStyle = col('--county-fill');
+    for (let i=0;i<NC;i++){ if (countyVisible(i) && hit(cGeo[i].bb)) ctx.fill(cGeo[i].path); }
+    if (!fast){
+      ctx.strokeStyle = col('--county-line'); ctx.lineWidth = 1.3*px;
+      for (let i=0;i<NC;i++){ if (countyVisible(i) && hit(cGeo[i].bb)) ctx.stroke(cGeo[i].path); }
     }
 
-    ctx.fillStyle = col('--touch-fill');
-    // county-owned neighbours keep their owner colour underneath; they get the amber outline only
-    for (let i=0;i<NP;i++){ if (visible[i] && P.self[i] < 0 && hit(pGeo[i].bb)) ctx.fill(pGeo[i].path); }
-    if (!fast){
-      ctx.strokeStyle = col('--touch-line'); ctx.lineWidth = px;
-      for (let i=0;i<NP;i++){ if (visible[i] && hit(pGeo[i].bb)) ctx.stroke(pGeo[i].path); }
+    for (let st=0; st<4; st++){
+      ctx.fillStyle = st < 3 ? col(SLOT_FILL[st]) : col('--touch-fill');
+      for (let i=0;i<NP;i++){
+        if (visible[i] && styleOf[i] === st && hit(pGeo[i].bb)) ctx.fill(pGeo[i].path);
+      }
+      if (fast) continue;
+      ctx.strokeStyle = st < 3 ? col(SLOT[st]) : col('--touch-line');
+      ctx.lineWidth = px;
+      ctx.setLineDash([]);
+      for (let i=0;i<NP;i++){
+        if (visible[i] && styleOf[i] === st && !dashOf[i] && hit(pGeo[i].bb)) ctx.stroke(pGeo[i].path);
+      }
+      ctx.setLineDash([5*px, 3*px]); ctx.lineWidth = 1.6*px;
+      for (let i=0;i<NP;i++){
+        if (visible[i] && styleOf[i] === st && dashOf[i] && hit(pGeo[i].bb)) ctx.stroke(pGeo[i].path);
+      }
+      ctx.setLineDash([]);
     }
 
     if (state.sel){
@@ -320,7 +411,7 @@
     let found = null;
     for (const [tag,i] of cand){
       if (tag === 'p' && !visible[i]) continue;
-      if (tag === 'c' && !state.groups[C.grp[i]]) continue;
+      if (tag === 'c' && !countyVisible(i)) continue;
       const g = tag === 'p' ? pGeo[i] : cGeo[i];
       if (ctx.isPointInPath(g.path, mx*dpr, my*dpr)){
         found = [tag,i];
@@ -352,12 +443,13 @@
       const selected = state.sel && state.sel[0] === 'p' && state.sel[1] === i;
       const groups = [];
       for (let gi=0;gi<4;gi++) if (P.grp[i] & (1<<gi)) groups.push(GROUP_VARS[gi]);
+
       html += '<div class="row" role="option" aria-selected="' + (selected?'true':'false') +
         '" data-i="' + i + '" style="top:' + (n*ROW) + 'px;height:' + ROW + 'px">' +
         '<div class="a">' + (esc(P.addr[i]) || '<span style="color:var(--muted)">No situs address</span>') + '</div>' +
         '<div class="o">' + esc(DICT.own[P.own[i]]) + '</div>' +
         '<div class="m">' + groups.map(v => '<span class="dot" style="background:var(--' + v.slice(2) + ')"></span>').join('') +
-        '<span>' + P.pid[i] + '</span><span>' + acres(P.ac[i]) + ' ac</span><span>' + D.rels[P.rel[i]] + '</span></div>' +
+        '<span>' + P.pid[i] + '</span><span>' + acres(P.ac[i]) + ' ac</span><span>' + esc(D.classes[P.cat[i]]) + '</span></div>' +
         '</div>';
     }
     rowsEl.innerHTML = html;
@@ -387,7 +479,8 @@
         row('Parcel ID', P.pid[i], true) +
         row('Owner type', P.self[i] < 0 ? 'Private / other owner' : D.groups[P.self[i]]) +
         row('Jurisdiction', DICT.muni[P.muni[i]] || '—') +
-        row('Property use', DICT.use[P.use[i]] || '—') +
+        row('Land use', D.classes[P.cat[i]]) +
+        row('CAMA use code', DICT.use[P.use[i]] || '—') +
         row('Area', acres(P.ac[i]) + ' acres') +
         row('Assessed value', money(P.val[i])) +
         row('Contact', D.rels[P.rel[i]]) +
@@ -397,7 +490,9 @@
           '<span class="chip"><span class="dot" style="background:var(' + GROUP_VARS[gi] + ')"></span>' +
           esc(D.groups[gi]) + '</span>').join('') + '</div></dd>' +
         '</div>' +
-        '<div class="sect"><h4>County owners on the other side</h4><ul>' +
+        '<div class="sect"><h4>County land it touches</h4><div class="chips">' +
+        D.classes.map((c,ci) => (P.ccat[i] & (1<<ci)) ? '<span class="chip">' + esc(c) + '</span>' : '').join('') +
+        '</div><h4>County owners on the other side</h4><ul>' +
         P.cown[i].map(ci => '<li>' + esc(DICT.cown[ci]) + '</li>').join('') + '</ul>' +
         '<h4>County parcel IDs</h4><ul><li style="font-family:\'IBM Plex Mono\',monospace">' +
         P.cpid[i].join(', ') + (P.nct[i] > P.cpid[i].length ? ' +' + (P.nct[i]-P.cpid[i].length) + ' more' : '') +
@@ -411,7 +506,8 @@
         row('Parcel ID', C.pid[i], true) +
         row('Owner group', D.groups[C.grp[i]]) +
         row('Jurisdiction', DICT.muni[C.muni[i]] || '—') +
-        row('Property use', DICT.use[C.use[i]] || '—') +
+        row('Land use', D.classes[C.cat[i]]) +
+        row('CAMA use code', DICT.use[C.use[i]] || '—') +
         row('Area', acres(C.ac[i]) + ' acres') +
         '</div><div class="sect"><p style="font-size:12.5px;color:var(--muted)">County-owned land. ' +
         'The amber parcels around it are its touching neighbours.</p></div>' +
@@ -427,15 +523,85 @@
   }
   document.addEventListener('keydown', e => { if (e.key === 'Escape') select(null); });
 
+  // ---- land-use panels -------------------------------------------------
+  function useRows(el, dim){
+    el.innerHTML = D.classes.map((c,ci) =>
+      '<div class="use" data-c="' + ci + '">' +
+      '<input type="checkbox" checked aria-label="Include ' + esc(c) + '">' +
+      '<label class="lbl"><span>' + esc(c) + '</span><span class="bar"><i style="width:0"></i></span></label>' +
+      '<span class="n">—</span>' +
+      (dim === 'cat' ? '<button type="button" class="hl" aria-label="Colour ' + esc(c) + ' on the map"></button>' : '') +
+      '</div>').join('');
+  }
+  useRows($('catUses'), 'cat');
+  useRows($('ccatUses'), 'ccat');
+
+  function updateUseCounts(){
+    const cat = new Array(NCAT).fill(0), ccat = new Array(NCAT).fill(0);
+    for (let i=0;i<NP;i++){
+      if (passes(i, 'cat')) cat[P.cat[i]]++;
+      if (passes(i, 'ccat')){
+        for (let c=0;c<NCAT;c++) if (P.ccat[i] & (1<<c)) ccat[c]++;
+      }
+    }
+    paintUse($('catUses'), cat, state.cats);
+    paintUse($('ccatUses'), ccat, state.ccats);
+  }
+  function paintUse(el, counts, checks){
+    const max = Math.max(1, ...counts);
+    el.querySelectorAll('.use').forEach(row => {
+      const c = +row.dataset.c;
+      row.querySelector('.n').textContent = fmt(counts[c]);
+      row.querySelector('.bar i').style.width = (100*counts[c]/max) + '%';
+      row.querySelector('input').checked = checks[c];
+      row.style.opacity = counts[c] ? '1' : '.55';
+      const hl = row.querySelector('.hl');
+      if (hl){
+        const slot = state.hi.indexOf(c);
+        if (slot >= 0) hl.dataset.slot = String(slot); else delete hl.dataset.slot;
+      }
+    });
+  }
+  function bindUse(el, dim){
+    el.addEventListener('change', e => {
+      if (!e.target.matches('input')) return;
+      const c = +e.target.closest('.use').dataset.c;
+      (dim === 'cat' ? state.cats : state.ccats)[c] = e.target.checked;
+      applyFilters();
+    });
+    el.addEventListener('click', e => {
+      const hl = e.target.closest('.hl'); if (!hl) return;
+      const c = +hl.closest('.use').dataset.c;
+      const at = state.hi.indexOf(c);
+      if (at >= 0) state.hi.splice(at, 1);
+      else if (state.hi.length < 3) state.hi.push(c);
+      else { $('hiNote').textContent = 'Three at a time — unpick one first.'; return; }
+      $('hiNote').textContent = state.hi.length
+        ? 'Coloured: ' + state.hi.map(x => D.classes[x]).join(', ') + '. Everything else stays amber.'
+        : 'Tap a swatch to colour a type on the map — up to three at once.';
+      if (state.color !== 'type') setColorMode('type');
+      restyle(); updateUseCounts(); draw();
+    });
+  }
+  bindUse($('catUses'), 'cat');
+  bindUse($('ccatUses'), 'ccat');
+
+  function setColorMode(mode){
+    state.color = mode;
+    document.querySelectorAll('.seg button[data-color]').forEach(b =>
+      b.setAttribute('aria-pressed', String(b.dataset.color === mode)));
+    restyle(); draw();
+  }
+  document.querySelectorAll('.seg button[data-color]').forEach(b =>
+    b.addEventListener('click', () => setColorMode(b.dataset.color)));
+
   // ---- controls --------------------------------------------------------
   const counts = [0,0,0,0];
   for (let i=0;i<NP;i++) for (let gi=0;gi<4;gi++) if (P.grp[i] & (1<<gi)) counts[gi]++;
   $('groupChecks').innerHTML = D.groups.map((g,gi) =>
     '<label class="check"><input type="checkbox" data-g="' + gi + '" checked>' +
-    '<span class="swatch" style="background:var(' + GROUP_VARS[gi] + ')"></span>' + esc(g) +
+    '<span class="swatch' + (gi === 3 ? ' dash' : '') + '" style="background-color:var(' + GROUP_VARS[gi] + ')"></span>' + esc(g) +
     '<span class="n">' + fmt(counts[gi]) + '</span></label>').join('');
-  $('legendKeys').innerHTML = D.groups.map((g,gi) =>
-    '<div class="k"><span class="swatch" style="background:var(' + GROUP_VARS[gi] + ')"></span>' + esc(g) + '</div>').join('');
   $('groupChecks').addEventListener('change', e => {
     state.groups[+e.target.dataset.g] = e.target.checked; applyFilters();
   });
@@ -469,6 +635,7 @@
   $('loading').remove();
   resize();
   fitTo(full, 30);
+  restyle();
   applyFilters();
   setTimeout(() => { const h = $('hint'); if (h) h.style.opacity = '0'; }, 6000);
   $('hint').style.transition = 'opacity .6s';

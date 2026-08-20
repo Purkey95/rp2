@@ -3,6 +3,7 @@ import csv, json, datetime
 from collections import defaultdict
 
 from classify import bucket
+from landuse import CLASSES, land_class
 from geomutil import esri_rings_to_polygon
 from pyproj import Transformer
 
@@ -48,13 +49,14 @@ for noid, ls in links.items():
     grp = bucket(own) if (a["pid"] in county_pids or noid in county_oids) else None
     rels = {l["rel"] for l in ls}
     best = next(r for r in REL_RANK if r in rels)
-    cgroups, cpids, cowners, cuses = set(), [], set(), set()
+    cgroups, cpids, cowners, cuses, ccats = set(), [], set(), set(), set()
     for l in ls:
         ca = county[l["county_oid"]]["attributes"]
         cgroups.add(bucket(ca["full_owner_name"]))
         cpids.append(ca["pid"])
         cowners.add(clean(ca["full_owner_name"]))
         cuses.add(clean(ca["txt_propertyuse_desc"]))
+        ccats.add(CLASSES[land_class(ca["txt_propertyuse_desc"])])
     lon, lat, acres = geom_facts(rings[noid])
     rows.append({
         "pid": a["pid"],
@@ -63,6 +65,7 @@ for noid, ls in links.items():
         "situs_address": clean(a["situsaddress1"]),
         "municipality": clean(a["municipality_desc"]),
         "property_use": clean(a["txt_propertyuse_desc"]),
+        "property_type": CLASSES[land_class(a["txt_propertyuse_desc"])],
         "acres": f"{acres:.3f}",
         "land_value": money(a["amt_landvalue"]),
         "total_value": money(a["amt_totalvalue"]),
@@ -78,6 +81,7 @@ for noid, ls in links.items():
         "county_parcels_touched": len(ls),
         "county_pids_touched": "; ".join(sorted(set(cpids))[:8]) + (" …" if len(set(cpids)) > 8 else ""),
         "county_owners_touched": "; ".join(sorted(cowners)),
+        "county_property_types": "; ".join(sorted(ccats)),
         "county_property_uses": "; ".join(sorted(u for u in cuses if u)),
         "latitude": f"{lat:.6f}",
         "longitude": f"{lon:.6f}",
@@ -109,6 +113,7 @@ for oid in sorted(county_oids):
         "situs_address": clean(a["situsaddress1"]),
         "municipality": clean(a["municipality_desc"]),
         "property_use": clean(a["txt_propertyuse_desc"]),
+        "property_type": CLASSES[land_class(a["txt_propertyuse_desc"])],
         "acres": f"{geom_facts(county[oid]['geometry']['rings'])[2]:.3f}",
         "total_value": money(a["amt_totalvalue"]),
         "touching_parcels": len(nbs),

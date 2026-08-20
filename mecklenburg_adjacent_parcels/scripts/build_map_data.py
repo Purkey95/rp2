@@ -3,6 +3,7 @@ import base64, gzip, json, math
 from collections import defaultdict
 
 from classify import bucket
+from landuse import CLASSES, land_class
 from geomutil import esri_rings_to_polygon
 from pyproj import Transformer
 from shapely.geometry import LineString
@@ -91,9 +92,12 @@ for noid in sorted(links):
     rels = {l["rel"] for l in ls}
     mask = 0
     cowners, cpids = set(), set()
+    cmask = 0
     for l in ls:
-        b = bucket(county_feats[l["county_oid"]]["attributes"]["full_owner_name"])
+        ca = county_feats[l["county_oid"]]["attributes"]
+        b = bucket(ca["full_owner_name"])
         mask |= 1 << GIDX[b]
+        cmask |= 1 << land_class(ca["txt_propertyuse_desc"])
         cowners.add(" ".join(county_feats[l["county_oid"]]["attributes"]["full_owner_name"].split()))
         cpids.add(county_feats[l["county_oid"]]["attributes"]["pid"])
     own = " ".join((a["full_owner_name"] or "").split())
@@ -112,6 +116,8 @@ for noid in sorted(links):
     P["cown"].append([cown_d(c) for c in sorted(cowners)])
     P["cpid"].append(sorted(cpids)[:6])
     P["self"].append(-1 if self_group is None else GIDX[self_group])
+    P["cat"].append(land_class(a["txt_propertyuse_desc"]))
+    P["ccat"].append(cmask)
     P["geo"].append(geo)
 print("touching parcels encoded:", len(P["pid"]))
 
@@ -130,6 +136,7 @@ for oid in sorted(county_oids):
     C["muni"].append(muni_d(a["municipality_desc"]))
     C["ac"].append(int(round(g.area / 43560.0 * 100)))
     C["grp"].append(GIDX[bucket(a["full_owner_name"])])
+    C["cat"].append(land_class(a["txt_propertyuse_desc"]))
     C["geo"].append(geo)
 print("county parcels encoded:", len(C["pid"]))
 
@@ -144,7 +151,7 @@ for f in json.load(open("ctx_juris.json")) + json.load(open("ctx_county.json")):
 print("street paths:", len(streets), "boundary rings:", len(juris))
 
 payload = {
-    "q": Q, "groups": GROUPS, "rels": REL_RANK,
+    "q": Q, "groups": GROUPS, "rels": REL_RANK, "classes": CLASSES,
     "dicts": {"use": use_d.vals, "muni": muni_d.vals, "cown": cown_d.vals, "own": own_d.vals},
     "parcels": dict(P), "county": dict(C), "streets": streets, "boundaries": juris,
 }

@@ -26,18 +26,31 @@ row and every map feature.)
 
 **Kind of contact** — shared boundary 18,034 · corner point 2,032 · within 1 ft 53 · overlapping 52.
 
+**Land use of the touching parcels** — single-family homes 11,992 · condo & townhouse 2,879 ·
+public land/ROW/utility 1,449 · HOA common area 667 · commercial & office 659 · industrial & warehouse 584 ·
+multi-family 566 · vacant/floodplain/farm 544 · institutional 271 · unclassified 560 (mostly blank use codes).
+
+**Land use of the county land being touched** — public land/ROW/utility 1,399 parcels · single-family 916
+(land-bank and floodplain-buyout lots) · vacant/floodplain/farm 298 · institutional 220 · commercial & office 176 ·
+multi-family 67 · industrial 45 · HOA common area 33 · condo 10.
+
 **Jurisdiction** — Charlotte 16,065 · unincorporated county 1,498 · Huntersville 1,276 · Cornelius 568 ·
 Matthews 308 · Mint Hill 259 · Pineville 119 · Davidson 53 · unassigned 25.
 
 ## Deliverables
 
-- `map/mecklenburg_adjacent_parcels_map.html` — self-contained interactive map (no tile server, no CDN):
-  filter by county owner group, jurisdiction and contact type, search by address/owner/PID, click any
-  parcel for its record and a Polaris link.
+- `map/mecklenburg_adjacent_parcels_map.html` — self-contained interactive map (no tile server, no CDN).
+  Filter by county owner group, **land use of the touching parcel**, **land use of the county land it
+  touches**, jurisdiction, contact type and whether the neighbour is itself county-owned; search by
+  address/owner/PID; click any parcel for its record and a Polaris link. Two colouring modes: by the
+  county owner a parcel touches, or by land use (tap up to three type swatches to colour them; the rest
+  fold to amber).
 - `data/touching_parcels.csv` — one row per touching parcel (20,171): owner, mailing address, situs
-  address, use, acres, land and total value, last sale, contact type, shared boundary length, which
-  county groups and county PIDs it touches, centroid lat/lon, Polaris URL.
-- `data/county_properties.csv` — one row per county/affiliate property (3,158) with its neighbour counts.
+  address, CAMA use code and `property_type` class, acres, land and total value, last sale, contact type,
+  shared boundary length, which county groups, county land types (`county_property_types`) and county PIDs
+  it touches, centroid lat/lon, Polaris URL.
+- `data/county_properties.csv` — one row per county/affiliate property (3,158) with its land-use class and
+  neighbour counts.
 
 ## Who counts as "the County or an affiliate"
 
@@ -53,6 +66,22 @@ Owner names in CAMA are matched to four groups (`scripts/classify.py`):
 Private owners whose names merely contain "Mecklenburg" or "Meck Co" — HOAs, churches, `MECKLENBURG
 COUNTY LLC`, the Autism Society housing corporations, the Boy Scouts council — are excluded. The City of
 Charlotte and its Housing Authority are **not** included; they are a different government.
+
+## Land-use classes
+
+The 115 CAMA use codes are folded into ten classes by `scripts/landuse.py`: single-family homes ·
+condo & townhouse · multi-family · commercial & office · industrial & warehouse · institutional
+(schools, churches, hospitals) · HOA common area · public land, ROW & utility · vacant, floodplain & farm ·
+unclassified. The raw code stays on every row as `property_use`, so a finer cut is always available.
+
+A parcel's `county_property_types` lists the classes of the county land it touches — the filter answers
+questions like "single-family lots backing onto county institutional land" (1,907 of them).
+
+Map colour follows a validated categorical palette, capped at three hues at once: on a map any two
+classes can end up adjacent, and beyond three hues the colourblind-separation floors cannot be met. So
+the fourth county group (Hospital Authority) shares the third hue with a dashed outline, and land-use
+colouring is limited to three chosen classes with everything else folded into amber. Class identity is
+always carried in the list, the detail panel and the CSV, never by colour alone.
 
 ## What "touching" means
 
