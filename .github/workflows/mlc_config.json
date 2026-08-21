@@ -1,0 +1,6 @@
+{
+  "aliveStatusCodes": [200, 206, 301, 302, 308, 429],
+  "retryOn429": true,
+  "retryCount": 3,
+  "fallbackRetryDelay": "30s"
+}
