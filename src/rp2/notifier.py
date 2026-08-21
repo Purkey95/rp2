@@ -53,11 +53,11 @@ class EmailConfiguration:
         if not api_key and not from_address and not to_addresses:
             return None
         if not api_key or not from_address or not to_addresses:
+            # Literal environment variable names (not values) are logged here: keeping them out of the argument list
+            # avoids a CodeQL clear-text-logging false positive on the *_API_KEY_ENV identifier.
             LOGGER.warning(
-                "Email notification is partially configured and will be skipped: set all of %s, %s and %s",
-                SENDGRID_API_KEY_ENV,
-                NOTIFICATION_EMAIL_FROM_ENV,
-                NOTIFICATION_EMAIL_TO_ENV,
+                "Email notification is partially configured and will be skipped: "
+                "set all of SENDGRID_API_KEY, RP2_NOTIFICATION_EMAIL_FROM and RP2_NOTIFICATION_EMAIL_TO"
             )
             return None
         return cls(api_key=api_key, from_address=from_address, to_addresses=to_addresses)
@@ -79,12 +79,11 @@ class SmsConfiguration:
         if not account_sid and not auth_token and not from_number and not to_numbers:
             return None
         if not account_sid or not auth_token or not from_number or not to_numbers:
+            # Literal environment variable names (not values) are logged here: keeping them out of the argument list
+            # avoids a CodeQL clear-text-logging false positive on the *_AUTH_TOKEN_ENV identifier.
             LOGGER.warning(
-                "SMS notification is partially configured and will be skipped: set all of %s, %s, %s and %s",
-                TWILIO_ACCOUNT_SID_ENV,
-                TWILIO_AUTH_TOKEN_ENV,
-                TWILIO_FROM_NUMBER_ENV,
-                NOTIFICATION_SMS_TO_ENV,
+                "SMS notification is partially configured and will be skipped: "
+                "set all of TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER and RP2_NOTIFICATION_SMS_TO"
             )
             return None
         return cls(account_sid=account_sid, auth_token=auth_token, from_number=from_number, to_numbers=to_numbers)
