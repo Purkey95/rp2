@@ -158,8 +158,12 @@ def _send_sms(configuration: SmsConfiguration, body: str) -> bool:
 
 
 def _post(http_request: request.Request, service_name: str) -> bool:
+    # Both notification endpoints are hardcoded https:// constants; guard anyway so urlopen can never receive another scheme.
+    if not http_request.full_url.startswith("https://"):
+        LOGGER.warning("%s notification skipped: URL is not HTTPS", service_name)
+        return False
     try:
-        with request.urlopen(http_request, timeout=_HTTP_TIMEOUT_SECONDS) as response:
+        with request.urlopen(http_request, timeout=_HTTP_TIMEOUT_SECONDS) as response:  # nosec B310
             status: int = response.status
             if 200 <= status < 300:
                 return True
