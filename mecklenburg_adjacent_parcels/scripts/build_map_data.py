@@ -83,6 +83,7 @@ def encode_line(paths):
 
 use_d, muni_d, cown_d, own_d = Dict_(), Dict_(), Dict_(), Dict_()
 P = defaultdict(list)
+pid_row = {}                     # pid -> index into P, so repeated units fold into one feature
 for noid in sorted(links):
     a, ls = attrs[noid], links[noid]
     g = esri_rings_to_polygon(rings[noid])
@@ -102,6 +103,18 @@ for noid in sorted(links):
         cpids.add(county_feats[l["county_oid"]]["attributes"]["pid"])
     own = " ".join((a["full_owner_name"] or "").split())
     self_group = bucket(own) if (a["pid"] in county_pids or noid in county_oids) else None
+    if a["pid"] in pid_row:
+        # another ownership record on a parcel already placed: keep one polygon, add the owner
+        j = pid_row[a["pid"]]
+        P["owners"][j].append(own_d(own))
+        P["val"][j] += int(a["amt_totalvalue"] or 0)
+        P["grp"][j] |= mask
+        P["ccat"][j] |= cmask
+        if self_group is None:
+            P["self"][j] = -1      # any private owner on the parcel makes it a non-county neighbour
+        continue
+    pid_row[a["pid"]] = len(P["pid"])
+    P["owners"].append([own_d(own)])
     P["pid"].append(a["pid"])
     P["own"].append(own_d(own))
     P["addr"].append(" ".join((a["situsaddress1"] or "").split()))
@@ -119,7 +132,8 @@ for noid in sorted(links):
     P["cat"].append(land_class(a["txt_propertyuse_desc"]))
     P["ccat"].append(cmask)
     P["geo"].append(geo)
-print("touching parcels encoded:", len(P["pid"]))
+print(f"touching parcels encoded: {len(P['pid'])} parcels "
+      f"({sum(len(o) for o in P['owners'])} ownership records folded in)")
 
 C = defaultdict(list)
 for oid in sorted(county_oids):

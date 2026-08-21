@@ -1,6 +1,6 @@
 """Write the parcel lists: every parcel touching county/affiliate land, plus the county side."""
 import csv, json, datetime
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 from classify import bucket
 from landuse import CLASSES, land_class
@@ -42,6 +42,8 @@ def geom_facts(ring_list):
     return lon, lat, g.area / 43560.0
 
 
+records_per_pid = Counter(a["pid"] for noid, a in attrs.items() if noid in links)
+
 rows = []
 for noid, ls in links.items():
     a = attrs[noid]
@@ -62,6 +64,7 @@ for noid, ls in links.items():
         "pid": a["pid"],
         "owner": own,
         "owner_group": grp or PRIVATE,
+        "owner_records_on_parcel": records_per_pid[a["pid"]],
         "situs_address": clean(a["situsaddress1"]),
         "municipality": clean(a["municipality_desc"]),
         "property_use": clean(a["txt_propertyuse_desc"]),
@@ -89,12 +92,21 @@ for noid, ls in links.items():
     })
 
 rows.sort(key=lambda r: (r["owner_group"] != PRIVATE, r["municipality"], r["situs_address"], r["pid"]))
+distinct_parcels = len({r["pid"] for r in rows})
 with open("touching_parcels.csv", "w", newline="") as fh:
     w = csv.DictWriter(fh, fieldnames=list(rows[0].keys()))
     w.writeheader()
     w.writerows(rows)
-print("touching_parcels.csv", len(rows), "rows;",
-      sum(1 for r in rows if r["owner_group"] == PRIVATE), "not county-owned")
+print(f"touching_parcels.csv: {len(rows)} ownership records over {distinct_parcels} distinct parcels "
+      f"({len(rows) - distinct_parcels} extra rows are condo/townhome units sharing a parcel)")
+print(f"  not county-owned: {sum(1 for r in rows if r['owner_group'] == PRIVATE)} records / "
+      f"{len({r['pid'] for r in rows if r['owner_group'] == PRIVATE})} parcels")
+seen_area, acres_total = set(), 0.0
+for r in rows:
+    if r["pid"] not in seen_area:
+        seen_area.add(r["pid"])
+        acres_total += float(r["acres"])
+print(f"  area (each parcel counted once): {acres_total:,.0f} acres")
 
 # county side: one row per county/affiliate property with its neighbor count
 nb_by_county = defaultdict(list)

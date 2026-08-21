@@ -6,6 +6,7 @@
     </div>
     <div class="tally">
       <div><b id="tTouch">—</b><span>Touching parcels</span></div>
+      <div><b id="tRecords">—</b><span>Owner records</span></div>
       <div><b id="tOutside">—</b><span>Not county-owned</span></div>
       <div><b id="tCounty">—</b><span>County properties</span></div>
       <div><b id="tShown">—</b><span>Matching filters</span></div>
@@ -69,7 +70,8 @@
       <div class="listhead"><strong id="listCount">—</strong><span>parcels listed</span></div>
       <div class="listwrap" id="listwrap"><div class="rows" id="rows"></div></div>
       <div class="foot">
-        Parcel geometry, ownership and CAMA values from Mecklenburg County GIS, pulled 20 Aug 2026.
+        Parcel geometry, ownership and CAMA values from Mecklenburg County GIS, pulled 21 Aug 2026.
+        One entry per parcel; condo and townhome units sharing a parcel are folded together.
         Contact tested at a <code>1 ft</code> tolerance to absorb slivers in the parcel fabric.
       </div>
     </aside>
@@ -161,7 +163,7 @@
 
   const searchKey = new Array(NP);
   for (let i=0;i<NP;i++)
-    searchKey[i] = (P.addr[i] + ' ' + DICT.own[P.own[i]] + ' ' + P.pid[i]).toLowerCase();
+    searchKey[i] = (P.addr[i] + ' ' + P.owners[i].map(o => DICT.own[o]).join(' ') + ' ' + P.pid[i]).toLowerCase();
 
   // ---- spatial index ---------------------------------------------------
   const CELL = 400;
@@ -447,7 +449,9 @@
       html += '<div class="row" role="option" aria-selected="' + (selected?'true':'false') +
         '" data-i="' + i + '" style="top:' + (n*ROW) + 'px;height:' + ROW + 'px">' +
         '<div class="a">' + (esc(P.addr[i]) || '<span style="color:var(--muted)">No situs address</span>') + '</div>' +
-        '<div class="o">' + esc(DICT.own[P.own[i]]) + '</div>' +
+        '<div class="o">' + esc(DICT.own[P.own[i]]) +
+        (P.owners[i].length > 1 ? ' <span style="color:var(--muted)">+ ' + (P.owners[i].length - 1) + ' more owners</span>' : '') +
+        '</div>' +
         '<div class="m">' + groups.map(v => '<span class="dot" style="background:var(--' + v.slice(2) + ')"></span>').join('') +
         '<span>' + P.pid[i] + '</span><span>' + acres(P.ac[i]) + ' ac</span><span>' + esc(D.classes[P.cat[i]]) + '</span></div>' +
         '</div>';
@@ -474,15 +478,17 @@
       const groups = [];
       for (let gi=0;gi<4;gi++) if (P.grp[i] & (1<<gi)) groups.push(gi);
       html += '<h3>' + (esc(P.addr[i]) || 'Parcel ' + P.pid[i]) + '</h3>' +
-        '<p class="sub">' + esc(DICT.own[P.own[i]]) + '</p></div>' +
+        '<p class="sub">' + esc(DICT.own[P.own[i]]) +
+        (P.owners[i].length > 1 ? ' and ' + (P.owners[i].length - 1) + ' other owners' : '') + '</p></div>' +
         '<div class="kv">' +
         row('Parcel ID', P.pid[i], true) +
+        (P.owners[i].length > 1 ? row('Owner records', fmt(P.owners[i].length) + ' (condo/townhome units)') : '') +
         row('Owner type', P.self[i] < 0 ? 'Private / other owner' : D.groups[P.self[i]]) +
         row('Jurisdiction', DICT.muni[P.muni[i]] || '—') +
         row('Land use', D.classes[P.cat[i]]) +
         row('CAMA use code', DICT.use[P.use[i]] || '—') +
         row('Area', acres(P.ac[i]) + ' acres') +
-        row('Assessed value', money(P.val[i])) +
+        row('Assessed value', money(P.val[i]) + (P.owners[i].length > 1 ? ' (all units)' : '')) +
         row('Contact', D.rels[P.rel[i]]) +
         row('Shared line', P.sft[i] ? fmt(P.sft[i]) + ' ft' : 'corner only') +
         row('County parcels', fmt(P.nct[i])) +
@@ -490,6 +496,12 @@
           '<span class="chip"><span class="dot" style="background:var(' + GROUP_VARS[gi] + ')"></span>' +
           esc(D.groups[gi]) + '</span>').join('') + '</div></dd>' +
         '</div>' +
+        (P.owners[i].length > 1
+          ? '<div class="sect"><h4>Owners on this parcel</h4><ul>' +
+            P.owners[i].slice(0, 12).map(o => '<li>' + esc(DICT.own[o]) + '</li>').join('') +
+            (P.owners[i].length > 12 ? '<li style="color:var(--muted)">+ ' + (P.owners[i].length - 12) + ' more — see the CSV</li>' : '') +
+            '</ul></div>'
+          : '') +
         '<div class="sect"><h4>County land it touches</h4><div class="chips">' +
         D.classes.map((c,ci) => (P.ccat[i] & (1<<ci)) ? '<span class="chip">' + esc(c) + '</span>' : '').join('') +
         '</div><h4>County owners on the other side</h4><ul>' +
@@ -627,6 +639,7 @@
   $('zfit').addEventListener('click', () => { select(null); fitTo(full, 30); });
 
   $('tTouch').textContent = fmt(NP);
+  $('tRecords').textContent = fmt(P.owners.reduce((n,o) => n + o.length, 0));
   let outside = 0; for (let i=0;i<NP;i++) if (P.self[i] < 0) outside++;
   $('tOutside').textContent = fmt(outside);
   $('tCounty').textContent = fmt(NC);

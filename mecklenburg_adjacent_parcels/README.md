@@ -3,39 +3,48 @@
 Every tax parcel in Mecklenburg County, NC that physically touches a parcel owned by the County or
 one of its affiliated public bodies, with the map and lists built from the County's own GIS.
 
-Data pulled 20 Aug 2026 from Mecklenburg County GIS (`meckgis.mecklenburgcountync.gov`):
+Data pulled 21 Aug 2026 from Mecklenburg County GIS (`meckgis.mecklenburgcountync.gov`):
 `TaxParcel_Camaownershipvalues` (parcel geometry + CAMA ownership/value), `StreetCenterline`,
 `Jurisdictions`, `CountyBoundary`. 428,487 parcels countywide were searched.
 
 ## Results
 
-| | parcels |
+| | count |
 |---|---|
 | County-side properties (the land being touched) | **3,158** |
-| Parcels touching them | **20,171** |
-| …of which **not** county/affiliate-owned | **17,495** |
+| Parcels touching them | **17,121** |
+| …of which **not** county/affiliate-owned | **14,659** |
+| Ownership records across those parcels | **20,171** |
 
-Touching parcels total ~103,300 acres and ~$27.5B in assessed value.
+Touching parcels cover **59,152 acres** and ~**$27.5B** in assessed value.
+
+**Parcels vs ownership records.** 163 of the touching parcels are condominium or townhome
+developments: one parcel, one polygon, but one CAMA ownership record per unit — up to 348 of them on a
+single parcel. The map shows one entry per parcel (with every owner listed in its detail panel); the CSV
+keeps one row per ownership record, which is what a notice mailing needs, and carries
+`owner_records_on_parcel` so the two views reconcile. Acreage is counted once per parcel; assessed value
+sums the units, because each unit is assessed separately.
 
 **County-side owners, by group** — County government 2,771 · CMS Board of Education 266 ·
 Hospital Authority (Atrium) 73 · Library / ABC / Landmarks 48.
 
-**What each touching parcel touches** — County government 17,231 · CMS 2,806 · Hospital Authority 257 ·
-Library / ABC / Landmarks 164. (A parcel can touch more than one group; the group is carried on every
+**What each touching parcel touches** — County government 14,330 · CMS 2,675 · Hospital Authority 190 ·
+Library / ABC / Landmarks 128. (A parcel can touch more than one group; the group is carried on every
 row and every map feature.)
 
-**Kind of contact** — shared boundary 18,034 · corner point 2,032 · within 1 ft 53 · overlapping 52.
+**Kind of contact** — shared boundary 15,695 · corner point 1,329 · within 1 ft 49 · overlapping 48.
 
-**Land use of the touching parcels** — single-family homes 11,992 · condo & townhouse 2,879 ·
-public land/ROW/utility 1,449 · HOA common area 667 · commercial & office 659 · industrial & warehouse 584 ·
-multi-family 566 · vacant/floodplain/farm 544 · institutional 271 · unclassified 560 (mostly blank use codes).
+**Land use of the touching parcels** — single-family homes 11,980 · public land/ROW/utility 1,255 ·
+HOA common area 648 · commercial & office 641 · multi-family 553 · vacant/floodplain/farm 532 ·
+industrial & warehouse 374 · condo & townhouse 317 · institutional 265 · unclassified 556 (mostly blank
+use codes).
 
 **Land use of the county land being touched** — public land/ROW/utility 1,399 parcels · single-family 916
 (land-bank and floodplain-buyout lots) · vacant/floodplain/farm 298 · institutional 220 · commercial & office 176 ·
 multi-family 67 · industrial 45 · HOA common area 33 · condo 10.
 
-**Jurisdiction** — Charlotte 16,065 · unincorporated county 1,498 · Huntersville 1,276 · Cornelius 568 ·
-Matthews 308 · Mint Hill 259 · Pineville 119 · Davidson 53 · unassigned 25.
+**Jurisdiction** — Charlotte 13,352 · unincorporated county 1,476 · Huntersville 1,261 · Matthews 308 ·
+Cornelius 281 · Mint Hill 256 · Pineville 115 · Davidson 51 · unassigned 21.
 
 ## Deliverables
 
@@ -45,10 +54,10 @@ Matthews 308 · Mint Hill 259 · Pineville 119 · Davidson 53 · unassigned 25.
   address/owner/PID; click any parcel for its record and a Polaris link. Two colouring modes: by the
   county owner a parcel touches, or by land use (tap up to three type swatches to colour them; the rest
   fold to amber).
-- `data/touching_parcels.csv` — one row per touching parcel (20,171): owner, mailing address, situs
-  address, CAMA use code and `property_type` class, acres, land and total value, last sale, contact type,
-  shared boundary length, which county groups, county land types (`county_property_types`) and county PIDs
-  it touches, centroid lat/lon, Polaris URL.
+- `data/touching_parcels.csv` — one row per ownership record (20,171 rows over 17,121 parcels): owner,
+  mailing address, situs address, CAMA use code and `property_type` class, `owner_records_on_parcel`,
+  acres, land and total value, last sale, contact type, shared boundary length, which county groups,
+  county land types (`county_property_types`) and county PIDs it touches, centroid lat/lon, Polaris URL.
 - `data/county_properties.csv` — one row per county/affiliate property (3,158) with its land-use class and
   neighbour counts.
 
@@ -75,7 +84,7 @@ condo & townhouse · multi-family · commercial & office · industrial & warehou
 unclassified. The raw code stays on every row as `property_use`, so a finer cut is always available.
 
 A parcel's `county_property_types` lists the classes of the county land it touches — the filter answers
-questions like "single-family lots backing onto county institutional land" (1,907 of them).
+questions like "single-family lots backing onto county institutional land" (1,906 parcels).
 
 Map colour follows a validated categorical palette, capped at three hues at once: on a map any two
 classes can end up adjacent, and beyond three hues the colourblind-separation floors cannot be met. So
