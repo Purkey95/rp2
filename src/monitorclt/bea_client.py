@@ -53,8 +53,10 @@ class BeaApiClient:
         }
         query.update(params)
         url: str = f"{BEA_API_BASE_URL}?{urlencode(query)}"
+        if not url.startswith("https://"):
+            raise BeaApiError(f"Refusing to open non-HTTPS URL: {url}")
         request: Request = Request(url, headers={"User-Agent": _USER_AGENT})
-        with urlopen(request, timeout=self.__timeout) as response:
+        with urlopen(request, timeout=self.__timeout) as response:  # nosec B310 - HTTPS-only, enforced above
             payload: Any = json.loads(response.read().decode("utf-8"))
 
         try:
