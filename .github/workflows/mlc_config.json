@@ -2,6 +2,9 @@
   "ignorePatterns": [
     {
       "pattern": "^https?://(www\\.)?investopedia\\.com"
+    },
+    {
+      "pattern": "^https?://(www\\.)?realpython\\.com"
     }
   ],
   "retryOn429": true,
