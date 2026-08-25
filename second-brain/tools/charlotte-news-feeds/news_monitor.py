@@ -357,6 +357,10 @@ def main():
     parser.add_argument("--email", action="store_true", help="MonitorCLT-format alert body")
     parser.add_argument("--new-only", action="store_true",
                         help="with --once, report only stories first seen this run")
+    parser.add_argument("--only-if-actionable", action="store_true",
+                        help="print nothing unless there is a pitchable story or a failed "
+                             "feed - so a cron job mails you only when there is something "
+                             "to do")
     args = parser.parse_args()
 
     if not (args.once or args.digest):
@@ -375,6 +379,17 @@ def main():
                 row["topics"] = ",".join(row["topics"]) if isinstance(row["topics"], list) else row["topics"]
     else:
         rows = load_recent(conn, since)
+
+    # Silence when there is nothing to act on. MonitorCLT's existing alerts fail
+    # precisely because they arrive every day whether or not anything happened,
+    # so they stop being read - which is how four pipelines sat dead for eleven
+    # days. A digest that only speaks when it has something to say gets opened.
+    if args.only_if_actionable:
+        actionable = [r for r in rows
+                      if r["score"] >= PITCH_THRESHOLD and r["is_local"]]
+        if not actionable and not failures:
+            conn.close()
+            return 0
 
     if args.json:
         print(json.dumps({

@@ -23,6 +23,7 @@ python3 news_monitor.py --once              # fetch, store, print the digest
 python3 news_monitor.py --digest --since 7d # re-print from the DB, no fetching
 python3 news_monitor.py --once --email      # MonitorCLT-format alert body
 python3 news_monitor.py --once --json       # for a metrics sink
+python3 news_monitor.py --once --email --only-if-actionable   # silent when quiet
 python3 verify_feeds.py --quiet             # feed health only
 python3 test_scoring.py                     # scorer regression tests
 ```
@@ -35,8 +36,17 @@ Environment: `CLT_NEWS_DB` sets the SQLite path (default: alongside the script),
 Three integration points, in the order they're worth doing:
 
 1. **Schedule it.** Twice daily beats hourly — you pitch on a story, you don't
-   day-trade it. `0 7,15 * * * cd /path/to/this && python3 news_monitor.py --once
-   --email | mail -s "[MonitorCLT alert] Charlotte housing news" you@cltbuys.com`
+   day-trade it. Use `--only-if-actionable` so it mails you *only* when there's a
+   pitchable story or a failed feed; a digest that arrives every day regardless
+   is a digest that stops being read, which is how four MonitorCLT pipelines sat
+   dead for eleven days.
+
+   ```cron
+   0 7,15 * * * cd /path/to/charlotte-news-feeds && \
+     out=$(python3 news_monitor.py --once --email --only-if-actionable) && \
+     [ -n "$out" ] && printf '%s' "$out" | \
+     mail -s "[MonitorCLT alert] Charlotte housing news" you@cltbuys.com
+   ```
 2. **Register it as a pipeline** so it appears in the metrics digest alongside
    the others. It already exits non-zero when any feed fails, which is the
    signal `pipeline.success_rate_7d` needs.
