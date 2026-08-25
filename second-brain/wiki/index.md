@@ -29,3 +29,4 @@ first when answering queries.
 - [[charlotte-news-feeds]] — Verified RSS feeds for the six Charlotte housing outlets, and the Google News workaround for the four that block servers.
 - [[seller-engine-blueprint-review]] — Review of Seller Engine Technical Blueprint v2.0: what to endorse, five findings, and revised phase gates.
 - [[seller-engine-spec]] — The Data & Workflow Specification: 35 tables, 22 events, executable state machines and scoring, all validated.
+- [[foreclosure-sale-report-gap]] — The upset-bid window MonitorCLT is blind to, found in the Mecklenburg daily sale report.

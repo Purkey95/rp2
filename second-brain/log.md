@@ -68,3 +68,14 @@ integrity guards were exercised with live inserts, and validate_spec.py runs 13
 cross-checks including SQL enums against the Python state machines. Blueprint
 review findings F2/F3/F4 are folded into the contracts. Filed as
 [[seller-engine-spec]].
+
+## [2026-08-25] ingest | Mecklenburg DAILY REPORT OF SALE FILE (Carolina Data Integration)
+
+Parsed 8 sale records from the 2026-08-25 report. Finding: MonitorCLT captures
+foreclosure notices (pre-sale) and trustee deeds (weeks post-sale) but not the
+10-day upset window between them — the only period the property is still
+acquirable. The report also carries high-bidder identity with phone, same-day
+bid-to-tax ratios, and Mecklenburg parcel ids that solve address resolution.
+Parser in `tools/foreclosure-sale-report/`. Filed as
+[[foreclosure-sale-report-gap]]. Licensing caution noted: the compilation is
+copyrighted and the subscription belongs to a third party.
