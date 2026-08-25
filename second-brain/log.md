@@ -57,3 +57,14 @@ organic keeps everything downstream intact and makes the §85 economics gate
 passable at low volume. Five findings filed in [[seller-engine-blueprint-review]],
 including a stale-enrichment scoring guard and an NC compliance gap (G.S. 75-120,
 TCPA) that needs attorney review before G8, not G10.
+
+## [2026-08-25] build | Seller Engine Data & Workflow Specification v1.0
+
+Wrote the pre-code specification in `tools/seller-engine-spec/`: 35 tables, 22
+events, API contracts, executable state machines and scoring formulas,
+enrichment SLAs, wireframes, operations rules, dependency graph. Verified rather
+than asserted — the DDL executes against real PostgreSQL 16 (36 tables), four
+integrity guards were exercised with live inserts, and validate_spec.py runs 13
+cross-checks including SQL enums against the Python state machines. Blueprint
+review findings F2/F3/F4 are folded into the contracts. Filed as
+[[seller-engine-spec]].

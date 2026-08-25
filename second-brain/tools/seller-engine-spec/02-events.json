@@ -1,0 +1,141 @@
+{
+  "spec": "MonitorCLT Seller Engine — Event Catalog v1.0",
+  "frozen_at": "G0",
+  "notes": [
+    "Every event carries the envelope below. Blueprint §7.",
+    "correlation_id threads one seller from first landing view to closing (§8).",
+    "causation_id is the event_id of the event that caused this one, so any chain is replayable.",
+    "Transport is Redis Streams behind EventPublisher/EventConsumer (§6). Do not import a Redis client outside that abstraction.",
+    "Consumers must be idempotent on event_id: at-least-once delivery is assumed."
+  ],
+
+  "envelope": {
+    "event_id":     {"type": "uuid",      "required": true},
+    "event_type":   {"type": "string",    "required": true},
+    "event_version":{"type": "string",    "required": true, "example": "1.0"},
+    "occurred_at":  {"type": "timestamptz","required": true},
+    "correlation_id":{"type": "uuid",     "required": true},
+    "causation_id": {"type": "uuid",      "required": false},
+    "tenant_id":    {"type": "uuid",      "required": false, "note": "null until G10"},
+    "entity_type":  {"type": "string",    "required": true},
+    "entity_id":    {"type": "uuid",      "required": true},
+    "source":       {"type": "string",    "required": true, "note": "emitting service"},
+    "payload":      {"type": "object",    "required": true}
+  },
+
+  "pii_rule": "No event payload may contain a name, phone, email or street address. Carry ids; consumers that are entitled to PII read it from seller.person. Blueprint §72.",
+
+  "events": [
+    {"type": "marketing.session_started", "entity": "marketing_session",
+     "emitted_by": "attribution-service", "payload": {"channel": "enum", "campaign_id": "uuid|null", "landing_page_id": "string"},
+     "consumers": ["analytics-service"]},
+
+    {"type": "seller.submitted", "entity": "seller_inquiry",
+     "emitted_by": "seller-intake-service", "payload": {"inquiry_id": "uuid", "marketing_session_id": "uuid", "has_property_text": "bool"},
+     "consumers": ["verification-service", "analytics-service"],
+     "transition": "STARTED -> PROPERTY_ENTERED"},
+
+    {"type": "seller.otp_sent", "entity": "verification_session",
+     "emitted_by": "verification-service", "payload": {"inquiry_id": "uuid", "send_count": "int"},
+     "consumers": ["analytics-service"],
+     "note": "Metered cost per send. Rate limited per inquiry and per phone. Blueprint §69."},
+
+    {"type": "seller.phone_verified", "entity": "seller_inquiry",
+     "emitted_by": "verification-service", "payload": {"inquiry_id": "uuid", "attempts": "int"},
+     "consumers": ["seller-intake-service", "analytics-service"],
+     "transition": "OTP_PENDING -> PHONE_VERIFIED"},
+
+    {"type": "seller.consent_recorded", "entity": "consent_record",
+     "emitted_by": "seller-intake-service", "payload": {"inquiry_id": "uuid", "consent_type": "string", "consent_text_version": "string", "onward_disclosure_shown": "bool"},
+     "consumers": ["audit-service"],
+     "note": "[REVIEW F4] onward_disclosure_shown must be true before an opportunity may ever be assigned to a buyer."},
+
+    {"type": "seller.questionnaire_completed", "entity": "seller_inquiry",
+     "emitted_by": "seller-intake-service", "payload": {"inquiry_id": "uuid", "form_version": "string", "answered_count": "int"},
+     "consumers": ["scoring-service"]},
+
+    {"type": "seller.inquiry_submitted", "entity": "seller_inquiry",
+     "emitted_by": "seller-intake-service", "payload": {"inquiry_id": "uuid", "idempotency_key": "string"},
+     "consumers": ["property-resolution-service"],
+     "transition": "QUESTIONNAIRE_COMPLETE -> SUBMITTED"},
+
+    {"type": "property.resolved", "entity": "address_resolution",
+     "emitted_by": "property-resolution-service", "payload": {"inquiry_id": "uuid", "property_id": "bigint|null", "resolution_status": "enum", "confidence": "number"},
+     "consumers": ["enrichment-orchestrator", "ops-console"],
+     "note": "AMBIGUOUS never auto-selects a parcel. Blueprint §22."},
+
+    {"type": "property.enrichment_requested", "entity": "seller_inquiry",
+     "emitted_by": "enrichment-orchestrator", "payload": {"inquiry_id": "uuid", "property_id": "bigint", "domains": "string[]"},
+     "consumers": ["enrichment workers"],
+     "transition": "SUBMITTED -> ENRICHING"},
+
+    {"type": "property.enrichment_completed", "entity": "enrichment_snapshot",
+     "emitted_by": "enrichment-orchestrator",
+     "payload": {"inquiry_id": "uuid", "snapshot_id": "uuid", "domain_freshness": "object", "stale_domains": "string[]", "is_scoreable": "bool"},
+     "consumers": ["lead-quality-service", "scoring-service"],
+     "note": "[REVIEW F3] is_scoreable=false routes to MANUAL_REVIEW instead of scoring. A partial enrichment still emits — external providers must never corrupt the core transaction (§74)."},
+
+    {"type": "lead.quality_completed", "entity": "seller_inquiry",
+     "emitted_by": "lead-quality-service", "payload": {"inquiry_id": "uuid", "checks_run": "int", "failed": "string[]", "warned": "string[]", "duplicate_probability": "number", "fraud_probability": "number"},
+     "consumers": ["scoring-service", "ops-console"],
+     "transition": "ENRICHING -> QUALITY_REVIEW"},
+
+    {"type": "lead.scored", "entity": "seller_inquiry",
+     "emitted_by": "scoring-service",
+     "payload": {"inquiry_id": "uuid", "trust": "number|null", "motivation": "number|null", "property": "number|null", "master": "number|null", "score_version": "string", "suppressed_reason": "string|null"},
+     "consumers": ["opportunity-service"]},
+
+    {"type": "opportunity.qualified", "entity": "opportunity",
+     "emitted_by": "opportunity-service", "payload": {"opportunity_id": "uuid", "inquiry_id": "uuid", "master_score": "number|null", "priority": "enum"},
+     "consumers": ["fub-sync-service", "routing-service", "analytics-service"],
+     "transition": "QUALITY_REVIEW -> QUALIFIED, then opportunity created"},
+
+    {"type": "opportunity.synced_to_fub", "entity": "opportunity",
+     "emitted_by": "fub-sync-service", "payload": {"opportunity_id": "uuid", "fub_person_id": "string"},
+     "consumers": ["ops-console"],
+     "note": "[REVIEW F2] Follow Up Boss is the system of engagement. lead.opportunity stays the system of record."},
+
+    {"type": "opportunity.routable", "entity": "opportunity",
+     "emitted_by": "opportunity-service", "payload": {"opportunity_id": "uuid"},
+     "consumers": ["routing-service"],
+     "note": "Not emitted before G10. Requires master_score IS NOT NULL and consent.onward_disclosure_shown = true."},
+
+    {"type": "opportunity.assigned", "entity": "assignment",
+     "emitted_by": "routing-service", "payload": {"opportunity_id": "uuid", "assignment_id": "uuid", "buyer_id": "uuid", "price_cents": "int", "exclusivity_type": "string"},
+     "consumers": ["delivery-service", "billing-service"],
+     "note": "Emitted only after the atomic RESERVE -> CHARGE -> ASSIGN commits (§44)."},
+
+    {"type": "lead.delivered", "entity": "delivery",
+     "emitted_by": "delivery-service", "payload": {"assignment_id": "uuid", "channel": "string", "attempt": "int"},
+     "consumers": ["analytics-service"]},
+
+    {"type": "outcome.activity_recorded", "entity": "opportunity",
+     "emitted_by": "outcome-service", "payload": {"opportunity_id": "uuid", "activity_type": "string", "source": "string"},
+     "consumers": ["analytics-service", "ml-feature-builder"]},
+
+    {"type": "outcome.contract_signed", "entity": "contract",
+     "emitted_by": "outcome-service", "payload": {"opportunity_id": "uuid", "contract_id": "uuid", "contract_price": "number"},
+     "consumers": ["analytics-service"]},
+
+    {"type": "outcome.closed", "entity": "closing",
+     "emitted_by": "outcome-service", "payload": {"contract_id": "uuid", "gross_profit": "number", "lead_cost": "number", "marketing_cost": "number"},
+     "consumers": ["analytics-service", "ml-feature-builder"],
+     "note": "This is the event that closes the learning loop of §86. Without it the system never improves."},
+
+    {"type": "finance.credit_requested", "entity": "credit_request",
+     "emitted_by": "refund-service", "payload": {"credit_request_id": "uuid", "assignment_id": "uuid", "reason_code": "string"},
+     "consumers": ["refund-agent", "ops-console"],
+     "note": "The agent attaches a recommendation. A human decides. Blueprint §78."},
+
+    {"type": "system.dead_letter", "entity": "event",
+     "emitted_by": "any consumer", "payload": {"failed_event_id": "uuid", "failed_event_type": "string", "attempts": "int", "last_error": "string"},
+     "consumers": ["ops-console", "alerting"],
+     "note": "Blueprint §75. Events are never silently dropped."}
+  ],
+
+  "funnel_attribution_events": [
+    "landing_view", "form_started", "address_entered", "phone_entered",
+    "otp_sent", "otp_verified", "form_completed", "qualified_lead",
+    "delivered", "contacted", "appointment", "offer", "contract", "closing"
+  ]
+}

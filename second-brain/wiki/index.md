@@ -28,3 +28,4 @@ first when answering queries.
 - [[agentic-harness-assessment]] — What the Kimi K3 "agentic harness" course is and isn't worth to MonitorCLT.
 - [[charlotte-news-feeds]] — Verified RSS feeds for the six Charlotte housing outlets, and the Google News workaround for the four that block servers.
 - [[seller-engine-blueprint-review]] — Review of Seller Engine Technical Blueprint v2.0: what to endorse, five findings, and revised phase gates.
+- [[seller-engine-spec]] — The Data & Workflow Specification: 35 tables, 22 events, executable state machines and scoring, all validated.
