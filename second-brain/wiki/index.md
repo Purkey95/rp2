@@ -26,3 +26,4 @@ first when answering queries.
 
 - [[marketing-strategy-monitorclt]] — Zero-budget marketing strategy that turns MonitorCLT's proprietary data into a publishing, press, SEO, and referral flywheel.
 - [[agentic-harness-assessment]] — What the Kimi K3 "agentic harness" course is and isn't worth to MonitorCLT.
+- [[charlotte-news-feeds]] — Verified RSS feeds for the six Charlotte housing outlets, and the Google News workaround for the four that block servers.

@@ -18,3 +18,13 @@ notices) and the Daily Research Brief market-signals block. Filed the answer as
 unmatched locally, but the funnel leaks (85% of drip enrollments uncontactable,
 302 hot leads untouched, four pipelines dead 10+ days, CAN-SPAM address unset) —
 fix those before opening any new channel.
+
+## [2026-08-25] query | RSS feeds for the six Charlotte housing outlets
+
+Probed native feeds for the Observer, Axios Charlotte, WFAE, the Ledger, the
+Business Journal, and QCity Metro. Only WFAE (section feeds, not the empty root)
+and QCity Metro serve usable RSS to a server; the other four block datacenter
+fetches with Cloudflare or connection resets. Google News `site:` feeds cover all
+four, verified returning genuine per-outlet headlines. Filed as
+[[charlotte-news-feeds]] with config and a verifier in
+`tools/charlotte-news-feeds/`. All 8 feeds healthy at time of writing.

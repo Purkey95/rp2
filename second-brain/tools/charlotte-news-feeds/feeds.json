@@ -1,0 +1,70 @@
+{
+  "_comment": "Charlotte housing-news feeds for MonitorCLT. Verified 2026-08-25 from a datacenter IP. 'native' feeds are the outlet's own RSS; 'proxy' feeds route via Google News because the outlet sits behind Cloudflare and blocks server-side fetches. Re-run verify_feeds.py before trusting any of these after a site redesign.",
+  "verified": "2026-08-25",
+  "feeds": [
+    {
+      "id": "wfae_news",
+      "outlet": "WFAE 90.7 (NPR Charlotte)",
+      "kind": "native",
+      "url": "https://www.wfae.org/news.rss",
+      "status": "ok",
+      "note": "Root https://www.wfae.org/index.rss parses but is EMPTY (0 items) - do not use it. Section feeds carry the items."
+    },
+    {
+      "id": "wfae_business",
+      "outlet": "WFAE 90.7 (NPR Charlotte)",
+      "kind": "native",
+      "url": "https://www.wfae.org/business.rss",
+      "status": "ok",
+      "note": "Business/development coverage. Pairs with wfae_news; expect overlap, dedupe on link."
+    },
+    {
+      "id": "qcitymetro",
+      "outlet": "QCity Metro",
+      "kind": "native",
+      "url": "https://qcitymetro.com/rss.xml",
+      "status": "ok",
+      "note": "Full site feed, ~20 items. Note the path is /rss.xml - /feed/ and /rss both 404."
+    },
+    {
+      "id": "observer_housing",
+      "outlet": "Charlotte Observer",
+      "kind": "proxy",
+      "url": "https://news.google.com/rss/search?q=site:charlotteobserver.com+housing+OR+foreclosure+OR+%22real+estate%22&hl=en-US&gl=US&ceid=US:en",
+      "status": "ok",
+      "note": "Direct McClatchy feeds reset the connection from a server IP (curl err 92). Google News site: filter returns genuine Observer headlines."
+    },
+    {
+      "id": "axios_charlotte",
+      "outlet": "Axios Charlotte",
+      "kind": "proxy",
+      "url": "https://news.google.com/rss/search?q=site:axios.com+charlotte+housing+OR+%22real+estate%22+OR+development&hl=en-US&gl=US&ceid=US:en",
+      "status": "ok",
+      "note": "axios.com/local/charlotte/feed and api.axios.com/feed/* both return Cloudflare 403 to servers."
+    },
+    {
+      "id": "cbj_charlotte",
+      "outlet": "Charlotte Business Journal",
+      "kind": "proxy",
+      "url": "https://news.google.com/rss/search?q=site:bizjournals.com/charlotte&hl=en-US&gl=US&ceid=US:en",
+      "status": "ok",
+      "note": "feeds.bizjournals.com/bizj_charlotte returns S3 AccessDenied; bizjournals.com/charlotte/news/rss.xml returns Cloudflare 403. CBJ is paywalled, so headlines are the usable signal anyway."
+    },
+    {
+      "id": "charlotte_ledger",
+      "outlet": "The Charlotte Ledger",
+      "kind": "proxy",
+      "url": "https://news.google.com/rss/search?q=%22Charlotte+Ledger%22+OR+site:charlotteledger.substack.com&hl=en-US&gl=US&ceid=US:en",
+      "status": "degraded",
+      "note": "Publishes at thecharlotteledger.com (Substack custom domain). RSS is off: /feed, /feed/, /rss.xml and /feed.xml all 404 on the custom domain, and charlotteledger.substack.com/feed returns 403 to curl UAs and 404 to browser UAs. Newsletter-first, so Google indexes it thinly - only ~6 items. Most reliable capture is subscribing hello@cltbuys.com to the newsletter and parsing inbound mail."
+    },
+    {
+      "id": "clt_housing_topic",
+      "outlet": "All outlets (topic sweep)",
+      "kind": "proxy",
+      "url": "https://news.google.com/rss/search?q=Charlotte+NC+(foreclosure+OR+housing+OR+rezoning+OR+%22home+prices%22)+when:7d&hl=en-US&gl=US&ceid=US:en",
+      "status": "ok",
+      "note": "Catch-all. This is the feed to pitch off of - it shows what is running in the cycle right now, across every outlet, including ones not listed here."
+    }
+  ]
+}
