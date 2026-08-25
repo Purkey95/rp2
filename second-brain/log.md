@@ -46,3 +46,14 @@ Scheduled the Charlotte news monitor as a daily Routine (trig_01KWSPm9gzRYvnK218
 tools). Added `--only-if-actionable` so quiet days stay silent. Tabled Kimi Code/K3,
 gods-eye-view, and CopilotKit/openbot with reasons recorded in
 [[agentic-harness-assessment]] so the question is not re-litigated later.
+
+## [2026-08-25] query | Does the Seller Engine blueprint combine with the marketing strategy?
+
+Reviewed Technical Blueprint v2.0 (87 sections, 15 locked decisions) against
+MonitorCLT's current operational state. Verdict: adopt with amendments — the
+architecture is sound, but its funnel begins with paid ads while the marketing
+strategy was built to a zero-budget constraint. Swapping the funnel top for
+organic keeps everything downstream intact and makes the §85 economics gate
+passable at low volume. Five findings filed in [[seller-engine-blueprint-review]],
+including a stale-enrichment scoring guard and an NC compliance gap (G.S. 75-120,
+TCPA) that needs attorney review before G8, not G10.
