@@ -1,7 +1,7 @@
 ---
 type: index
 created: 2026-07-08
-updated: 2026-07-08
+updated: 2026-08-25
 ---
 
 # Wiki Index
@@ -12,11 +12,11 @@ first when answering queries.
 
 ## Sources
 
-*(none yet — drop a file into `raw/` and ask Claude to ingest it)*
+- [[charlotte-market-signals-2026-08]] — August 2026 snapshot of Charlotte price, distress, capital, development, and sentiment data from MonitorCLT.
 
 ## Entities
 
-*(none yet)*
+- [[monitorclt]] — Charlotte real estate intelligence pipeline (53 sources, 155 metrics) run from cltbuys.com; its data inventory and current operational health.
 
 ## Concepts
 
@@ -24,4 +24,5 @@ first when answering queries.
 
 ## Syntheses & Answers
 
-*(none yet)*
+- [[marketing-strategy-monitorclt]] — Zero-budget marketing strategy that turns MonitorCLT's proprietary data into a publishing, press, SEO, and referral flywheel.
+- [[agentic-harness-assessment]] — What the Kimi K3 "agentic harness" course is and isn't worth to MonitorCLT.
