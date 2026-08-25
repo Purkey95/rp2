@@ -28,3 +28,13 @@ fetches with Cloudflare or connection resets. Google News `site:` feeds cover al
 four, verified returning genuine per-outlet headlines. Filed as
 [[charlotte-news-feeds]] with config and a verifier in
 `tools/charlotte-news-feeds/`. All 8 feeds healthy at time of writing.
+
+## [2026-08-25] build | Charlotte news monitor wired up
+
+Built `tools/charlotte-news-feeds/news_monitor.py` to replace MonitorCLT's dead
+GDELT job: fetches the 8 verified feeds, scores headlines against seven weighted
+housing topics with a locality gate, stores to SQLite, and promotes pitchable
+stories with the MonitorCLT asset that answers each. Four bugs found and fixed
+during testing (unstable `hash()` breaking dedupe, fetch-date rather than
+publish-date windowing, "zoning" matching inside "rezoning", and word boundaries
+rejecting plurals). Regression tests pinned in `test_scoring.py`, 7/7 passing.

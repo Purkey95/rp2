@@ -1,5 +1,5 @@
 {
-  "_comment": "Charlotte housing-news feeds for MonitorCLT. Verified 2026-08-25 from a datacenter IP. 'native' feeds are the outlet's own RSS; 'proxy' feeds route via Google News because the outlet sits behind Cloudflare and blocks server-side fetches. Re-run verify_feeds.py before trusting any of these after a site redesign.",
+  "_comment": "Charlotte housing-news feeds for MonitorCLT. Verified 2026-08-25 from a datacenter IP. 'native' feeds are the outlet's own RSS; 'proxy' feeds route via Google News because the outlet sits behind Cloudflare and blocks server-side fetches. Re-run verify_feeds.py before trusting any of these after a site redesign. Proxy queries are windowed with when:14d.",
   "verified": "2026-08-25",
   "feeds": [
     {
@@ -30,33 +30,33 @@
       "id": "observer_housing",
       "outlet": "Charlotte Observer",
       "kind": "proxy",
-      "url": "https://news.google.com/rss/search?q=site:charlotteobserver.com+housing+OR+foreclosure+OR+%22real+estate%22&hl=en-US&gl=US&ceid=US:en",
+      "url": "https://news.google.com/rss/search?q=site:charlotteobserver.com+housing+OR+foreclosure+OR+%22real+estate%22+when:14d&hl=en-US&gl=US&ceid=US:en",
       "status": "ok",
-      "note": "Direct McClatchy feeds reset the connection from a server IP (curl err 92). Google News site: filter returns genuine Observer headlines."
+      "note": "Direct McClatchy feeds reset the connection from a server IP (curl err 92). Google News site: filter returns genuine Observer headlines. Query is windowed to when:14d - without it Google returns years-old articles."
     },
     {
       "id": "axios_charlotte",
       "outlet": "Axios Charlotte",
       "kind": "proxy",
-      "url": "https://news.google.com/rss/search?q=site:axios.com+charlotte+housing+OR+%22real+estate%22+OR+development&hl=en-US&gl=US&ceid=US:en",
+      "url": "https://news.google.com/rss/search?q=site:axios.com+charlotte+housing+OR+%22real+estate%22+OR+development+when:14d&hl=en-US&gl=US&ceid=US:en",
       "status": "ok",
-      "note": "axios.com/local/charlotte/feed and api.axios.com/feed/* both return Cloudflare 403 to servers."
+      "note": "axios.com/local/charlotte/feed and api.axios.com/feed/* both return Cloudflare 403 to servers. Query is windowed to when:14d - without it Google returns years-old articles."
     },
     {
       "id": "cbj_charlotte",
       "outlet": "Charlotte Business Journal",
       "kind": "proxy",
-      "url": "https://news.google.com/rss/search?q=site:bizjournals.com/charlotte&hl=en-US&gl=US&ceid=US:en",
+      "url": "https://news.google.com/rss/search?q=site:bizjournals.com/charlotte+when:14d&hl=en-US&gl=US&ceid=US:en",
       "status": "ok",
-      "note": "feeds.bizjournals.com/bizj_charlotte returns S3 AccessDenied; bizjournals.com/charlotte/news/rss.xml returns Cloudflare 403. CBJ is paywalled, so headlines are the usable signal anyway."
+      "note": "feeds.bizjournals.com/bizj_charlotte returns S3 AccessDenied; bizjournals.com/charlotte/news/rss.xml returns Cloudflare 403. CBJ is paywalled, so headlines are the usable signal anyway. Query is windowed to when:14d - without it Google returns years-old articles."
     },
     {
       "id": "charlotte_ledger",
       "outlet": "The Charlotte Ledger",
       "kind": "proxy",
-      "url": "https://news.google.com/rss/search?q=%22Charlotte+Ledger%22+OR+site:charlotteledger.substack.com&hl=en-US&gl=US&ceid=US:en",
+      "url": "https://news.google.com/rss/search?q=%22Charlotte+Ledger%22+OR+site:charlotteledger.substack.com+when:14d&hl=en-US&gl=US&ceid=US:en",
       "status": "degraded",
-      "note": "Publishes at thecharlotteledger.com (Substack custom domain). RSS is off: /feed, /feed/, /rss.xml and /feed.xml all 404 on the custom domain, and charlotteledger.substack.com/feed returns 403 to curl UAs and 404 to browser UAs. Newsletter-first, so Google indexes it thinly - only ~6 items. Most reliable capture is subscribing hello@cltbuys.com to the newsletter and parsing inbound mail."
+      "note": "Publishes at thecharlotteledger.com (Substack custom domain). RSS is off: /feed, /feed/, /rss.xml and /feed.xml all 404 on the custom domain, and charlotteledger.substack.com/feed returns 403 to curl UAs and 404 to browser UAs. Newsletter-first, so Google indexes it thinly - only ~6 items. Most reliable capture is subscribing hello@cltbuys.com to the newsletter and parsing inbound mail. Query is windowed to when:14d - without it Google returns years-old articles."
     },
     {
       "id": "clt_housing_topic",

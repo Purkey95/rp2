@@ -9,8 +9,11 @@ tags: [charlotte, media, rss, monitorclt, pr]
 
 **Yes for two of them natively; yes for the rest through a proxy.** All eight
 feeds below were fetched and verified from a datacenter IP on 2026-08-25 and
-returned live items. Machine-readable config and a verifier live in
-`second-brain/tools/charlotte-news-feeds/`.
+returned live items. Machine-readable config, a health checker, and a working monitor live in
+`second-brain/tools/charlotte-news-feeds/` — see that directory's README for
+wiring instructions. `news_monitor.py` fetches all eight feeds, scores each
+headline for Charlotte housing relevance, and promotes the ones worth pitching,
+naming the MonitorCLT asset that answers each. It replaces the dead GDELT job.
 
 This matters for two pillars of [[marketing-strategy-monitorclt]]: Pillar 2
 (pitch into a story while it is running) and the repair of the dead GDELT news
@@ -78,5 +81,13 @@ kind of story where a same-day MonitorCLT number turns a pitch into a citation.
 - Feeds rot. Treat a feed dropping to zero items as an outage, the same way
   MonitorCLT should treat a pipeline at 0% success. `verify_feeds.py` exits
   non-zero when any feed fails, so it can run on a schedule.
+
+## What the monitor found on its first run
+
+Fetching 311 stories across a 14-day window, the scorer promoted the Observer's
+"Charlotte-area foreclosures spike 71% — what's pushing homeowners to the brink?"
+as the top pitch, matched to the Foreclosure Auction Report. That is the exact
+shape of the Pillar 2 opportunity: a reporter asking a question your data
+answers, while the story is still open.
 
 Related: [[marketing-strategy-monitorclt]] · [[monitorclt]]

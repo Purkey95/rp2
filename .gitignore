@@ -24,3 +24,7 @@ __pycache__/
 src/*.egg-info/
 .venv/
 .vscode/
+
+# Charlotte news monitor local store
+second-brain/tools/charlotte-news-feeds/clt_news.db
+second-brain/tools/charlotte-news-feeds/__pycache__/
