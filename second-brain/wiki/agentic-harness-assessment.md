@@ -76,4 +76,23 @@ stack change:
    leads. Mechanical, high-volume, cheap-model work that attacks the 15.09%
    contactable rate directly.
 
-Related: [[monitorclt]] · [[marketing-strategy-monitorclt]]
+## Tabled — reviewed and deliberately not adopted (2026-08-25)
+
+Three tools were assessed against MonitorCLT's actual blockers and shelved. None
+was rejected on quality; all three were rejected on timing. Recorded here so the
+question does not get re-litigated in three months.
+
+| Tool | What it is | Why tabled |
+|---|---|---|
+| **Kimi Code / K3 harness** | Moonshot's coding agent + 2.8T open-weight model | Nothing broken in MonitorCLT is a model-capability problem. Migration cost, no fix attached. The *diagnosis* was kept — see above. |
+| **[gods-eye-view](https://github.com/bilawalsidhu/gods-eye-view)** | CesiumJS globe plotting live aircraft, vessels, satellites, fires (MIT) | Every data layer is aviation/maritime/orbital. Nothing touches parcels or deeds. The transferable idea — plotting foreclosures or the 86 rezonings on a 3D globe as a shareable asset — is real but is a flourish, and Google Photorealistic 3D Tiles is metered, breaking the zero-cost constraint. Cesium + OSM buildings would do it free if ever revisited. |
+| **[CopilotKit/openbot](https://github.com/CopilotKit/openbot)** | Platform for running AI agents as governed coworkers: isolated container, own browser and logins, granted tools, policy check before each action, audit log after. React/Hono/Postgres+pgvector/Docker/Bun, MIT, **alpha**, 2.7k stars | Right shape, wrong time. It governs agents you have already built, and none of the three worth building exist yet. Adds Postgres and an identity provider to a box already at 90% disk. Alpha software should not be load-bearing for a business. |
+
+**The common thread:** all three are infrastructure for capability MonitorCLT does
+not yet lack. The blockers are a dead OCR pipeline, a full disk, and 302 uncalled
+leads. Revisit openbot specifically once the enrichment agent exists — its
+sandboxed browser genuinely fits NC Secretary of State lookups, which are browser
+work against a site with no API, and its audit log matters once an agent is
+touching distressed-homeowner PII.
+
+Related: [[monitorclt]] · [[marketing-strategy-monitorclt]] · [[charlotte-news-feeds]]

@@ -38,3 +38,11 @@ stories with the MonitorCLT asset that answers each. Four bugs found and fixed
 during testing (unstable `hash()` breaking dedupe, fetch-date rather than
 publish-date windowing, "zoning" matching inside "rezoning", and word boundaries
 rejecting plurals). Regression tests pinned in `test_scoring.py`, 7/7 passing.
+
+## [2026-08-25] decision | News monitor scheduled; three agent tools tabled
+
+Scheduled the Charlotte news monitor as a daily Routine (trig_01KWSPm9gzRYvnK218fNYrZT,
+07:04 ET, push delivery — connectors are org-gated so the fired session has no mail
+tools). Added `--only-if-actionable` so quiet days stay silent. Tabled Kimi Code/K3,
+gods-eye-view, and CopilotKit/openbot with reasons recorded in
+[[agentic-harness-assessment]] so the question is not re-litigated later.
