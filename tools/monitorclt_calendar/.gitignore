@@ -1,0 +1,4 @@
+.env
+out/
+*.log
+client_secret*.json

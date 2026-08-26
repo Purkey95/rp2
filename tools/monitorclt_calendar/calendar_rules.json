@@ -1,0 +1,52 @@
+{
+  "_comment": "Google Calendar bridge config. PUSH: the catalyst calendar (tools/monitorclt_catalyst) already answers 'which parcels have a meaningful catalyst in the next 60 days?' -- this puts those dates on the calendar acquisitions actually looks at, as all-day events keyed by APN so a re-run updates in place instead of duplicating. PULL: dates you learn away from the desk (a hearing announced at a REIA meeting, a maturity a broker mentions) get typed straight into the calendar; we read them back as EXPLICIT catalyst rows and feed them to catalyst.py, which always prefers an explicit date over a derived offset. inbound_aliases map the words you would actually type in an event title to the catalyst vocabulary in catalyst_rules.json.",
+  "timezone": "America/New_York",
+  "push_horizon_days": 120,
+  "reminder_days_before": [
+    7,
+    1
+  ],
+  "title_template": "{catalyst} — {address}",
+  "title_fallback_address": "APN {apn}",
+  "colors": {
+    "_comment": "Google Calendar colorId per urgency band; 11 red, 6 orange, 5 yellow, 8 grey.",
+    "0": "11",
+    "30": "6",
+    "90": "5",
+    "default": "8"
+  },
+  "apn_patterns": [
+    "\\bAPN[:# ]\\s*([0-9][0-9\\-]{5,})",
+    "\\bapn\\s*=\\s*([0-9][0-9\\-]{5,})",
+    "\\bparcel[:# ]\\s*([0-9][0-9\\-]{5,})"
+  ],
+  "inbound_aliases": {
+    "foreclosure sale": "foreclosure_sale_date",
+    "foreclosure": "foreclosure_sale_date",
+    "auction": "auction_date",
+    "upset bid": "redemption_deadline",
+    "redemption": "redemption_deadline",
+    "loan maturity": "loan_maturity",
+    "maturity": "loan_maturity",
+    "balloon": "balloon_maturity",
+    "hard money": "hard_money_maturity",
+    "rezoning": "rezoning_hearing",
+    "hearing": "rezoning_hearing",
+    "entitlement": "entitlement_expiration",
+    "subdivision approval": "subdivision_approval_expiration",
+    "ground lease": "ground_lease_expiration",
+    "ground lease expiration": "ground_lease_expiration",
+    "ground lease expires": "ground_lease_expiration",
+    "lease expiration": "lease_expiration",
+    "lease expires": "lease_expiration",
+    "affordable restriction": "affordable_restriction_expiration",
+    "special assessment": "special_assessment_effective",
+    "co expiration": "co_expiration",
+    "certificate of occupancy": "co_expiration",
+    "tax incentive": "tax_incentive_expiration",
+    "permit expiration": "permit_expiration",
+    "permit expires": "permit_expiration",
+    "infrastructure": "infrastructure_completion",
+    "school boundary": "school_boundary_effective"
+  }
+}

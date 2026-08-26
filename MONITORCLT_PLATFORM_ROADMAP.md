@@ -320,7 +320,12 @@ Built since: multi-year tax staging, 311 velocity, stalled subdivision
 - **`tax_lot_legal_lot_mismatch`** and **`address_anomaly_multiunit`** (information
   arbitrage, both derivable from records we hold)
 - feed **real recorded dates** into the catalyst calendar and **resolution events**
-  into the lifecycle engine as those sources come online (ROD, planning, tax status)
+  into the lifecycle engine as those sources come online (ROD, planning, tax status).
+  Built: **`monitorclt_calendar`** — the Google Calendar bridge. It pushes upcoming
+  catalysts onto the calendar acquisitions actually reads, and pulls hand-entered
+  dates back as *explicit* catalysts, which is a real-recorded-date path that works
+  today, ahead of ROD/planning coming online: a hearing date you hear at a REIA
+  meeting outranks a derived offset the moment you type it into your phone.
 
 ---
 
