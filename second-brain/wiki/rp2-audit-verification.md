@@ -81,11 +81,48 @@ are the same person — the threat model is weak. It is better understood as a
 `=` is silently turned into a formula and renders as `#NAME?`. Worth fixing,
 not worth alarm.
 
-## Not yet checked
+## Confirmed and fixed (second pass)
 
-The audit's remaining claims — dead `generators` option, transaction-type
-localization, config validation permitting country-illegal accounting methods,
-dead CodeQL scanning, packaging metadata — were not verified in this pass.
+### Country accounting-method restrictions were half-enforced
+
+A country declares which accounting methods are legal, but only one of the two
+paths that select one checked it. Demonstrated with Japan, which permits `fifo`
+alone:
+
+```
+rp2_jp -m lifo ...                 -> rejected: invalid choice: 'lifo'
+[accounting_methods] 2020 = lifo   -> accepted: "Accounting method: lifo"
+```
+
+`-m` is constrained by argparse choices built from
+`country.get_accounting_methods()`; the configuration section was checked only
+for module existence. A report could be computed with a method illegal in the
+filer's jurisdiction. Both paths now enforce the same set.
+
+### The `generators` option never worked — two stacked defects
+
+`docs/input_files.md` and the JSON schema both define `generators` as a **key**
+of the `general` section, but the guard tested whether a `[generators]`
+**section** existed. The documented spelling was therefore silently ignored and
+the default set always used. Past that guard, configured names were stored bare
+while plugins are matched by fully qualified module name, so the run would have
+aborted with `Report generator plugins ... not found`.
+
+Both fixed. `generators = open_positions` now emits only that report where it
+previously emitted all three; a country-specific name (`us.tax_report_us`)
+works; omitting the key still yields the full default set.
+
+## Refuted
+
+**"Dead CodeQL scanning."** The workflow triggers on pushes to `main`, PRs to
+`main`, and a weekly cron, and a CodeQL run completed with conclusion `success`
+on 2026-08-28. It is not dead. It *is* pinned to `github/codeql-action@v1`,
+which GitHub has retired — worth updating, but a different and much smaller
+problem than the audit describes.
+
+## Still not checked
+
+Transaction-type localization and the packaging-metadata claims.
 
 **Note on provenance:** `AUDIT.md` states it was requested for a repo called
 "monitorclt" which does not exist on GitHub, and covers `rp2` instead. See
