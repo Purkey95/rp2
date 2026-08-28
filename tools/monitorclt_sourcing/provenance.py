@@ -25,6 +25,8 @@ The five governance rules (verbatim intent, ported from HomeSignal CLAUDE.md §8
 Pure stdlib.
 """
 
+from __future__ import annotations  # PEP 604 `X | None` annotations stay lazy on py3.8/3.9
+
 import hashlib
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timezone
