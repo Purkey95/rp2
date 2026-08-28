@@ -10,7 +10,7 @@ jobs:
     - uses: actions/checkout@main
     - uses: gaurav-nelson/github-action-markdown-link-check@v1
       with:
-        config-file: '.github/markdown_link_check_config.json'
+        config-file: '.github/workflows/mlc_config.json'
 
   plugin-documentation-check:
     name: Check plugin documentation is in sync with code
