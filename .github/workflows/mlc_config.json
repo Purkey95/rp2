@@ -1,12 +1,10 @@
 {
   "ignorePatterns": [
-    {
-      "pattern": "^https?://(www\\.)?investopedia\\.com"
-    },
-    {
-      "pattern": "^https?://(www\\.)?realpython\\.com"
-    }
+    { "pattern": "^https://www\\.investopedia\\.com/" },
+    { "pattern": "^https://realpython\\.com/" }
   ],
+  "aliveStatusCodes": [200, 206, 301, 302, 308, 429],
   "retryOn429": true,
-  "aliveStatusCodes": [200, 206, 429]
+  "retryCount": 3,
+  "fallbackRetryDelay": "30s"
 }
