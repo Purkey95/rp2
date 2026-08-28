@@ -13,6 +13,7 @@
 # limitations under the License.
 
 
+from datetime import datetime
 from typing import List, Set
 
 from pycountry import countries, currencies
@@ -74,6 +75,15 @@ class AbstractCountry:
     # Measured in days
     def get_long_term_capital_gain_period(self) -> int:
         raise NotImplementedError("Abstract function")
+
+    # Whether the gain from disposing of a lot acquired at acquired_timestamp on
+    # taxable_timestamp is long-term. The default is a plain day count against
+    # get_long_term_capital_gain_period(), which is what most countries express in law.
+    # Countries whose holding period is defined in calendar terms rather than in days
+    # (e.g. the US "more than one year" rule) should override this: a fixed day count
+    # cannot express an anniversary across leap years.
+    def is_long_term_capital_gains(self, acquired_timestamp: datetime, taxable_timestamp: datetime) -> bool:
+        return (taxable_timestamp - acquired_timestamp).days >= self.get_long_term_capital_gain_period()
 
     # Default accounting method to use if the user doesn't specify one on the command line
     def get_default_accounting_method(self) -> str:

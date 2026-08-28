@@ -177,7 +177,11 @@ class Generator(AbstractODSGenerator):
         for entry in chain(in_transaction_set, out_transaction_set, intra_transaction_set):  # type: ignore
             years_2_transaction_sets.setdefault(entry.timestamp.year, []).append(entry)
 
-        for year, transaction_set in years_2_transaction_sets.items():
+        # Years must be processed in chronological order: the sheets are laid out
+        # sequentially via previous_year_row_offset and the summary sheet carries totals
+        # forward, so an out-of-order year corrupts both. The dict above is keyed in
+        # encounter order across the in/out/intra sets, which is not chronological.
+        for year, transaction_set in sorted(years_2_transaction_sets.items()):
             # Sort the transactions by timestamp and generate sheet by year
             previous_year_row_offset = self.__generate_asset_year(
                 asset=asset,

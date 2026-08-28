@@ -318,5 +318,78 @@ class TestGainLoss(unittest.TestCase):
             GainLoss(self._configuration, RP2Decimal("0.1"), self._out, in_transaction)
 
 
+class TestLongTermCapitalGainsHoldingPeriod(unittest.TestCase):
+    """The US holding period is a calendar anniversary, not a day count.
+
+    IRS Topic 409 / Pub. 544: the holding period begins the day after acquisition and
+    includes the day of disposal, and a gain is long-term only if the asset was held for
+    MORE than one year. A ">= 365 days" test classifies a sale on the one-year anniversary
+    as long-term, and a leap year puts the anniversary 366 days out, so both were reported
+    as long-term when they are short-term -- understating the tax owed.
+    """
+
+    _configuration: Configuration
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls._configuration = Configuration("./config/test_data.ini", US())
+
+    def _gain_loss(self, acquired_timestamp: str, taxable_timestamp: str) -> GainLoss:
+        acquired_lot = InTransaction(
+            self._configuration,
+            acquired_timestamp,
+            "B1",
+            "Coinbase Pro",
+            "Bob",
+            "BUY",
+            RP2Decimal("10000"),
+            RP2Decimal("1"),
+            fiat_fee=RP2Decimal("0"),
+            row=10,
+        )
+        taxable_event = OutTransaction(
+            self._configuration,
+            taxable_timestamp,
+            "B1",
+            "Coinbase Pro",
+            "Bob",
+            "SELL",
+            RP2Decimal("20000"),
+            RP2Decimal("1"),
+            RP2Decimal("0"),
+            row=20,
+        )
+        return GainLoss(self._configuration, RP2Decimal("1"), taxable_event, acquired_lot)
+
+    def test_sale_on_one_year_anniversary_is_short_term(self) -> None:
+        # 365 days elapsed: exactly one year, which is not MORE than one year.
+        self.assertFalse(self._gain_loss("2021-01-01T10:00:00Z", "2022-01-01T10:00:00Z").is_long_term_capital_gains())
+
+    def test_sale_day_after_one_year_anniversary_is_long_term(self) -> None:
+        self.assertTrue(self._gain_loss("2021-01-01T10:00:00Z", "2022-01-02T10:00:00Z").is_long_term_capital_gains())
+
+    def test_sale_on_anniversary_across_leap_year_is_short_term(self) -> None:
+        # 366 days elapsed because 2020 is a leap year, but still exactly one year.
+        self.assertFalse(self._gain_loss("2020-01-01T10:00:00Z", "2021-01-01T10:00:00Z").is_long_term_capital_gains())
+
+    def test_sale_day_after_anniversary_across_leap_year_is_long_term(self) -> None:
+        self.assertTrue(self._gain_loss("2020-01-01T10:00:00Z", "2021-01-02T10:00:00Z").is_long_term_capital_gains())
+
+    def test_february_29_acquisition_rolls_anniversary_to_march_1(self) -> None:
+        # No February 29 in 2021: the anniversary rolls forward to March 1, so a sale on
+        # March 1 is still short-term and March 2 is the first long-term day.
+        self.assertFalse(self._gain_loss("2020-02-29T10:00:00Z", "2021-03-01T10:00:00Z").is_long_term_capital_gains())
+        self.assertTrue(self._gain_loss("2020-02-29T10:00:00Z", "2021-03-02T10:00:00Z").is_long_term_capital_gains())
+
+    def test_classification_uses_dates_not_instants(self) -> None:
+        # Held 365 days and 2 minutes by the clock, but the disposal date is the day after
+        # the anniversary, so the holding period is one year and one day: long-term.
+        self.assertTrue(self._gain_loss("2021-01-01T23:59:00Z", "2022-01-02T00:01:00Z").is_long_term_capital_gains())
+
+    def test_clearly_short_and_clearly_long_are_unchanged(self) -> None:
+        self.assertFalse(self._gain_loss("2021-06-01T10:00:00Z", "2021-12-01T10:00:00Z").is_long_term_capital_gains())
+        self.assertTrue(self._gain_loss("2019-01-01T10:00:00Z", "2023-01-01T10:00:00Z").is_long_term_capital_gains())
+
+
 if __name__ == "__main__":
     unittest.main()
