@@ -29,3 +29,9 @@ Connector reads succeed but writes return "token expired", independent of the
 read-only subscription problem. Recorded both faults, the four missing monthly
 recurrences with verified RRULEs, and two source conflicts in
 [[charlotte-reia-calendar]].
+
+## [2026-08-28] query | Second pass over the rp2 AUDIT.md claims
+
+Two more confirmed and fixed (country accounting-method enforcement, the dead
+`generators` option). One refuted: CodeQL is not dead, though it is pinned to a
+retired action version. See [[rp2-audit-verification]].
