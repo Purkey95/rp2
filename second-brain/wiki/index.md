@@ -1,7 +1,7 @@
 ---
 type: index
 created: 2026-07-08
-updated: 2026-07-08
+updated: 2026-08-28
 ---
 
 # Wiki Index
@@ -16,7 +16,8 @@ first when answering queries.
 
 ## Entities
 
-*(none yet)*
+- [[rp2]] — the crypto tax calculator fork; also, awkwardly, the host repo for MonitorCLT work
+- [[monitorclt]] — Charlotte real-estate intelligence platform; **has no GitHub repo**, which blocks several sessions
 
 ## Concepts
 
@@ -24,4 +25,6 @@ first when answering queries.
 
 ## Syntheses & Answers
 
-*(none yet)*
+- [[outstanding-items-2026-08-28]] — every unfinished thread across 72 sessions, with what each needs
+- [[rp2-audit-verification]] — which claims in rp2 `AUDIT.md` hold up against the code; two fixed
+- [[charlotte-reia-calendar]] — why the REIA calendar import is stuck (not the token)
