@@ -104,7 +104,20 @@ def _rp2_main_internal(country: AbstractCountry) -> None:  # pylint: disable=too
 
         old_year: int = MIN_DATE.year
         years_2_accounting_methods: AVLTree[int, AbstractAccountingMethod] = AVLTree()
+        country_accounting_methods: Set[str] = country.get_accounting_methods()
         for year, accounting_method_name in years_2_accounting_method_names.items():
+            # The -m command line option is constrained to the country's methods by argparse
+            # choices, but the 'accounting_methods' configuration section is not: without this
+            # check a config file could select a method the country does not allow, and the
+            # report would be computed with it. Both paths must enforce the same restriction.
+            if accounting_method_name not in country_accounting_methods:
+                LOGGER.error(
+                    "Accounting method '%s' is not allowed in country '%s' (allowed: %s). Exiting...",
+                    accounting_method_name,
+                    country.country_iso_code,
+                    ", ".join(sorted(country_accounting_methods)),
+                )
+                sys.exit(1)
             try:
                 accounting_method_module: ModuleType = import_module(
                     f"{_ACCOUNTING_METHOD_PACKAGE}.{accounting_method_name}", package=_ACCOUNTING_METHOD_PACKAGE

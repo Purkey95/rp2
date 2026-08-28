@@ -178,8 +178,21 @@ class Configuration:  # pylint: disable=too-many-public-methods
                     self.__assets = self._validate_string_set(Keyword.ASSETS.value, ini_configuration[section_name], configuration_path)
                     self.__exchanges = self._validate_string_set(Keyword.EXCHANGES.value, ini_configuration[section_name], configuration_path)
                     self.__holders = self._validate_string_set(Keyword.HOLDERS.value, ini_configuration[section_name], configuration_path)
-                    if Keyword.GENERATORS.value in ini_configuration:
-                        self.__generators = self._validate_string_set(Keyword.GENERATORS.value, ini_configuration[section_name], configuration_path)
+                    # 'generators' is an optional key of the 'general' section (see
+                    # docs/input_files.md), so it must be looked up in that section, not in the
+                    # configuration's list of section names. Testing `in ini_configuration` asked
+                    # whether a '[generators]' SECTION existed -- which the documented format never
+                    # produces -- so a documented 'generators' key was always silently ignored and
+                    # the default generator set was used instead.
+                    if Keyword.GENERATORS.value in ini_configuration[section_name]:
+                        # Qualify with the report-generator package, exactly as the default set is
+                        # built in __init__. The plugins are matched by fully qualified module name,
+                        # so bare names from the configuration file would never match and the run
+                        # would abort with "Report generator plugins ... not found".
+                        self.__generators = {
+                            f"{REPORT_GENERATOR_PACKAGE}.{generator}"
+                            for generator in self._validate_string_set(Keyword.GENERATORS.value, ini_configuration[section_name], configuration_path)
+                        }
                 elif normalized_section_name == Keyword.IN_HEADER.value:
                     if self.__in_header:
                         raise RP2ValueError(f"{configuration_path}: section '{normalized_section_name}' found multiple times in configuration file")
