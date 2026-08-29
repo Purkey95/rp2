@@ -104,6 +104,35 @@ solicitation of estates within NC rules on contacting personal representatives.
 ## Calibrate before trusting the numbers
 
 The weights in `match_rules.json` are defensible starting points, not measured
-ones. Score a few hundred pairs by hand against Mecklenburg data, then tune the
-thresholds to the precision you need — this is a *recall-then-review* design, so
-the cost of a wrong `confirmed` is far higher than the cost of a `pending`.
+ones. `evaluate.py` is how you find out what they are actually worth: label
+estate/parcel pairs by hand, then score the matcher against them.
+
+```bash
+python3 evaluate.py --estates sample/estate_cases.jsonl \
+                    --parcels sample/parcels.jsonl \
+                    --deeds   sample/deeds.jsonl \
+                    --labels  sample/labels.csv \
+                    --target-precision 0.95
+```
+
+Labels are a CSV with a header — `file_number, pin, is_match` (1/0); counties are
+resolved from the records, and a PIN that exists in two counties is an error
+rather than a guess. The report gives:
+
+- **two operating points** — auto-confirm (what reaches outreach with no human;
+  precision is what matters) and through-review (confirmed + pending: the recall
+  ceiling a reviewer could ever reach)
+- **why each match was missed** — *blocked out* (never became a candidate: a
+  parsing/blocking problem no threshold fixes) vs *scored low* (a weights problem)
+- **precision per tier and per evidence label** — which corroboration keeps its
+  promises and which is just adding points
+- **a threshold sweep** with two picks: best F1, and the lowest `auto_confirm`
+  that still clears your target precision — usually the one to ship, since this
+  is a *recall-then-review* design where a wrong `confirmed` costs far more than
+  a `pending`
+
+On the synthetic sample it reports 100% precision and 50% recall at auto-confirm,
+with 100% recall through the review queue — the intended shape, and a reminder
+that these numbers describe the sample, not Mecklenburg. Label the hard cases
+(common surnames, remarriages, junior/senior pairs) or the harness flatters
+itself.
