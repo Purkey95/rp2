@@ -1,0 +1,76 @@
+{
+  "version": "1.0",
+
+  "_comment": "Tunable matching policy. Scores are additive: a candidate starts at its name-match base and every piece of corroborating or contradicting evidence moves it. Nothing here is a proxy for a protected characteristic, and no criminal-justice signal exists as an input.",
+
+  "name_base": {
+    "name_full_exact": 0.70,
+    "name_first_last_only": 0.55
+  },
+
+  "evidence": {
+    "estate_marker_on_owner": 0.18,
+    "mailing_address_match": 0.15,
+    "deed_grantor_link": 0.15,
+    "situs_address_match": 0.10,
+    "middle_initial_conflict": -0.30,
+    "common_name": -0.15,
+    "organization_owner": -0.40,
+    "county_mismatch": -0.50
+  },
+
+  "thresholds": {
+    "auto_confirm": 0.85,
+    "review_floor": 0.45,
+    "common_name_parcels": 8
+  },
+
+  "require_corroboration_to_confirm": true,
+  "corroborating_evidence": [
+    "estate_marker_on_owner",
+    "mailing_address_match",
+    "deed_grantor_link",
+    "situs_address_match"
+  ],
+
+  "name_formats": {
+    "estate_case": "first_last",
+    "parcel": "last_first",
+    "deed": "last_first"
+  },
+
+  "suffixes": ["JR", "SR", "II", "III", "IV", "MD", "DDS", "ESQ", "PHD"],
+
+  "organization_tokens": [
+    "LLC", "L L C", "INC", "CORP", "CORPORATION", "COMPANY", "CO", "LP", "LLP",
+    "PLLC", "TRUST", "TRUSTEE", "TRUSTEES", "BANK", "CHURCH", "MINISTRIES",
+    "PARTNERS", "PARTNERSHIP", "HOLDINGS", "PROPERTIES", "ASSOCIATION",
+    "ASSOCIATES", "FOUNDATION", "COUNTY", "CITY", "STATE", "AUTHORITY",
+    "HOA", "CONDOMINIUM", "APARTMENTS", "DEVELOPMENT", "INVESTMENTS", "GROUP"
+  ],
+
+  "estate_markers": [
+    "ESTATE OF",
+    "LIFE ESTATE",
+    "HEIRS OF",
+    "HEIRS",
+    "DEVISEES",
+    "DECEASED",
+    "DECD",
+    "EXECUTOR",
+    "EXECUTRIX",
+    "ADMINISTRATOR",
+    "ADMINISTRATRIX"
+  ],
+
+  "noise_tokens": ["ET", "AL", "ETAL", "ETUX", "UX", "VIR", "ETVIR"],
+
+  "street_suffixes": {
+    "STREET": "ST", "AVENUE": "AVE", "AVENU": "AVE", "BOULEVARD": "BLVD",
+    "DRIVE": "DR", "ROAD": "RD", "LANE": "LN", "COURT": "CT", "CIRCLE": "CIR",
+    "PLACE": "PL", "TERRACE": "TER", "PARKWAY": "PKWY", "HIGHWAY": "HWY",
+    "TRAIL": "TRL", "SQUARE": "SQ", "NORTH": "N", "SOUTH": "S", "EAST": "E",
+    "WEST": "W", "NORTHEAST": "NE", "NORTHWEST": "NW", "SOUTHEAST": "SE",
+    "SOUTHWEST": "SW", "APARTMENT": "APT", "SUITE": "STE", "BUILDING": "BLDG"
+  }
+}
