@@ -20,6 +20,7 @@ first when answering queries.
 - [[nc-ecourts]] — NC statewide court system (Odyssey) and its public Portal; access terms are the project's highest-priority open question.
 - [[nc-press-association-public-notices]] — statewide legal-notice database; likely the best value-per-effort source.
 - [[pacer-cm-ecf]] — federal bankruptcy dockets and the per-court RSS feed; narrower than commonly assumed.
+- [[mecklenburg-cama-parcel-data]] — the county ArcGIS parcel/owner service; verified against live data, with five measured traps and current signal counts.
 
 ## Concepts
 

@@ -18,3 +18,18 @@ person-keyed obituaries), and withhold any numeric score until backtested.
 Recorded seven unverified factual claims from the source on
 `life-event-property-intelligence-engine`; the NC eCourts portal access
 terms are flagged as the blocking open question.
+
+## [2026-08-29] build | Parcel enrichment layer (MonitorCLT Step 1)
+
+Built `monitorclt/` against the live Mecklenburg CAMA ArcGIS service: address
+and owner normalization, SQLite index with provenance and `observed_at`, and
+person-to-parcel candidate generation that emits evidence rather than a
+confidence score. Full county load verified at 428,504 parcels in ~4 minutes,
+reconciling exactly with the service's own record and distinct-`pid` counts.
+
+Filed [[mecklenburg-cama-parcel-data]] with five traps the live data exposed
+(non-unique `pid`, unreliable name split, substring false positives, `UNINC`,
+non-USPS suffixes) plus current signal populations. Updated [[monitorclt]]
+(buy-vs-build resolved: build), [[mecklenburg-foreclosure-slice]] (Step 1
+done), [[entity-resolution-for-property-records]] (two decedent name orders)
+and [[public-record-source-matrix-mecklenburg]] (CAMA row verified).

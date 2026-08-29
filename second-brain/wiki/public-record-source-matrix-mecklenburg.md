@@ -21,8 +21,8 @@ runs.
 
 | Source | Access mode | Key | Verify |
 |---|---|---|---|
-| County tax roll / parcel + owner index | Download or GIS export | parcel id | Bulk download available? refresh cadence? |
-| County GIS parcel layer | Shapefile / API | parcel id | Geometry + address normalization |
+| **County tax roll / parcel + owner index** | **ArcGIS REST, paged — BUILT** | **`camapid`** | **Verified 2026-08-29: 428,504 records, ~4 min full extract. Terms still unchecked.** See [[mecklenburg-cama-parcel-data]] |
+| County GIS parcel layer | Shapefile / API | parcel id | Geometry not yet loaded; `TaxParcelBoundaries` layer exists |
 | Register of Deeds — deeds, deeds of trust | Search / possible bulk | parcel + instrument | Bulk terms; DoT presence is the mortgage proxy |
 | Tax delinquency list | Published list | parcel id | Publication cadence |
 | County tax foreclosure listings | Web page | parcel + sale date | Attorney assignment, auction dates |

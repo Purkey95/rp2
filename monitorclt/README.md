@@ -1,0 +1,92 @@
+# MonitorCLT — parcel enrichment
+
+The parcel + owner index for Mecklenburg County, NC. This is **Step 1** of the
+plan in `../second-brain/wiki/mecklenburg-foreclosure-slice.md`: the spine that
+every property-keyed source joins to, and that person-keyed sources (obituaries,
+probate, bankruptcy) later match *against*.
+
+Standard library only — no dependency install, no network access needed for the
+tests.
+
+## Why this exists first
+
+Sources divide by whether the record already names a parcel
+(`../second-brain/wiki/property-keyed-vs-person-keyed-sources.md`). Everything
+person-keyed is blocked on having an owner index to match against, so the index
+is built before anything that needs it.
+
+## Usage
+
+```sh
+python -m monitorclt.cli load      --db parcels.db            # ~428k records, ~3.5 min
+python -m monitorclt.cli load      --db parcels.db --limit 20000
+python -m monitorclt.cli stats     --db parcels.db
+python -m monitorclt.cli address   --db parcels.db "210 N Church St Unit 1104"
+python -m monitorclt.cli parcel    --db parcels.db 07848364
+python -m monitorclt.cli person    --db parcels.db "Walter H Conrad" --city CHARLOTTE
+python -m monitorclt.cli decedents --db parcels.db
+python -m monitorclt.cli absentee  --db parcels.db --out-of-state
+```
+
+## Layout
+
+| Module | Responsibility |
+|---|---|
+| `normalize/text.py` | Whitespace, case, word-boundary tokenization |
+| `normalize/address.py` | Address → stable join key |
+| `normalize/owner.py` | Owner string → type + person names |
+| `parcel/model.py` | The `Parcel` record and its derived fields |
+| `parcel/source.py` | ArcGIS feature-layer client with paging + retry |
+| `parcel/store.py` | SQLite index with provenance and `observed_at` |
+| `parcel/loader.py` | Wires source → model → store |
+| `parcel/enrich.py` | Lookups; person→parcel candidate generation |
+
+## Five things the live data settled
+
+Each of these was found by querying the real service, and each would have been
+a silent bug:
+
+1. **`pid` is not a unique key.** 428,504 records carry 396,310 distinct `pid`
+   values, because condo units in a building share one. `camapid` and
+   `propertyid` are distinct. Keying on `pid` collapses ~32,000 units.
+2. **The county's first/last name split is unreliable.** It splits without
+   understanding the string, so `'THE GELPI LIVING TRUST'` is stored as
+   last=`'THE GELPI LIVING '` / first=`'TRUST'`. The split columns are used only
+   after `full_owner_name` classifies as a person.
+3. **Substring matching on owner strings is wrong far more often than right.**
+   `LIKE '%ESTATE%'` returns 1,119 "REAL ESTATE" companies against ~57 genuine
+   estate owners. "LIFE" hits `GRACELIFE CHURCH`; "ETAL" hits
+   `VETAL DONALD III`. Every marker is matched on word-boundary tokens.
+4. **`UNINC` occupies the jurisdiction slot** for unincorporated addresses
+   (`' GOODMAN RD UNINC NC'`) on ~5.5% of parcels, and must be stripped like a
+   city name.
+5. **Mecklenburg's street suffixes are not USPS.** The county writes AV, CR, BV,
+   WY, PY, TR where USPS writes AVE, CIR, BLVD, WAY, PKWY, TRL. Both forms
+   canonicalize to the same key, or no cross-source address join works.
+
+## What this does not do
+
+- **No opportunity score.** Enrichment emits facts
+  (`evidence_summary()`), and person matching emits candidates with evidence and
+  a corroboration tier. Nothing emits a number, because nothing has been
+  backtested yet — see
+  `../second-brain/wiki/property-signal-scoring-and-calibration.md`.
+- **No auto-promotion of person matches.** `Candidate` has no `is_match` field.
+  A `STRONG` tier means "exact name plus at least one independent corroborating
+  signal", not "this is the person".
+- **No outreach, and no verified access terms.** Terms of use for this service
+  have not been checked; see
+  `../second-brain/wiki/distressed-property-outreach-compliance.md` before
+  running scheduled full extracts.
+
+## Tests
+
+```sh
+python tests/test_normalize_address.py
+python tests/test_normalize_owner.py
+python tests/test_parcel_index.py
+python tests/test_source.py
+```
+
+`tests/fixtures/mecklenburg_cama_sample.json` holds 35 real records covering the
+awkward cases above. `pytest` from the repository root also collects them.

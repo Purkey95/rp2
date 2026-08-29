@@ -52,6 +52,29 @@ Middle initial/name; suffix (Jr/Sr/III); spouse name; age vs. length of
 ownership; town; funeral home service area; estate case decedent name and
 county; recorded deed history; co-owner names.
 
+## What the live data added (2026-08-29)
+
+Building the index against real Mecklenburg records
+([[mecklenburg-cama-parcel-data]]) confirmed the owner-string problems above
+and surfaced one the design had missed: **decedent records are stored in two
+different name orders.**
+
+- `CONRAD WALTER H HEIRS` -> last=`'CONRAD'`, first=`'WALTER H HEIRS'`
+  (county order, surname first)
+- `JOSEPH P BAGWELL ESTATE` -> last=`'JOSEPH P BAGWELL'`, first=`'ESTATE'`
+  (natural order, marker occupying the whole first column)
+
+Guessing name order would be wrong roughly half the time on exactly the records
+an obituary most needs to match. The marker word consuming the entire first
+column is what distinguishes the two layouts, so that is the test used rather
+than a heuristic about name order.
+
+The first implementation omitted decedent-marked owners from the name index
+entirely — they classify as ESTATE/HEIRS rather than PERSON — which silently
+made the single highest-value lookup return nothing. Worth remembering as a
+general shape: classification that is *correct* can still route the most
+important case out of the pipeline.
+
 ## Measurement
 
 Track precision explicitly against a hand-labeled sample. A match rate

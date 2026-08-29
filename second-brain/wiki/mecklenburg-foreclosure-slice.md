@@ -33,11 +33,17 @@ The eCourts answer determines whether the probate branch is a scraper, a
 license, or dead. Everything below is designed to survive a "no" on eCourts
 by leaning on public notices and county sources.
 
-## Step 1 — parcel + owner index
+## Step 1 — parcel + owner index — **DONE (2026-08-29)**
 
-Load the Mecklenburg tax roll and GIS parcel layer. Address normalization
-and a stable parcel key. This is the spine; nothing else works without it.
-Decide buy-vs-build now if Tier 1 expansion is real.
+Built as `monitorclt/` in this repository: ArcGIS client with paging and
+retry, address and owner normalization, SQLite index with provenance, and
+person-to-parcel candidate generation. Full county load is 428,504 parcels in
+~4 minutes; record and distinct-`pid` counts reconcile exactly against the
+service. Buy-vs-build resolved in favour of build — see
+[[mecklenburg-cama-parcel-data]] for the data's real shape and its traps.
+
+Deliberately not included: any numeric score, and any auto-promotion of a
+person match.
 
 ## Step 2 — two ingest paths
 
