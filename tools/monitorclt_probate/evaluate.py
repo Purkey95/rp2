@@ -64,15 +64,24 @@ def _build_resolver(records, id_field, label):
     the label file has to say which.
     """
     table = defaultdict(set)
+    qualified = {}
     for record in records:
         key = _norm_key(record.get(id_field))
         if key:
-            table[key].add(f"{record.get('county')}/{record.get(id_field)}")
+            full_id = f"{record.get('county')}/{record.get(id_field)}"
+            table[key].add(full_id)
+            qualified[f"{_norm_key(record.get('county'))}/{key}"] = full_id
 
     def resolve(value):
         key = _norm_key(value)
-        if "/" in str(value or ""):
-            return str(value)
+        text = str(value or "")
+        if "/" in text:
+            # A county-qualified id still has to name a record we actually hold.
+            # Returning it unchecked turned a typo'd or differently-cased county
+            # into a phantom pair that scored as a false negative and was blamed
+            # on blocking rather than on the label file.
+            county, _, bare = text.partition("/")
+            return qualified.get(f"{_norm_key(county)}/{_norm_key(bare)}")
         found = table.get(key)
         if not found:
             return None
@@ -90,8 +99,19 @@ def load_labels(path, estates, parcels):
 
     labels, unresolved = {}, []
     with open(path, encoding="utf-8-sig", newline="") as f:
-        for row in csv.DictReader(f):
-            row = {(k or "").strip().lower(): (v or "").strip() for k, v in row.items()}
+        for raw_row in csv.DictReader(f):
+            if None in raw_row:
+                # More fields than the header -- usually an unquoted comma in a
+                # trailing note column. DictReader parks the overflow in a list
+                # under the None restkey, which is not a value we can strip.
+                unresolved.append(
+                    {
+                        "row": {k: v for k, v in raw_row.items() if k is not None},
+                        "reason": "more fields than the header (unquoted comma?)",
+                    }
+                )
+                continue
+            row = {(k or "").strip().lower(): (v or "").strip() for k, v in raw_row.items()}
             raw_estate = row.get("file_number") or row.get("left_id") or ""
             raw_parcel = row.get("pin") or row.get("right_id") or ""
             raw_label = (row.get("is_match") or row.get("label") or "").upper()

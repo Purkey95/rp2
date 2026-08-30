@@ -257,5 +257,90 @@ class TestEndToEnd(unittest.TestCase):
         self.assertEqual(json.dumps(again, sort_keys=True), json.dumps(self.result, sort_keys=True))
 
 
+class TestParsingRegressions(unittest.TestCase):
+    """Cases that produced silently wrong answers, one test per defect.
+
+    None of these are exercised by sample/: the fixtures were blind to every one
+    of them, which is why the suite stayed green while the parser dropped exactly
+    the parties this tool exists to find.
+    """
+
+    def test_deceased_co_owner_still_inherits_the_printed_surname(self):
+        # "SMITH JOHN & MARY HEIRS" is the estate party we are hunting for; the
+        # marker used to suppress inheritance, keying Mary as "|MARY" so no
+        # estate could ever block in.
+        parties = crossref.split_parties("SMITH JOHN & MARY HEIRS", "last_first", rules())
+        self.assertEqual([p["key_fl"] for p in parties], ["JOHN|SMITH", "MARY|SMITH"])
+        self.assertEqual(parties[1]["markers"], ["HEIRS"])
+
+    def test_deceased_co_owner_with_a_middle_initial_inherits_too(self):
+        parties = crossref.split_parties("SMITH JOHN & MARY A HEIRS", "last_first", rules())
+        self.assertEqual([p["key_full"] for p in parties], ["JOHN||SMITH", "MARY|A|SMITH"])
+
+    def test_a_second_surname_is_not_swallowed_in_a_last_first_source(self):
+        # "JONES MARY" is Mary Jones, not Mary Jones-under-Smith: in a LAST FIRST
+        # source a two-token fragment is only forenames when the second is an initial.
+        parties = crossref.split_parties("SMITH JOHN & JONES MARY", "last_first", rules())
+        self.assertEqual([p["key_fl"] for p in parties], ["JOHN|SMITH", "MARY|JONES"])
+
+    def test_two_token_fragment_still_inherits_when_the_source_is_first_last(self):
+        parties = crossref.split_parties("JOHN Q PUBLIC & MARY B", "first_last", rules())
+        self.assertEqual([p["key_fl"] for p in parties], ["JOHN|PUBLIC", "MARY|PUBLIC"])
+
+    def test_a_fragment_that_is_only_a_suffix_does_not_abort_the_run(self):
+        # Used to raise IndexError out of split_parties and take the whole run
+        # down -- there is no exception handling anywhere in the chain.
+        parties = crossref.split_parties("PUBLIC JOHN Q & JR", "last_first", rules())
+        self.assertEqual(parties[0]["key_fl"], "JOHN|PUBLIC")
+
+    def test_life_estate_of_does_not_parse_of_as_the_surname(self):
+        # Markers strip longest-first, so "LIFE ESTATE" is consumed and a bare
+        # "OF" was left behind to be read as the surname.
+        name = crossref.parse_name("LIFE ESTATE OF HENRY W PLACEHOLDER", "last_first", rules())
+        self.assertEqual((name["first"], name["middle"], name["last"]), ("HENRY", "W", "PLACEHOLDER"))
+        self.assertEqual(name["markers"], ["LIFE ESTATE"])
+
+    def test_a_person_holding_as_trustee_is_still_a_candidate(self):
+        # The organization_owner contradiction was unreachable: org-flagged
+        # parties were dropped before scoring, so the parcel simply vanished.
+        name = crossref.parse_name("PUBLIC JOHN Q TRUSTEE", "last_first", rules())
+        self.assertTrue(name["is_organization"])
+        self.assertEqual(name["key_fl"], "JOHN|PUBLIC")
+
+    def test_a_pure_organization_is_still_not_a_person(self):
+        name = crossref.parse_name("NONESUCH HOLDINGS LLC", "last_first", rules())
+        self.assertTrue(name["is_organization"])
+        self.assertEqual(name["key_fl"], "|")
+
+
+class TestScoringRegressions(unittest.TestCase):
+    def test_organization_owner_penalty_is_applied_not_dead_code(self):
+        link = link_for(
+            estate(),
+            parcel(owner_name="PUBLIC JOHN Q TRUSTEE", owner_mailing_address="4210 ELM ST CHARLOTTE NC 28205"),
+        )
+        self.assertIn("organization_owner", link["evidence"])
+        self.assertEqual(link["status"], "pending")
+
+    def test_an_organization_owner_never_auto_confirms(self):
+        # Same evidence confirms an individual; the org gate must hold it back.
+        individual = link_for(estate(), parcel(owner_mailing_address="4210 ELM ST CHARLOTTE NC 28205"))
+        self.assertEqual(individual["status"], "confirmed")
+
+    def test_one_row_per_estate_parcel_pair(self):
+        # "PUBLIC JOHN Q & JOHN Q JR" names the same FIRST+LAST twice, which
+        # emitted duplicate rows, double-counted the rollup, and violated
+        # entity_match's UNIQUE (left_source, left_id, right_source, right_id).
+        result = crossref.crossref(
+            [estate()],
+            [parcel(owner_name="PUBLIC JOHN Q & JOHN Q JR", owner_mailing_address="4210 ELM ST CHARLOTTE NC 28205")],
+            [],
+            rules(),
+        )
+        keys = [(m["left_source"], m["left_id"], m["right_source"], m["right_id"]) for m in result["matches"]]
+        self.assertEqual(len(keys), len(set(keys)))
+        self.assertEqual(result["estates"][0]["assessed_value_confirmed"], 300000.0)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

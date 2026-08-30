@@ -171,5 +171,44 @@ class TestScoring(unittest.TestCase):
         self.assertIn("RECOMMENDATION", text)
 
 
+class TestLabelRegressions(unittest.TestCase):
+    """Label-file defects that corrupted the calibration numbers themselves."""
+
+    estates: List[Any]
+    parcels: List[Any]
+    deeds: List[Any]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.estates, cls.parcels, cls.deeds = load_sample()
+
+    def _load(self, body):
+        handle = tempfile.NamedTemporaryFile("w", suffix=".csv", delete=False, encoding="utf-8", newline="")
+        with handle:
+            handle.write(body)
+        return evaluate.load_labels(handle.name, self.estates, self.parcels)
+
+    def test_a_qualified_id_naming_no_record_is_reported_not_believed(self):
+        # A county-qualified id used to pass through unchecked, so a typo became
+        # a phantom pair: counted as a false negative and blamed on blocking.
+        labels, unresolved = self._load("file_number,pin,is_match\nNOSUCHCOUNTY/26 E 001234,MECKLENBURG/045-121-08,1\n")
+        self.assertEqual(labels, {})
+        self.assertEqual(len(unresolved), 1)
+        self.assertIn("estate case", unresolved[0]["reason"])
+
+    def test_a_qualified_id_resolves_regardless_of_case_or_punctuation(self):
+        labels, unresolved = self._load("file_number,pin,is_match\nmecklenburg/26e001234,mecklenburg/04512108,1\n")
+        self.assertEqual(unresolved, [])
+        self.assertEqual(list(labels), [("MECKLENBURG/26 E 001234", "MECKLENBURG/045-121-08")])
+
+    def test_a_row_with_more_fields_than_the_header_is_reported_not_a_crash(self):
+        # An unquoted comma in a trailing note column parks the overflow under
+        # DictReader's None restkey, which used to raise AttributeError.
+        labels, unresolved = self._load("file_number,pin,is_match\n26 E 001234,045-121-08,1,note, with a comma\n")
+        self.assertEqual(labels, {})
+        self.assertEqual(len(unresolved), 1)
+        self.assertIn("more fields than the header", unresolved[0]["reason"])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

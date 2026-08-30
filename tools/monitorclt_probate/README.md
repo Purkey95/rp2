@@ -48,6 +48,15 @@ suffixes, `PUBLIC JOHN Q & JANE R` (the second owner inherits the printed
 surname), organizations, and `ESTATE OF …` prefixes (which flip the remainder
 back to natural order). All tunable in `match_rules.json` — no code change.
 
+Two cases the inheritance rule turns on, because they read the same but are not:
+in a `LAST FIRST` source `PUBLIC JOHN Q & MARY B` is Mary B Public (a forename
+and an initial) while `SMITH JOHN & JONES MARY` is Mary Jones — a second surname,
+not an inherited one. A fragment carrying an estate marker still inherits:
+`SMITH JOHN & MARY HEIRS` is Mary Smith, and she is the party this tool exists to
+find. A person named on an organization-style owner string
+(`PUBLIC JOHN Q TRUSTEE`) is a candidate too, carrying the `−0.40` contradiction
+and barred from auto-confirmation — visible for review rather than dropped.
+
 `post_death_conveyance` is flagged when a deed from the decedent is recorded
 *after* the date of death: identity corroborated, but the parcel may already have
 left the estate. Parcels whose owner reads `ESTATE OF …` with no matching estate

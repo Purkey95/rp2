@@ -33,7 +33,7 @@ import os
 import re
 import sys
 from collections import defaultdict
-from typing import Dict
+from typing import Any, Dict
 
 TOOL_VERSION = "1.0"
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -136,9 +136,16 @@ def parse_name(raw, name_format, rules):
     tokens = [t for t in tokens if t not in noise]
 
     org_tokens = set(rules.get("organization_tokens", []))
-    if any(t in org_tokens for t in tokens):
+    is_org = any(t in org_tokens for t in tokens)
+    if is_org:
+        # Keep parsing: "PUBLIC JOHN Q TRUSTEE" names a person, and dropping it
+        # here is what made the organization_owner contradiction unreachable.
+        # The residual name is still blocked on, then penalized and barred from
+        # auto-confirmation by is_organization.
         joined = " ".join(t for t in tokens if t != ",")
-        return _make_name(raw, "", "", "", "", True, markers, joined)
+        tokens = [t for t in tokens if t not in org_tokens]
+        if len(tokens) < 2:
+            return _make_name(raw, "", "", "", "", True, markers, joined)
 
     suffixes = set(rules.get("suffixes", []))
     suffix = ""
@@ -146,7 +153,13 @@ def parse_name(raw, name_format, rules):
         suffix = suffix or tokens[-1]
         tokens.pop()
 
-    if any(m.endswith(" OF") for m in markers):
+    # "<MARKER> OF <NAME>" is natural order, never surname-first. Markers are
+    # stripped longest-first, so "LIFE ESTATE OF ..." consumes "LIFE ESTATE" and
+    # leaves a bare "OF" that would otherwise be read as the surname.
+    dangling_of = bool(markers) and bool(tokens) and tokens[0] == "OF"
+    if dangling_of:
+        tokens = tokens[1:]
+    if dangling_of or any(m.endswith(" OF") for m in markers):
         name_format = "first_last"
 
     if "," in tokens:
@@ -162,15 +175,30 @@ def parse_name(raw, name_format, rules):
     else:
         last, first, middle = tokens[-1], tokens[0], " ".join(tokens[1:-1])
 
-    return _make_name(raw, first, middle, last, suffix, False, markers, body)
+    return _make_name(raw, first, middle, last, suffix, is_org, markers, body)
+
+
+def _inherits_surname(tokens, name_format):
+    """Is this trailing fragment forenames under the primary's surname?
+
+    One token is always a bare forename ("... & MARY"). Two tokens are only
+    unambiguous when the source prints forenames first: in a LAST FIRST source
+    "JONES MARY" is Mary Jones, a second surname, and only a single-letter
+    second token ("MARY B") reads as forename + middle initial.
+    """
+    if len(tokens) == 1:
+        return True
+    if len(tokens) != 2:
+        return False
+    return name_format != "last_first" or len(tokens[1]) == 1
 
 
 def split_parties(raw, name_format, rules):
     """Split a multi-owner string into parties, inheriting an implied surname.
 
     "PUBLIC JOHN Q & MARY B" is two people, and the second one's surname is only
-    printed once. A trailing fragment of one or two tokens is read as forenames
-    under the first party's surname; anything longer is parsed on its own.
+    printed once. A trailing fragment of forenames is read under the first
+    party's surname; a fragment carrying its own surname is parsed on its own.
     """
     body = clean_text(raw)
     parts = [p.strip() for p in re.split(r"\s*&\s*|\s+AND\s+|\s*;\s*", body) if p.strip()]
@@ -178,13 +206,19 @@ def split_parties(raw, name_format, rules):
         return []
 
     suffixes = set(rules.get("suffixes", []))
+    markers = rules.get("estate_markers", [])
     out = [parse_name(parts[0], name_format, rules)]
     for part in parts[1:]:
         name = parse_name(part, name_format, rules)
         primary = out[0]
-        tokens = [t for t in part.split() if t not in suffixes and t != ","]
-        if not name["is_organization"] and not primary["is_organization"] and primary["last"] and len(tokens) <= 2 and not name["markers"]:
-            name = _make_name(part, tokens[0], " ".join(tokens[1:]), primary["last"], "", False, [], part)
+        # Count the fragment's *name* tokens: markers and suffixes are not part of
+        # the name, and leaving them in both miscounted the fragment and (via the
+        # old "no markers" guard) denied inheritance to the deceased co-owner --
+        # "SMITH JOHN & MARY HEIRS" is exactly the party this tool exists to find.
+        stripped, part_markers = strip_markers(part, markers)
+        tokens = [t for t in stripped.split() if t not in suffixes and t != ","]
+        if not name["is_organization"] and not primary["is_organization"] and primary["last"] and _inherits_surname(tokens, name_format):
+            name = _make_name(part, tokens[0], " ".join(tokens[1:]), primary["last"], "", False, part_markers, part)
         out.append(name)
     return out
 
@@ -218,7 +252,10 @@ def index_parcels(parcels, rules):
     frequency = defaultdict(set)
     for parcel in parcels:
         for party in split_parties(parcel.get("owner_name", ""), fmt, rules):
-            if party["is_organization"] or not party["key_fl"].strip("|"):
+            # Blocking needs both halves of the name. Organization-flagged parties
+            # stay in: "PUBLIC JOHN Q TRUSTEE" is a real candidate, scored down by
+            # organization_owner and barred from auto-confirmation by disposition.
+            if not (party["first"] and party["last"]):
                 continue
             by_name[party["key_fl"]].append((parcel, party))
             frequency[party["key_fl"]].add(pin_key(parcel.get("county"), parcel.get("pin")))
@@ -231,7 +268,7 @@ def index_deeds(deeds, rules):
     by_name = defaultdict(list)
     for deed in deeds or []:
         for party in split_parties(deed.get("grantor_name", ""), fmt, rules):
-            if party["is_organization"] or not party["key_fl"].strip("|"):
+            if not (party["first"] and party["last"]):
                 continue
             by_name[party["key_fl"]].append(deed)
     return by_name
@@ -373,8 +410,18 @@ def crossref(estates, parcels, deeds, rules):
                 }
             )
             continue
+        # One row per (estate, parcel): an owner string can name the same
+        # FIRST+LAST twice ("PUBLIC JOHN Q & JOHN Q JR"), which otherwise emitted
+        # duplicate rows, double-counted assessed value in the rollup, and
+        # violated entity_match's UNIQUE (left_source, left_id, right_source,
+        # right_id) on the straight insert. Keep the best-scoring party.
+        best: Dict[str, Dict[str, Any]] = {}
         for parcel, party in parcel_index.get(decedent["key_fl"], []):
             link = score_link(estate, parcel, decedent, party, rules, frequency, deed_index)
+            incumbent = best.get(link["right_id"])
+            if incumbent is None or link["score"] > incumbent["score"]:
+                best[link["right_id"]] = link
+        for link in best.values():
             links.append(link)
             if link["status"] != "rejected":
                 matched_pins.add(link["right_id"])
