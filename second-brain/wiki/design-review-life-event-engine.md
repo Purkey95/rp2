@@ -99,6 +99,13 @@ See [[public-record-source-matrix-mecklenburg]].
 - **No audit trail.** Snapshot raw source HTML. When a match is wrong you
   need to be able to reconstruct why.
 
+## Outcome (2026-08-29)
+
+The backtest was built and run — [[backtest-results-2026-08]]. Objection 2
+turned out to understate the problem: the ladder was not merely uncalibrated,
+its tenure terms had the wrong sign. Objection 1's build order is reinforced,
+now on measured rather than structural grounds.
+
 ## Verdict
 
 Adopt the architecture. Invert the build order. Do not ship a score until

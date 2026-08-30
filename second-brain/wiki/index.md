@@ -35,3 +35,4 @@ first when answering queries.
 - [[design-review-life-event-engine]] — assessment of the proposal: adopt the architecture, invert the build order, don't ship an uncalibrated score.
 - [[mecklenburg-foreclosure-slice]] — the recommended v0: a property-keyed foreclosure vertical slice, with a definition of done.
 - [[public-record-source-matrix-mecklenburg]] — the source matrix scoped from 100 counties down to one, ordered by build phase.
+- [[backtest-results-2026-08]] — first measurement against real outcomes: long tenure anti-predicts sales, and the estate label is unusable.

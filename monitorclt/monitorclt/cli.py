@@ -5,6 +5,8 @@
     python -m monitorclt.cli address  --db parcels.db "210 N Church St Unit 1104"
     python -m monitorclt.cli person   --db parcels.db "Walter H Conrad" --city CHARLOTTE
     python -m monitorclt.cli decedents --db parcels.db
+    python -m monitorclt.cli load-sales --db parcels.db
+    python -m monitorclt.cli backtest   --db parcels.db --as-of 2022-01-01 --horizon-years 2
 """
 
 from __future__ import annotations
@@ -15,9 +17,14 @@ import sqlite3
 import sys
 from typing import List, Optional, Sequence
 
+from datetime import date
+
+from .backtest.harness import run_backtest
+from .backtest.report import format_report
 from .parcel.enrich import ParcelIndex, summarize_candidates
 from .parcel.loader import load_parcels
 from .parcel.store import ParcelStore
+from .sales.loader import load_sales
 
 
 def _print_rows(rows: Sequence[sqlite3.Row], columns: Sequence[str]) -> None:
@@ -38,6 +45,16 @@ def main(argv: Optional[List[str]] = None) -> int:
     load = subparsers.add_parser("load", help="fetch parcels into the index")
     load.add_argument("--limit", type=int, default=None, help="stop after N records")
     load.add_argument("--where", default="1=1", help="ArcGIS where clause")
+
+    load_sales_parser = subparsers.add_parser("load-sales", help="fetch sales history")
+    load_sales_parser.add_argument("--limit", type=int, default=None)
+    load_sales_parser.add_argument("--where", default="saledate >= DATE '1980-01-01'")
+
+    backtest = subparsers.add_parser("backtest", help="measure signals against outcomes")
+    backtest.add_argument("--as-of", required=True, help="reconstruction date, YYYY-MM-DD")
+    backtest.add_argument("--horizon-years", type=float, default=2.0)
+    backtest.add_argument("--outcome", action="append", default=None,
+                          help="restrict to one outcome; repeatable")
 
     subparsers.add_parser("stats", help="summarize the loaded index")
 
@@ -71,6 +88,21 @@ def main(argv: Optional[List[str]] = None) -> int:
                 progress=lambda n: print("  fetched " + str(n) + " ...", file=sys.stderr),
             )
             print("loaded " + str(written) + " parcels into " + args.db)
+        elif args.command == "load-sales":
+            written = load_sales(
+                store,
+                where=args.where,
+                limit=args.limit,
+                progress=lambda n: print("  fetched " + str(n) + " ...", file=sys.stderr),
+            )
+            print("loaded " + str(written) + " sales into " + args.db)
+        elif args.command == "backtest":
+            as_of = date.fromisoformat(args.as_of)
+            horizon_end = date.fromordinal(
+                as_of.toordinal() + int(round(args.horizon_years * 365.25))
+            )
+            report = run_backtest(store, as_of=as_of, horizon_end=horizon_end)
+            print(format_report(report, outcomes=args.outcome))
         elif args.command == "stats":
             print(json.dumps(store.stats(), indent=2, sort_keys=True))
         elif args.command == "address":

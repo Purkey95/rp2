@@ -174,6 +174,15 @@ def _classify(parts: Sequence[str]) -> Tuple[str, Tuple[str, ...]]:
     if company:
         return OwnerType.COMPANY, tuple(sorted(company))
 
+    # A named trust outranks the decedent markers: 'GAMBLE LEGACY ESTATE TRUST'
+    # and 'EL SPENCE SPENCE HEIRS FAMILY TRUST' are trusts whose names happen to
+    # contain ESTATE or HEIRS. The reverse never happens -- 'ESTATE OF JANE DOE'
+    # carries no TRUST token -- so checking TRUST first is safe in both
+    # directions.
+    trust = token_set & TRUST_TOKENS
+    if trust:
+        return OwnerType.TRUST, tuple(sorted(trust))
+
     # "LIFE ESTATE" must be adjacent; "REAL ESTATE" is never an estate marker.
     if _has_phrase(parts, ("LIFE", "ESTATE")):
         return OwnerType.LIFE_ESTATE, ("LIFE ESTATE",)
@@ -185,10 +194,6 @@ def _classify(parts: Sequence[str]) -> Tuple[str, Tuple[str, ...]]:
 
     if "HEIRS" in token_set:
         return OwnerType.HEIRS, ("HEIRS",)
-
-    trust = token_set & TRUST_TOKENS
-    if trust:
-        return OwnerType.TRUST, tuple(sorted(trust))
 
     return OwnerType.PERSON, ()
 

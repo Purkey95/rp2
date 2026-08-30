@@ -33,3 +33,17 @@ non-USPS suffixes) plus current signal populations. Updated [[monitorclt]]
 (buy-vs-build resolved: build), [[mecklenburg-foreclosure-slice]] (Step 1
 done), [[entity-resolution-for-property-records]] (two decedent name orders)
 and [[public-record-source-matrix-mecklenburg]] (CAMA row verified).
+
+## [2026-08-29] build | Backtest harness, and the first negative result
+
+Loaded 1,492,220 Mecklenburg sales (1980-2026) and built a backtest that
+reconstructs owner state from the sales chain alone, avoiding the CAMA feature
+leak. Ran four as-of dates.
+
+Result: long tenure anti-predicts sales at ~0.45x lift, stable across 2012,
+2016, 2019 and 2022 — the opposite sign to the proposed scoring ladder. The
+control signal (recent buyers) outperforms every tenure signal. The estate
+outcome label proved unusable: the grantor field records only 13-33 estate
+sales a year countywide, so the estate hypothesis cannot be tested with this
+data at all. A forced-sale result visible at 2022 alone did not replicate and
+is recorded as noise. Filed as [[backtest-results-2026-08]].

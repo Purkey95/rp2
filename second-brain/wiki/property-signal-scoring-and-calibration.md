@@ -68,6 +68,15 @@ earning its complexity:
 - Owner age proxy (length of ownership) alone
 - A purchased list from an incumbent data vendor
 
+## Result
+
+Run 2026-08-29. See [[backtest-results-2026-08]]. The backtest was built and
+the ladder did not survive it: long tenure anti-predicts sales at ~0.45x lift,
+stable across four windows, and the control signal (recent buyers) outperforms
+every tenure signal — the exact "measuring churn" failure listed below. The
+estate outcome label turned out to be unusable, so that hypothesis remains
+untested rather than confirmed or denied.
+
 ## Watch for
 
 - **Feature leakage** — a "signal" that is really a consequence of the sale.

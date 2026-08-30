@@ -17,6 +17,10 @@ Mecklenburg index loads in ~4 minutes with normalization, provenance and
 person-to-parcel candidate generation. See
 [[mecklenburg-cama-parcel-data]] for what the live data turned out to contain.
 
+Sales history (1,492,220 transfers, 1980-2026) is loaded and the signal
+backtest has been run — [[backtest-results-2026-08]]. Its result was negative
+for the tenure-based scoring premise.
+
 Everything else on this page is still design intent. Note that the `rp2`
 repository hosting this work is an unrelated crypto tax calculator; the
 `monitorclt/` package is self-contained and dependency-free precisely so it can

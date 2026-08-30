@@ -26,6 +26,9 @@ python -m monitorclt.cli parcel    --db parcels.db 07848364
 python -m monitorclt.cli person    --db parcels.db "Walter H Conrad" --city CHARLOTTE
 python -m monitorclt.cli decedents --db parcels.db
 python -m monitorclt.cli absentee  --db parcels.db --out-of-state
+
+python -m monitorclt.cli load-sales --db parcels.db          # ~1.5M sales, ~17 min
+python -m monitorclt.cli backtest   --db parcels.db --as-of 2022-01-01 --horizon-years 2
 ```
 
 ## Layout
@@ -40,6 +43,10 @@ python -m monitorclt.cli absentee  --db parcels.db --out-of-state
 | `parcel/store.py` | SQLite index with provenance and `observed_at` |
 | `parcel/loader.py` | Wires source → model → store |
 | `parcel/enrich.py` | Lookups; person→parcel candidate generation |
+| `sales/` | Sales history ingest — the outcome data |
+| `backtest/reconstruct.py` | Owner state as of a past date, from the sales chain |
+| `backtest/signals.py` | Signal definitions, plus what cannot be backtested |
+| `backtest/harness.py` | Precision / recall / lift against outcomes |
 
 ## Five things the live data settled
 
@@ -63,6 +70,22 @@ a silent bug:
 5. **Mecklenburg's street suffixes are not USPS.** The county writes AV, CR, BV,
    WY, PY, TR where USPS writes AVE, CIR, BLVD, WAY, PKWY, TRL. Both forms
    canonicalize to the same key, or no cross-source address join works.
+
+## The backtest found the premise backwards
+
+Run 2026-08-29 over 1,492,220 sales at four as-of dates. Long tenure
+**anti-predicts** a sale — lift 0.44–0.49x on a 20-year hold, stable across
+2012, 2016, 2019 and 2022 — and the control signal (bought within 3 years)
+beats every tenure signal. The estate outcome label is unusable: the county
+grantor field records only 13–33 estate sales a year.
+
+Full write-up and what it does and does not kill:
+`../second-brain/wiki/backtest-results-2026-08.md`.
+
+Reconstruction works from the sales chain alone, never from current CAMA
+fields, because CAMA's owner and last-sale-date already reflect the sale being
+predicted. That leak is the single easiest way to produce a beautiful and
+meaningless backtest.
 
 ## What this does not do
 

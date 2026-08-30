@@ -89,6 +89,24 @@ class TestSubstringTraps(unittest.TestCase):
         self.assertEqual(owner.owner_type, OwnerType.ORGANIZATION)
         self.assertFalse(owner.indicates_decedent)
 
+    def test_named_trust_beats_estate_and_heirs_markers(self) -> None:
+        # Real grantors from the sales history. A trust whose name contains
+        # ESTATE or HEIRS is a trust, not a decedent record.
+        for value in (
+            "GAMBLE LEGACY ESTATE TRUST",
+            "TORRES CHILDREN ESTATE TRUST",
+            "EL SPENCE SPENCE HEIRS FAMILY TRUST",
+            "EQUITY ESTATE TRUST",
+        ):
+            owner = classify(value)
+            self.assertEqual(owner.owner_type, OwnerType.TRUST, msg=value)
+            self.assertFalse(owner.indicates_decedent, msg=value)
+
+    def test_estate_of_a_person_is_still_an_estate(self) -> None:
+        # The reverse case never occurs: a genuine estate carries no TRUST token.
+        for value in ("ESTATE OF WILLIE BELL ALEXANDER", "MARGUERITE T COLINA ESTATE"):
+            self.assertTrue(classify(value).indicates_decedent, msg=value)
+
     def test_company_marker_beats_heirs_marker(self) -> None:
         # 'HALL JOHNSTON HEIRS LLC' is an operating company, not an estate.
         owner = classify("HALL JOHNSTON HEIRS LLC ")
