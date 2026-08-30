@@ -1,0 +1,77 @@
+{
+  "_comment": "MonitorCLT jurisdiction registry — DATA, not code. Add a county/source by appending an entry here; the adapter code never changes. Each entry is validated against these keys: platform, source_name, column_map, status_to_bucket, type_map. Endpoints below are illustrative shapes for the sample fixtures, not guaranteed-live URLs — replace service_url/domain/dataset_id with the real county endpoints when wiring.",
+  "sources": [
+    {
+      "registry_id": "meck-building-permits",
+      "platform": "arcgis",
+      "source_name": "Mecklenburg County Building Permits",
+      "service_url": "https://sampleserver.example/arcgis/rest/services/Permits/FeatureServer/0",
+      "zip_field": "zip",
+      "where": "permit_type IN ('BUILDING','DEMOLITION','RENOVATION')",
+      "record_url_template": "https://permits.mecknc.gov/permit/{permit_number}",
+      "dataset_url": "https://permits.mecknc.gov/",
+      "column_map": {
+        "native_id": "permit_number",
+        "apn": "parcel_id",
+        "situs_address": "address",
+        "situs_zip": "zip",
+        "status": "status",
+        "type": "permit_type",
+        "record_url": "permit_url",
+        "lat": "__lat",
+        "lng": "__lng"
+      },
+      "status_to_bucket": {
+        "Proposed": "active",
+        "Under Review": "active",
+        "Approved": "active",
+        "Issued": "active",
+        "Under Construction": "active",
+        "Finaled": "resolved",
+        "Completed": "resolved",
+        "Withdrawn": "resolved",
+        "Expired": "resolved"
+      },
+      "type_map": {
+        "BUILDING": "building_permit",
+        "DEMOLITION": "demolition_permit",
+        "RENOVATION": "renovation_permit"
+      }
+    },
+    {
+      "registry_id": "charlotte-code-violations",
+      "platform": "socrata",
+      "source_name": "City of Charlotte Code Enforcement",
+      "domain": "data.charlottenc.gov",
+      "dataset_id": "abcd-1234",
+      "zip_field": "zip_code",
+      "where": null,
+      "record_url_template": "https://data.charlottenc.gov/case/{case_number}",
+      "column_map": {
+        "native_id": "case_number",
+        "apn": "parcel",
+        "situs_address": "address",
+        "situs_zip": "zip_code",
+        "status": "case_status",
+        "type": "violation_type",
+        "record_url": "case_url",
+        "lat": "latitude",
+        "lng": "longitude"
+      },
+      "status_to_bucket": {
+        "Open": "active",
+        "In Violation": "active",
+        "Pending Hearing": "active",
+        "Closed": "resolved",
+        "Complied": "resolved"
+      },
+      "type_map": {
+        "Vacant Structure": "vacancy",
+        "Overgrowth": "code_violation",
+        "Junk / Debris": "code_violation",
+        "Unsafe Structure": "code_violation"
+      },
+      "default_type": "code_violation"
+    }
+  ]
+}

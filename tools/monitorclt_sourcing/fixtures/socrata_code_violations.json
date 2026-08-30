@@ -1,0 +1,33 @@
+[
+  {
+    "case_number": "CE-2026-11872",
+    "parcel": "05512304",
+    "address": "4520 Wilkinson Blvd",
+    "zip_code": "28208",
+    "case_status": "In Violation",
+    "violation_type": "Vacant Structure",
+    "case_url": "https://data.charlottenc.gov/case/CE-2026-11872",
+    "latitude": "35.2280",
+    "longitude": "-80.9100"
+  },
+  {
+    "case_number": "CE-2026-11901",
+    "parcel": "07655012",
+    "address": "17 Oak Ct",
+    "zip_code": "28105",
+    "case_status": "Open",
+    "violation_type": "Unsafe Structure",
+    "case_url": "",
+    "latitude": "35.1170",
+    "longitude": "-80.7210"
+  },
+  {
+    "case_number": "",
+    "parcel": "",
+    "address": "",
+    "zip_code": "28208",
+    "case_status": "Open",
+    "violation_type": "Overgrowth",
+    "case_url": ""
+  }
+]

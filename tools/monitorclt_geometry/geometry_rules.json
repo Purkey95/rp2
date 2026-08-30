@@ -1,0 +1,26 @@
+{
+  "_comment": "Parcel-geometry wedges. These move the two 0-built arbitrages (relationship, development) off zero using ONLY the parcel layer we already have -- adjacency, road frontage, zoning, lot area, existing units. No external data, no paywall. relationship_value_access finds parcels worth disproportionately more to one specific neighbor (the essence of Relationship arbitrage). hidden_density_zoning_mismatch finds parcels zoned for far more than what's built (Development arbitrage). Both are derived inferences from geometry/zoning fields, so they're marked lower-reliability -- a lift, not hard evidence.",
+
+  "relationship_value_access": {
+    "frontage_true_values": ["1", "true", "yes", "y", "t"],
+    "note": "a parcel with no road frontage whose access crosses a specific neighbor is worth far more to that neighbor than to the open market -- a natural buyer exists, so a deal is unusually doable"
+  },
+
+  "assemblage": {
+    "min_owned_adjacent": 2,
+    "require_recent": true,
+    "recent_true_values": ["1", "true", "yes", "y", "t"],
+    "note": "an owner buying up contiguous parcels (>=2 adjacent, at least one a recent acquisition) is an active assembler; the still-independent parcels touching that block are the natural next targets -- worth more to that specific buyer (relationship) and part of a redevelopment play (development)"
+  },
+
+  "hidden_density": {
+    "min_extra_units": 3,
+    "units_per_acre": {
+      "R-3": 3, "R-4": 4, "R-5": 5, "R-6": 6, "R-8": 8, "R-12": 12, "R-17MF": 17,
+      "R-22MF": 22, "R-43MF": 43, "UR-1": 8, "UR-2": 17, "UR-3": 22, "UR-C": 22,
+      "N1-A": 8, "N1-B": 12, "N1-C": 17, "N1-D": 22, "N1-E": 43, "N1-F": 43,
+      "MUDD": 40, "TOD-UC": 60, "TOD-CC": 40, "TOD-NC": 25, "NC": 8, "CAC": 20
+    },
+    "note": "zoning-implied max units minus existing units; a large gap = redevelopment/infill upside the parcel record doesn't advertise"
+  }
+}

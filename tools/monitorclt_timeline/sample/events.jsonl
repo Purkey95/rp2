@@ -1,0 +1,9 @@
+{"apn":"07104521","signal_type":"code_violation","date":"2026-05-01","source_url":"https://charlotte.example/case/CE-1"}
+{"apn":"07104521","signal_type":"failed_inspection","date":"2026-06-15","source_url":"https://charlotte.example/insp/1"}
+{"apn":"07104521","signal_type":"demolition_permit","date":"2026-07-20","source_url":"https://meck.example/permit/DEM-9"}
+{"apn":"11902388","signal_type":"code_violation","date":"2019-03-01","source_url":"https://charlotte.example/case/CE-77"}
+{"apn":"11902388","signal_type":"failed_inspection","date":"2022-06-15","source_url":"https://charlotte.example/insp/77"}
+{"apn":"11902388","signal_type":"demolition_permit","date":"2026-07-20","source_url":"https://meck.example/permit/DEM-77"}
+{"apn":"09330188","signal_type":"fire_damage","date":"2026-01-10","source_url":"https://fire.example/1"}
+{"apn":"05512304","signal_type":"renovation_permit","date":"2025-09-01","source_url":"https://rowan.example/permit/REN-3"}
+{"apn":"05512304","signal_type":"mechanics_lien","date":"2026-02-15","source_url":"https://rod.example/lien/3"}

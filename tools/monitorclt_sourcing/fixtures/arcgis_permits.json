@@ -1,0 +1,66 @@
+{
+  "_note": "Simulated ArcGIS FeatureServer /query response for Mecklenburg building permits. Row 1 emits (record_url column). Row 2 emits via record_url_template (permit_number fills it). Row 3 excluded: status not in status_to_bucket (surfaced for a human to map). Row 4 excluded: blank status. Row 5 emits. Net: 3 verified permit signals.",
+  "exceededTransferLimit": false,
+  "features": [
+    {
+      "attributes": {
+        "permit_number": "BLD-2026-004182",
+        "parcel_id": "07104521",
+        "address": "123 N Main St",
+        "zip": "28202",
+        "status": "Approved",
+        "permit_type": "BUILDING",
+        "permit_url": "https://permits.mecknc.gov/permit/BLD-2026-004182"
+      },
+      "geometry": { "x": -80.8412, "y": 35.2271 }
+    },
+    {
+      "attributes": {
+        "permit_number": "DEM-2026-000733",
+        "parcel_id": "11902388",
+        "address": "900 S Tryon St",
+        "zip": "28203",
+        "status": "Issued",
+        "permit_type": "DEMOLITION",
+        "permit_url": ""
+      },
+      "geometry": { "x": -80.8489, "y": 35.2201 }
+    },
+    {
+      "attributes": {
+        "permit_number": "BLD-2026-004999",
+        "parcel_id": "16700423",
+        "address": "1200 Central Ave",
+        "zip": "28204",
+        "status": "On Hold Pending Appeal",
+        "permit_type": "RENOVATION",
+        "permit_url": "https://permits.mecknc.gov/permit/BLD-2026-004999"
+      },
+      "geometry": { "x": -80.8005, "y": 35.2180 }
+    },
+    {
+      "attributes": {
+        "permit_number": "BLD-2026-005010",
+        "parcel_id": "09330188",
+        "address": "88 Rocky River Rd",
+        "zip": "28227",
+        "status": "",
+        "permit_type": "BUILDING",
+        "permit_url": "https://permits.mecknc.gov/permit/BLD-2026-005010"
+      },
+      "geometry": { "x": -80.6620, "y": 35.1850 }
+    },
+    {
+      "attributes": {
+        "permit_number": "BLD-2026-005044",
+        "parcel_id": "14235009",
+        "address": "255 Providence Rd",
+        "zip": "28207",
+        "status": "Under Construction",
+        "permit_type": "BUILDING",
+        "permit_url": "https://permits.mecknc.gov/permit/BLD-2026-005044"
+      },
+      "geometry": { "x": -80.8150, "y": 35.1980 }
+    }
+  ]
+}

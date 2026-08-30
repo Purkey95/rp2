@@ -1,0 +1,45 @@
+{
+  "_comment": "Market Timing series, all FREE (FRED keyless CSV, verified live 2026-08-19). layer = leading|coincident|lagging (lagging kept ONLY as confirmation, never a signal). geo: national, or Charlotte CBSA 16740 / BLS metro code 737 -- swap those ids for another metro. rising_read = what an UPWARD move means for a distressed-acquisition buyer (sourcing vs exit). This model answers WHEN/WHERE; the Owner Distress Score answers WHAT/WHO -- kept separate on purpose.",
+
+  "metro": {"name": "Charlotte-Concord-Gastonia", "cbsa": "16740", "bls_metro_code": "737"},
+
+  "series": [
+    {"id": "DGS10", "label": "10-Year Treasury yield", "layer": "leading", "geo": "national",
+     "rising_read": "financing cost up -> affordability pressure + more motivated sellers; hard-money pricing up"},
+    {"id": "MORTGAGE30US", "label": "30Y fixed mortgage rate", "layer": "leading", "geo": "national",
+     "rising_read": "buyer pool shrinks, prices soften -> better acquisition, harder exit/refi"},
+    {"id": "DRTSCLCC", "label": "SLOOS: net % banks tightening CRE standards", "layer": "leading", "geo": "national",
+     "rising_read": "local lending window closing -> fewer competing buyers, but your own debt harder"},
+    {"id": "DRTSCILM", "label": "SLOOS: net % tightening C&I standards", "layer": "leading", "geo": "national",
+     "rising_read": "broad credit tightening (confirms CRE read)"},
+    {"id": "PERMIT", "label": "Housing permits (national, SAAR)", "layer": "leading", "geo": "national",
+     "rising_read": "future supply ~12-24mo out -> caution on appreciation plays"},
+    {"id": "HOUST", "label": "Housing starts (national, SAAR)", "layer": "leading", "geo": "national",
+     "rising_read": "supply pipeline filling"},
+    {"id": "CHAR737BPPRIV", "label": "Charlotte metro building permits", "layer": "leading", "geo": "charlotte",
+     "rising_read": "LOCAL future supply -> the one that matters for your submarkets"},
+
+    {"id": "DRSFRMACBS", "label": "Single-family mortgage delinquency (banks)", "layer": "coincident", "geo": "national",
+     "rising_read": "borrower stress rising -> more distressed inventory (good sourcing, softening market)"},
+    {"id": "DRCRELEXFACBS", "label": "CRE loan delinquency (banks)", "layer": "coincident", "geo": "national",
+     "rising_read": "CRE distress rising -> forced-sale supply (the maturity-wall mechanism showing up)"},
+    {"id": "TDSP", "label": "Household debt service ratio", "layer": "coincident", "geo": "national",
+     "rising_read": "household budgets stretched -> demand/rent risk"},
+    {"id": "RHVRUSQ156N", "label": "Rental vacancy rate", "layer": "coincident", "geo": "national",
+     "rising_read": "softening rental demand -> concession risk, NOI pressure"},
+    {"id": "CHAR737URN", "label": "Charlotte metro unemployment rate", "layer": "coincident", "geo": "charlotte",
+     "rising_read": "local demand engine weakening"},
+    {"id": "CHAR737NA", "label": "Charlotte metro nonfarm employment (000s)", "layer": "coincident", "geo": "charlotte",
+     "rising_read": "job growth -> housing demand (feeds jobs-to-permits ratio)"},
+
+    {"id": "ATNHPIUS16740Q", "label": "Charlotte house price index", "layer": "lagging", "geo": "charlotte",
+     "rising_read": "CONFIRMATION ONLY -- prices are a lagging index, never a signal"}
+  ],
+
+  "derived": [
+    {"name": "mortgage_spread", "formula": "MORTGAGE30US - DGS10", "layer": "leading",
+     "read": "lender risk appetite. Widening = credit tightening / risk-off (also drives hard-money pricing); narrowing = easing."},
+    {"name": "jobs_to_permits", "formula": "(12mo change in CHAR737NA*1000) / (12mo sum of CHAR737BPPRIV)", "layer": "coincident",
+     "read": "~1.2-1.5 balanced; <1.0 signals local oversupply; high = undersupply / demand outrunning building."}
+  ]
+}

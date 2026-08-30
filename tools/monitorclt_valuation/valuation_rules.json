@@ -1,0 +1,35 @@
+{
+  "_comment": "Records-based valuation (ARV/AVM + CMA). The score says WHO to buy from; this says WHAT IT'S WORTH, so a lead becomes an OFFER. Tier 1 (this file's defaults) runs on recorded deed sales + assessor characteristics -- free/records data we already hold; no MLS. Tier 2 swaps the same engine onto MLS sold comps (photos/condition) for a retail CMA. The engine is identical; only the comp pool changes. Adjustment dollars are placeholders tuned to a Charlotte-area SFR baseline -- calibrate per submarket. Everything here is transparent and per-comp traceable, like a real appraisal adjustment grid.",
+
+  "comp_selection": {
+    "max_age_days": 365,
+    "max_distance_mi": 1.0,
+    "sqft_tolerance": 0.30,
+    "lot_tolerance": 1.00,
+    "year_built_tolerance": 25,
+    "match_fields": ["property_type"],
+    "min_comps": 3,
+    "max_comps": 6
+  },
+
+  "adjustments": {
+    "per_sqft": 90,
+    "per_bed": 5000,
+    "per_bath": 7500,
+    "per_lot_sqft": 1.5,
+    "per_year_built": 400,
+    "monthly_appreciation": 0.004
+  },
+
+  "weighting": {
+    "recency_halflife_days": 180,
+    "distance_halflife_mi": 0.5
+  },
+
+  "offer": {
+    "wholesale_low": 0.65,
+    "wholesale_high": 0.80,
+    "arv_rule_factor": 0.70,
+    "note": "wholesale_* = as-is offer band as a fraction of estimated value. arv_rule_factor = the investor '70% rule': MAO = ARV*0.70 - repairs (computed only when repairs are supplied)."
+  }
+}

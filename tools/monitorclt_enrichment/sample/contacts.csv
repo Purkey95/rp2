@@ -1,0 +1,11 @@
+contact_id,first_name,last_name,full_name,situs_street,situs_city,situs_state,situs_zip,mail_street,mail_city,mail_state,mail_zip,phone,email,apn,owner_name,acreage,zoning,land_use,source
+1001,,,,123 N Main Street,Charlotte,NC,28202,,,,,,,,,,,,rod_match
+1002,John,Smith,John Smith,,,,,,,,,7045551212,,,,,,,obituaries
+1003,,,,4520 Wilkinson Blvd,Charlotte,NC,28208,,,,,,,05512304,,,,,ncua_distress
+1004,,,,88 Rocky River Rd,Mint Hill,NC,28227,,,,,,,,,,,,iredell_delinquent
+1005,,,,,Matthews,NC,28105,,,,,,,,"SMITH, MARY A",,,,tax_sale
+1006,Robert,Jones,Robert Jones,17 Oak Ct,Matthews,NC,28105,17 Oak Court,Matthews,NC,28105,,rjones@example.com,,,,,,rod_lending_ocr
+1007,,,,900 South Tryon St,Charlotte,NC,28203,,,,,,,,,,,,stlco_taxsale
+1008,,,,255 Providence Rd,Charlotte,NC,28207,,,,,7045559999,,,,,,,obituaries
+1009,,,,1200 Central Ave,Charlotte,NC,28204,,,,,,,,,,,,rod_match
+1010,,,,,,,,,,,,,,88213045,,,,,econdev_proximity
