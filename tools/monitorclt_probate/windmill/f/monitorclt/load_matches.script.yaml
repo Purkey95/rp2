@@ -1,0 +1,45 @@
+summary: Load a cross-reference run into PostgreSQL
+description: >-
+  Upserts the sources, opens a match_run, and writes every candidate to
+  probate.entity_match in one transaction. Refreshes the rationale on rows a
+  human has already decided; never the verdict.
+lock: |
+  psycopg[binary]
+concurrent_limit: 1
+concurrency_time_window_s: 0
+kind: script
+schema:
+  $schema: 'https://json-schema.org/draft/2020-12/schema'
+  type: object
+  order:
+    - database
+    - result
+    - estates
+    - parcels
+    - deeds
+  properties:
+    database:
+      type: object
+      format: resource-postgresql
+      description: Connect as a role holding probate_loader -- nothing wider
+    result:
+      type: object
+      description: The `result` returned by run_crossref
+    estates:
+      type: array
+      default: []
+      items:
+        type: object
+    parcels:
+      type: array
+      default: []
+      items:
+        type: object
+    deeds:
+      type: array
+      default: []
+      items:
+        type: object
+  required:
+    - database
+    - result

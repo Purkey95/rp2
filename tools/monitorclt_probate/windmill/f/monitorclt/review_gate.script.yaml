@@ -1,0 +1,31 @@
+summary: Hold for human review before any lead is released
+description: >-
+  Summarises the pending queue and the auto-confirmed matches, then produces the
+  resume/cancel links. The module carrying this script suspends the flow, so
+  nothing downstream runs until a person approves. Carries no names, addresses or
+  PINs: an approval notification is not an access-controlled surface.
+lock: |
+  psycopg[binary]
+kind: approval
+schema:
+  $schema: 'https://json-schema.org/draft/2020-12/schema'
+  type: object
+  order:
+    - database
+    - load_summary
+    - approver
+  properties:
+    database:
+      type: object
+      format: resource-postgresql
+      description: Connect as a role holding probate_reviewer
+    load_summary:
+      type: object
+      description: The summary returned by load_matches
+    approver:
+      type: string
+      default: null
+      description: Optional named approver for the resume link
+  required:
+    - database
+    - load_summary

@@ -1,0 +1,31 @@
+summary: Release the approved, confirmed lead list
+description: >-
+  Reads probate.v_estate_property, which is confirmed-only. Runs after the
+  approval gate. Connect as a role holding probate_outreach so a mistake here
+  cannot become a mistake in a system of record.
+lock: |
+  psycopg[binary]
+kind: script
+schema:
+  $schema: 'https://json-schema.org/draft/2020-12/schema'
+  type: object
+  order:
+    - database
+    - filed_since
+    - county
+  properties:
+    database:
+      type: object
+      format: resource-postgresql
+      description: Connect as a role holding probate_outreach -- nothing wider
+    filed_since:
+      type: string
+      format: date
+      default: null
+      description: Only estates filed on or after this date
+    county:
+      type: string
+      default: null
+      description: Restrict to one county
+  required:
+    - database

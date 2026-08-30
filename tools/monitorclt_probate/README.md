@@ -20,7 +20,7 @@ takes **no incarceration, probation, parole, or arrest data as input at all** �
 
 Sources are systems of record and are never mutated by matching. Every assertion
 that two records are the same person lives in `entity_match` with its evidence,
-and is reviewable and reversible. `schema.sql` is the PostgreSQL model.
+and is reviewable and reversible. `db/migrations/` is the PostgreSQL model.
 
 ## How the match is decided
 
@@ -68,6 +68,62 @@ Each row of `matches` in the JSON maps 1:1 onto `probate.entity_match`, so loadi
 a run is a straight insert; `probate.v_estate_property` is the lead list
 (confirmed only) and `probate.v_review_queue` is what a human still has to clear.
 The sample data is synthetic.
+
+## Standing it up: PostgreSQL and a review gate
+
+The matcher runs fine as a script, but a review queue that exists only in a JSON
+file is a review queue nobody clears. Two pieces make it real, and both are
+optional — `crossref.py` and `evaluate.py` never import either.
+
+**PostgreSQL (Supabase, hosted or self-hosted, or a bare database).** Apply
+`db/migrations/` in order and load a run:
+
+```bash
+db/apply.sh "$DATABASE_URL"
+python3 load_run.py --run out.json \
+                    --estates sample/estate_cases.jsonl \
+                    --parcels sample/parcels.jsonl \
+                    --deeds   sample/deeds.jsonl \
+                    --db "$DATABASE_URL"          # --dry-run to see it first
+```
+
+What the migrations add beyond the tables:
+
+* **Three roles, and the boundary between them.** `probate_loader` writes;
+  `probate_reviewer` reads the queue and decides; `probate_outreach` sees the
+  confirmed lead list *and nothing else* — not pending candidates, not rejected
+  ones, not the source tables. "A pending candidate is a question, not a lead"
+  stops being a comment and becomes a permission. Supabase's contribution is
+  making that boundary reachable over an API with real logins behind it, which
+  matters as soon as the second person starts reviewing.
+* **An append-only decision log.** `probate.record_review()` is the only way to
+  change a match's status: it writes the audit row and updates the match in one
+  transaction, and nobody holds INSERT, UPDATE or DELETE on the log itself. A
+  reversal is a new row, not an edit.
+* **A re-run cannot overturn a human.** Next week's run refreshes score, tier and
+  evidence — the rationale should reflect the current rules — but a row somebody
+  has signed keeps its verdict. Enforced in a trigger, so it holds for any client.
+* **A person is keyed on the estate case that minted it, never on a name**, since
+  two Mecklenburg decedents can share one.
+
+`db/test_migrations.sql` asserts all of that against a live database and rolls
+back:
+
+```bash
+createdb probate_test && db/apply.sh "postgresql:///probate_test"
+psql "postgresql:///probate_test" -v ON_ERROR_STOP=1 -f db/test_migrations.sql
+```
+
+**Windmill** schedules the run and — the actual reason it is here — *suspends the
+flow for human approval* before any lead is released. See `windmill/README.md`.
+Nothing in it scores or decides; it schedules the matcher and gates the output.
+
+```
+run_crossref ──▶ load_matches ──▶ review_gate ══▶ publish_leads
+                                   ⏸ SUSPEND
+```
+
+Neither piece is required to use the tool, and neither changes a single weight.
 
 ## The workflow this belongs to
 

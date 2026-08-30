@@ -22,7 +22,7 @@ Matching is deterministic and staged, because a shared name is not evidence:
                    never be confirmed, however high it scores
 
 Every link carries its evidence list, so a reviewer sees why, not just how much.
-Output rows map 1:1 onto probate.entity_match in schema.sql. Pure stdlib.
+Output rows map 1:1 onto probate.entity_match in db/migrations/. Pure stdlib.
 """
 
 from __future__ import annotations

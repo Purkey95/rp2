@@ -1,0 +1,41 @@
+summary: Cross-reference estate cases against parcels and deeds
+description: >-
+  Runs the MonitorCLT probate matcher. Deterministic and staged: a shared name is
+  never enough to confirm. Returns every candidate with its evidence, plus the
+  input gaps worth looking at.
+lock: ''
+concurrent_limit: 1
+concurrency_time_window_s: 0
+kind: script
+schema:
+  $schema: 'https://json-schema.org/draft/2020-12/schema'
+  type: object
+  order:
+    - estates
+    - parcels
+    - deeds
+    - rules_variable
+  properties:
+    estates:
+      type: array
+      description: Estate case records (Clerk of Superior Court, estates division)
+      items:
+        type: object
+    parcels:
+      type: array
+      description: Parcel / assessor records (county tax + GIS)
+      items:
+        type: object
+    deeds:
+      type: array
+      default: []
+      description: Recorded deed records (Register of Deeds)
+      items:
+        type: object
+    rules_variable:
+      type: string
+      default: f/monitorclt/probate_match_rules
+      description: Windmill Variable holding match_rules.json
+  required:
+    - estates
+    - parcels

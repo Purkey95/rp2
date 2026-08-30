@@ -1,0 +1,197 @@
+summary: Probate -> real property cross-reference (weekly)
+description: >-
+  Pull newly opened estate cases, cross-reference them to parcels and deeds, load
+  the result, and hold for human review before any lead is released. The gate is
+  the point: the matcher produces candidates, and a candidate becomes a lead only
+  when a named person says so.
+
+  Schedule it weekly per county. It takes already-pulled records as input --
+  acquisition is deliberately not in this flow, because scraping a court portal
+  and deciding who owns a house are different failure modes and should not share
+  a retry policy.
+
+value:
+  modules:
+    - id: crossref
+      summary: Match estates to parcels and deeds
+      value:
+        type: script
+        path: f/monitorclt/run_crossref
+        input_transforms:
+          estates:
+            type: javascript
+            expr: flow_input.estates
+          parcels:
+            type: javascript
+            expr: flow_input.parcels
+          deeds:
+            type: javascript
+            expr: flow_input.deeds
+          rules_variable:
+            type: javascript
+            expr: flow_input.rules_variable
+      # A parsing change or a bad feed shows up here as a candidate count far
+      # from normal. Stopping early beats loading a run nobody trusts.
+      stop_after_if:
+        skip_if_stopped: false
+        expr: >-
+          results.crossref.inputs.estate_cases === 0 ||
+          results.crossref.inputs.parcels === 0
+
+    - id: load
+      summary: Write the run to PostgreSQL
+      value:
+        type: script
+        path: f/monitorclt/load_matches
+        input_transforms:
+          database:
+            type: javascript
+            expr: flow_input.loader_database
+          result:
+            type: javascript
+            expr: results.crossref.result
+          estates:
+            type: javascript
+            expr: flow_input.estates
+          parcels:
+            type: javascript
+            expr: flow_input.parcels
+          deeds:
+            type: javascript
+            expr: flow_input.deeds
+      retry:
+        constant:
+          attempts: 2
+          seconds: 30
+
+    - id: review
+      summary: Hold for human review
+      value:
+        type: script
+        path: f/monitorclt/review_gate
+        input_transforms:
+          database:
+            type: javascript
+            expr: flow_input.reviewer_database
+          load_summary:
+            type: javascript
+            expr: results.load
+          approver:
+            type: javascript
+            expr: flow_input.approver
+      # The flow stops here. One approval, and a week to give it: clearing a
+      # queue is real work with records to pull, and a gate that times out over a
+      # long weekend teaches people to approve without looking.
+      suspend:
+        required_events: 1
+        timeout: 604800
+        hide_cancel: false
+        resume_form:
+          schema:
+            $schema: 'https://json-schema.org/draft/2020-12/schema'
+            type: object
+            order:
+              - reviewed_by
+              - queue_disposition
+              - note
+            properties:
+              reviewed_by:
+                type: string
+                description: Who cleared the queue (recorded on the run)
+              queue_disposition:
+                type: string
+                description: What happened to the pending candidates
+                enum:
+                  - cleared -- every pending candidate was decided
+                  - accepted -- pending candidates left for a later pass
+              note:
+                type: string
+                description: Anything the next run should know
+            required:
+              - reviewed_by
+              - queue_disposition
+
+    - id: leads
+      summary: Release the confirmed lead list
+      value:
+        type: script
+        path: f/monitorclt/publish_leads
+        input_transforms:
+          database:
+            type: javascript
+            expr: flow_input.outreach_database
+          filed_since:
+            type: javascript
+            expr: flow_input.filed_since
+          county:
+            type: javascript
+            expr: flow_input.county
+
+schema:
+  $schema: 'https://json-schema.org/draft/2020-12/schema'
+  type: object
+  order:
+    - estates
+    - parcels
+    - deeds
+    - county
+    - filed_since
+    - loader_database
+    - reviewer_database
+    - outreach_database
+    - approver
+    - rules_variable
+  properties:
+    estates:
+      type: array
+      description: Estate case records for this run
+      items:
+        type: object
+    parcels:
+      type: array
+      description: Parcel / assessor records
+      items:
+        type: object
+    deeds:
+      type: array
+      default: []
+      description: Recorded deed records
+      items:
+        type: object
+    county:
+      type: string
+      default: null
+      description: County this run covers (used to narrow the lead list)
+    filed_since:
+      type: string
+      format: date
+      default: null
+      description: Only release leads for estates filed on or after this date
+    loader_database:
+      type: object
+      format: resource-postgresql
+      description: Role holding probate_loader
+    reviewer_database:
+      type: object
+      format: resource-postgresql
+      description: Role holding probate_reviewer
+    outreach_database:
+      type: object
+      format: resource-postgresql
+      description: Role holding probate_outreach
+    approver:
+      type: string
+      default: null
+      description: Named approver for the resume link
+    rules_variable:
+      type: string
+      default: f/monitorclt/probate_match_rules
+      description: Windmill Variable holding match_rules.json
+  required:
+    - estates
+    - parcels
+    - loader_database
+    - reviewer_database
+    - outreach_database
+
+ws_error_handler_muted: false

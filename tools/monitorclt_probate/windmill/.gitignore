@@ -1,0 +1,4 @@
+# Staged by sync.sh from the tool directory one level up; the copies here are
+# build output, and committing them would create a second matcher to keep in step.
+f/monitorclt/crossref.py
+f/monitorclt/load_run.py
