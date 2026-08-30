@@ -29,6 +29,7 @@ python -m monitorclt.cli absentee  --db parcels.db --out-of-state
 
 python -m monitorclt.cli load-sales --db parcels.db          # ~1.5M sales, ~17 min
 python -m monitorclt.cli backtest   --db parcels.db --as-of 2022-01-01 --horizon-years 2
+python -m monitorclt.cli propensity --db parcels.db   # fit + out-of-time validation
 ```
 
 ## Layout
@@ -47,6 +48,8 @@ python -m monitorclt.cli backtest   --db parcels.db --as-of 2022-01-01 --horizon
 | `backtest/reconstruct.py` | Owner state as of a past date, from the sales chain |
 | `backtest/signals.py` | Signal definitions, plus what cannot be backtested |
 | `backtest/harness.py` | Precision / recall / lift against outcomes |
+| `propensity/model.py` | Transparent cell model over (owner type, tenure) |
+| `propensity/validate.py` | Out-of-time decile validation |
 
 ## Five things the live data settled
 
@@ -86,6 +89,22 @@ Reconstruction works from the sales chain alone, never from current CAMA
 fields, because CAMA's owner and last-sale-date already reflect the sale being
 predicted. That leak is the single easiest way to produce a beautiful and
 meaningless backtest.
+
+## The propensity model works and ranks the wrong people
+
+Trained 2016-18, validated out of time on 2022-24: **2.53x lift on the top
+decile**, capturing 25% of arms-length sales. Real, and reproducible with
+`cli propensity`.
+
+But deciles 2-7 are flat at ~1.0x, so it is one useful cut and then noise;
+absolute probabilities do not survive a market regime change (predicted
+14.71% vs actual 10.24% in decile 2); and the top decile is
+`COMPANY, 0-3 years` — investor inventory being flipped. The model learned
+that recently-transacted property transacts again.
+
+Those are the worst leads for the intended business. Keep the model as a
+baseline any distress-driven score must beat, and as an exclusion filter.
+Write-up: `../second-brain/wiki/propensity-scoring-findings.md`.
 
 ## What this does not do
 

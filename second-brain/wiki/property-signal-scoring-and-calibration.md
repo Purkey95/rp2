@@ -77,6 +77,11 @@ every tenure signal — the exact "measuring churn" failure listed below. The
 estate outcome label turned out to be unusable, so that hypothesis remains
 untested rather than confirmed or denied.
 
+A propensity model was subsequently fitted and validated
+([[propensity-scoring-findings]]): 2.53x top-decile lift, but its top decile
+is investor inventory, and its absolute probabilities do not survive a market
+regime change. Both cautions on this page held.
+
 ## Watch for
 
 - **Feature leakage** — a "signal" that is really a consequence of the sale.

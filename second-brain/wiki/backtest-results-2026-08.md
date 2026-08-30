@@ -99,6 +99,13 @@ It can only be validated forward, starting from the snapshot taken
 2026-08-29 — which is what `observed_at` is for
 ([[event-lifecycle-state-machine]]).
 
+## Follow-up
+
+A full propensity model was then fitted and validated out of time —
+[[propensity-scoring-findings]]. It reaches 2.53x lift on its top decile,
+which is real, and that decile turns out to be investor inventory. The
+modelling route hits the same wall as the signal route.
+
 ## What this implies for sequencing
 
 It strengthens the case for [[mecklenburg-foreclosure-slice]] rather than

@@ -21,6 +21,9 @@ from datetime import date
 
 from .backtest.harness import run_backtest
 from .backtest.report import format_report
+from .propensity.dataset import build_examples
+from .propensity.model import PropensityModel
+from .propensity.validate import format_validation, validate
 from .parcel.enrich import ParcelIndex, summarize_candidates
 from .parcel.loader import load_parcels
 from .parcel.store import ParcelStore
@@ -55,6 +58,13 @@ def main(argv: Optional[List[str]] = None) -> int:
     backtest.add_argument("--horizon-years", type=float, default=2.0)
     backtest.add_argument("--outcome", action="append", default=None,
                           help="restrict to one outcome; repeatable")
+
+    propensity = subparsers.add_parser(
+        "propensity", help="fit a propensity model and validate it out of time"
+    )
+    propensity.add_argument("--train-as-of", default="2016-01-01")
+    propensity.add_argument("--test-as-of", default="2022-01-01")
+    propensity.add_argument("--horizon-years", type=float, default=2.0)
 
     subparsers.add_parser("stats", help="summarize the loaded index")
 
@@ -103,6 +113,37 @@ def main(argv: Optional[List[str]] = None) -> int:
             )
             report = run_backtest(store, as_of=as_of, horizon_end=horizon_end)
             print(format_report(report, outcomes=args.outcome))
+        elif args.command == "propensity":
+            def window(start_text):
+                start = date.fromisoformat(start_text)
+                return start, date.fromordinal(
+                    start.toordinal() + int(round(args.horizon_years * 365.25))
+                )
+
+            train_as_of, train_end = window(args.train_as_of)
+            test_as_of, test_end = window(args.test_as_of)
+            if train_end > test_as_of:
+                print(
+                    "error: train window ("
+                    + train_as_of.isoformat() + " to " + train_end.isoformat()
+                    + ") overlaps the test window starting " + test_as_of.isoformat()
+                    + "; overlapping windows measure memorisation, not prediction",
+                    file=sys.stderr,
+                )
+                return 2
+            model = PropensityModel.fit(
+                build_examples(store, as_of=train_as_of, horizon_end=train_end)
+            )
+            report = validate(
+                model, build_examples(store, as_of=test_as_of, horizon_end=test_end)
+            )
+            print(
+                "trained "
+                + train_as_of.isoformat() + " -> " + train_end.isoformat()
+                + "   tested " + test_as_of.isoformat() + " -> " + test_end.isoformat()
+            )
+            print("")
+            print(format_validation(report, model))
         elif args.command == "stats":
             print(json.dumps(store.stats(), indent=2, sort_keys=True))
         elif args.command == "address":

@@ -47,3 +47,17 @@ outcome label proved unusable: the grantor field records only 13-33 estate
 sales a year countywide, so the estate hypothesis cannot be tested with this
 data at all. A forced-sale result visible at 2022 alone did not replicate and
 is recorded as noise. Filed as [[backtest-results-2026-08]].
+
+## [2026-08-30] build | Propensity model: works, ranks the wrong population
+
+Fitted a transparent cell model over (owner_type, tenure_bucket), trained
+2016-18 and validated out of time on 2022-24. Top decile reaches 2.53x lift
+and captures 25% of arms-length sales — a real result. But deciles 2-7 are
+flat at ~1.0x, absolute probabilities do not transfer across market regimes,
+and the top decile is COMPANY/0-3yrs: investor inventory being flipped, the
+worst possible leads for the intended business. Filed as
+[[propensity-scoring-findings]].
+
+Caught and fixed a label leak mid-analysis: sorting rows by (score, outcome)
+ordered positives first within tied blocks and faked a 2.56x top decile with
+0.00% middle deciles. Regression test added.

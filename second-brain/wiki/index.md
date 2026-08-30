@@ -36,3 +36,4 @@ first when answering queries.
 - [[mecklenburg-foreclosure-slice]] — the recommended v0: a property-keyed foreclosure vertical slice, with a definition of done.
 - [[public-record-source-matrix-mecklenburg]] — the source matrix scoped from 100 counties down to one, ordered by build phase.
 - [[backtest-results-2026-08]] — first measurement against real outcomes: long tenure anti-predicts sales, and the estate label is unusable.
+- [[propensity-scoring-findings]] — a propensity model validated at 2.53x top-decile lift, whose top decile is investor inventory rather than motivated sellers.
