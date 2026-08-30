@@ -1,0 +1,190 @@
+{
+  "version": "1.0",
+
+  "_comment": "Routing policy for the multi-model harness. 'providers' is HOW a model is called (argv or endpoint, and where the answer sits in its output); 'tasks' is WHAT gets sent and to whom. Vendors rename flags and reshape payloads constantly, so both live here rather than in code -- a broken provider is a config edit, not a patch. Every task must declare 'sends': the exhaustive list of input fields allowed to leave the machine for that vendor. A field not listed is withheld, and the run log records that it was.",
+
+  "defaults": {
+    "transport": "cli",
+    "timeout_seconds": 180
+  },
+
+  "providers": {
+    "claude": {
+      "transport": "cli",
+      "argv": ["claude", "-p", "{prompt}", "--output-format", "json"],
+      "auth": {"kind": "subscription", "note": "Claude Code login (Pro/Max). No API key."},
+      "verified": true,
+      "response": {
+        "format": "json",
+        "text": ["result", "content[0].text"],
+        "error_flag": "is_error",
+        "usage": {
+          "input_tokens": "usage.input_tokens",
+          "output_tokens": "usage.output_tokens"
+        },
+        "cost_usd": "total_cost_usd"
+      }
+    },
+
+    "gemini": {
+      "transport": "cli",
+      "argv": ["gemini", "-p", "{prompt}"],
+      "auth": {"kind": "subscription", "note": "Google account login / free tier. No API key."},
+      "verified": false,
+      "response": {"format": "text"}
+    },
+
+    "grok": {
+      "transport": "cli",
+      "argv": ["grok", "-p", "{prompt}"],
+      "auth": {"kind": "subscription", "note": "SuperGrok / X Premium Plus login. Headless hosts may still need XAI_API_KEY."},
+      "verified": false,
+      "response": {"format": "text"}
+    },
+
+    "perplexity_search": {
+      "transport": "cli",
+      "argv": ["pplx", "search", "web", "{prompt}"],
+      "auth": {"kind": "api_key", "env": "PERPLEXITY_API_KEY", "note": "pplx wraps the Search API; there is no subscription auth for it."},
+      "verified": false,
+      "response": {
+        "format": "json",
+        "text": ["answer", "text", "results[0].snippet"],
+        "citations": {"path": "results", "url": "url", "title": "title"}
+      }
+    },
+
+    "perplexity_fetch": {
+      "transport": "cli",
+      "argv": ["pplx", "content", "fetch", "{prompt}"],
+      "auth": {"kind": "api_key", "env": "PERPLEXITY_API_KEY"},
+      "verified": false,
+      "response": {"format": "json", "text": ["content", "text", "results[0].content"]}
+    },
+
+    "openai_api": {
+      "_comment": "The http transport, for when a CLI cannot give you schema-enforced JSON or per-call usage. Same contract, different plumbing.",
+      "transport": "http",
+      "url": "https://api.openai.com/v1/chat/completions",
+      "model": "gpt-5",
+      "auth": {"kind": "api_key", "env": "OPENAI_API_KEY"},
+      "verified": false,
+      "headers": {"Authorization": "Bearer {env:OPENAI_API_KEY}"},
+      "body": {
+        "model": "{model}",
+        "messages": [{"role": "user", "content": "{prompt}"}],
+        "response_format": {"type": "json_object"}
+      },
+      "response": {
+        "format": "json",
+        "text": ["choices[0].message.content"],
+        "usage": {
+          "input_tokens": "usage.prompt_tokens",
+          "output_tokens": "usage.completion_tokens"
+        }
+      }
+    },
+
+    "anthropic_api": {
+      "transport": "http",
+      "url": "https://api.anthropic.com/v1/messages",
+      "model": "claude-sonnet-4-5",
+      "auth": {"kind": "api_key", "env": "ANTHROPIC_API_KEY"},
+      "verified": false,
+      "headers": {
+        "x-api-key": "{env:ANTHROPIC_API_KEY}",
+        "anthropic-version": "2023-06-01"
+      },
+      "body": {
+        "model": "{model}",
+        "max_tokens": 1024,
+        "messages": [{"role": "user", "content": "{prompt}"}]
+      },
+      "response": {
+        "format": "json",
+        "text": ["content"],
+        "usage": {
+          "input_tokens": "usage.input_tokens",
+          "output_tokens": "usage.output_tokens"
+        }
+      }
+    }
+  },
+
+  "tasks": {
+    "obituary_confirm": {
+      "_comment": "Retrieval with sources, not judgment. The answer is only worth having because it arrives with citations a human can open.",
+      "provider": "perplexity_search",
+      "sends": ["decedent_name", "county", "date_of_death"],
+      "prompt": [
+        "Obituary or death notice for {decedent_name}, died {date_of_death},",
+        "{county} County North Carolina. Report surviving relatives and any named",
+        "executor or personal representative, with the source URL for each."
+      ]
+    },
+
+    "page_fetch": {
+      "provider": "perplexity_fetch",
+      "sends": ["url"],
+      "prompt": "{url}"
+    },
+
+    "deed_extract": {
+      "_comment": "Long, scanned, or badly OCR'd deed text. Output is validated by the caller -- a model saying it emitted JSON is not evidence that it did.",
+      "provider": "gemini",
+      "sends": ["deed_text"],
+      "prompt": [
+        "Extract the recording data from this deed. Reply with one JSON object and",
+        "nothing else, using exactly these keys: grantor, grantee, instrument_type,",
+        "recorded_date (YYYY-MM-DD), book, page, pin. Use null for anything the",
+        "document does not state. Do not infer, do not normalize names.",
+        "",
+        "DEED TEXT:",
+        "{deed_text}"
+      ]
+    },
+
+    "deed_extract_api": {
+      "_comment": "Same task, http transport. Flipping a route between the two is this edit and nothing else.",
+      "provider": "openai_api",
+      "sends": ["deed_text"],
+      "prompt": [
+        "Extract the recording data from this deed as a JSON object with keys:",
+        "grantor, grantee, instrument_type, recorded_date (YYYY-MM-DD), book, page,",
+        "pin. Use null for anything the document does not state.",
+        "",
+        "DEED TEXT:",
+        "{deed_text}"
+      ]
+    },
+
+    "review_disambiguation": {
+      "_comment": "The one task that earns three vendors. Three models see identical evidence; two must agree or a human gets it. Disagreement is the product here, not an inefficiency to average away. This never writes back a score -- crossref.py stays deterministic.",
+      "fanout": ["claude", "gemini", "grok"],
+      "quorum": 2,
+      "decision_pattern": "\\b(NO_MATCH|MATCH|UNSURE)\\b",
+      "sends": [
+        "decedent_name",
+        "county",
+        "owner_string",
+        "situs_address",
+        "score",
+        "evidence"
+      ],
+      "prompt": [
+        "A probate estate is being matched against a county tax parcel. Decide whether",
+        "the parcel owner is the same person as the decedent. Public records only; a",
+        "shared name alone is not evidence.",
+        "",
+        "Decedent (from the estate file): {decedent_name}, {county} County NC",
+        "Parcel owner of record:          {owner_string}",
+        "Parcel situs address:            {situs_address}",
+        "Deterministic matcher score:     {score}",
+        "Corroborating evidence found:    {evidence}",
+        "",
+        "Give one short paragraph of reasoning, then a final line that is exactly one",
+        "of: MATCH, NO_MATCH, UNSURE. Answer UNSURE unless the evidence decides it."
+      ]
+    }
+  }
+}

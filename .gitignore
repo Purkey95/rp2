@@ -24,3 +24,6 @@ __pycache__/
 src/*.egg-info/
 .venv/
 .vscode/
+
+# multi-model harness run log (may contain vendor responses)
+tools/ai_harness/runs.jsonl

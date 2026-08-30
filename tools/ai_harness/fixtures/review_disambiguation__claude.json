@@ -1,0 +1,5 @@
+{
+  "error": null,
+  "ok": true,
+  "payload": "{\n  \"type\": \"result\",\n  \"subtype\": \"success\",\n  \"result\": \"The owner string carries an explicit estate marker and the parcel's tax-mailing address is the personal representative's address of record, which is corroboration independent of the name itself. Middle initial agrees. Same county.\\n\\nMATCH\",\n  \"usage\": {\n    \"input_tokens\": 412,\n    \"output_tokens\": 96\n  },\n  \"total_cost_usd\": 0.0071\n}"
+}

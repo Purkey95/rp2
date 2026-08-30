@@ -1,0 +1,5 @@
+{
+  "error": null,
+  "ok": true,
+  "payload": "{\n  \"answer\": \"John Q. Public, 78, of Charlotte, died January 14, 2026. He is survived by his wife Jane R. Public and a son, John Q. Public Jr. The notice names Jane R. Public as executor of the estate.\",\n  \"results\": [\n    {\n      \"url\": \"https://example.com/obituaries/john-q-public\",\n      \"title\": \"John Q. Public obituary - Charlotte, NC\",\n      \"snippet\": \"Survived by his wife Jane R. Public...\"\n    },\n    {\n      \"url\": \"https://example.org/legal-notices/2026/02/estate-notice\",\n      \"title\": \"Notice to creditors, estate of John Q Public\",\n      \"snippet\": \"All persons having claims against said estate...\"\n    }\n  ]\n}"
+}
