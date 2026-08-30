@@ -1,0 +1,15 @@
+file_number,pin,is_match,note
+26 E 001234,045-121-08,1,decedent's home -- deed and mailing address agree
+26 E 001234,045-133-19,1,second parcel he owned; nothing corroborates it in the records
+26 E 001235,213-002-44,1,owner string already reads HEIRS
+26 E 001236,017-455-02,1,executor deed recorded after death
+26 E 001237,099-001-01,1,the David Smith who died; his home address
+26 E 001237,099-001-02,0,a different David Smith
+26 E 001237,099-001-03,0,a different David Smith
+26 E 001237,099-001-04,0,a different David Smith
+26 E 001237,099-001-05,0,a different David Smith
+26 E 001237,099-001-06,0,a different David Smith
+26 E 001237,099-001-07,0,a different David Smith
+26 E 001237,099-001-08,0,a different David Smith
+26 E 001238,412-880-31,0,Alice C Example is a different person
+26 E 001239,07-190-225,1,out-of-county parcel genuinely in the estate
