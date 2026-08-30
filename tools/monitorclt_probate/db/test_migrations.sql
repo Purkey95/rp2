@@ -79,6 +79,13 @@ SELECT pg_temp.ok(
        FROM probate.match_review),
     'the audit row records the transition, the reviewer, and what they saw');
 
+-- record_review() is SECURITY DEFINER, where current_user is the function's
+-- owner rather than the caller. If current_reviewer() used it, every decision
+-- would be signed with one name and the log would attribute nothing.
+SELECT pg_temp.ok(
+    (SELECT reviewer FROM probate.match_review) = session_user,
+    'the decision is attributed to the role that connected, not the function owner');
+
 SELECT pg_temp.ok(
     (SELECT count(*) FROM probate.v_estate_property) = 1,
     'a confirmed match reaches the lead list');

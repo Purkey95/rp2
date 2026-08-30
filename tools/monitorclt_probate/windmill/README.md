@@ -52,20 +52,77 @@ there is no other door, by permission.
 
 ## Setup
 
+### 1. Three login roles in PostgreSQL
+
+The migrations create `probate_loader`, `probate_reviewer` and `probate_outreach`
+as `NOLOGIN` **group** roles — they carry the privileges, they are not accounts.
+Windmill needs something it can connect as:
+
+```sql
+CREATE ROLE wm_loader   LOGIN PASSWORD '...';
+CREATE ROLE wm_reviewer LOGIN PASSWORD '...';
+CREATE ROLE wm_outreach LOGIN PASSWORD '...';
+
+GRANT probate_loader   TO wm_loader;
+GRANT probate_reviewer TO wm_reviewer;
+GRANT probate_outreach TO wm_outreach;
+```
+
+Three logins, not one — a shared connection would make the separation in
+`0003_rls.sql` decorative.
+
+**On the audit trail:** `probate.current_reviewer()` prefers the JWT's email
+claim and falls back to `session_user`. A person reviewing through Supabase's
+API signs the log with their own address; a person reviewing over `psql` as
+`wm_reviewer` signs it `wm_reviewer`. If more than one human clears the queue,
+route them through the API or give each their own login — otherwise the log
+records that *someone* decided, which is not what it is for.
+
+### 2. One Variable and three Resources
+
+| Path | Kind | Holds |
+|---|---|---|
+| `f/monitorclt/probate_match_rules` | Variable, **not secret** | `match_rules.json` |
+| `f/monitorclt/probate_db_loader` | Resource, `postgresql` | `wm_loader` |
+| `f/monitorclt/probate_db_reviewer` | Resource, `postgresql` | `wm_reviewer` |
+| `f/monitorclt/probate_db_outreach` | Resource, `postgresql` | `wm_outreach` |
+
+That is the whole list. `sync.sh` generates the variable spec from
+`../match_rules.json`, so pushing it is not a separate step and the two cannot
+drift. It is deliberately **not secret**: Windmill defaults new variables to
+secret, but these weights decide who ends up on a lead list — that is policy, and
+policy that cannot be read cannot be reviewed. Nothing in the file is a
+credential.
+
+The resources are, so they are not generated and not in git. Copy the templates,
+fill in the passwords, push:
+
+```bash
+cp resources.example/*.resource.yaml f/monitorclt/
+$EDITOR f/monitorclt/probate_db_*.resource.yaml
+for role in loader reviewer outreach; do
+    wmill resource push f/monitorclt/probate_db_$role.resource.yaml \
+                        f/monitorclt/probate_db_$role
+done
+```
+
+(Or create them in the UI: Resources → Add resource → PostgreSQL. Either way
+`f/monitorclt/*.resource.yaml` is gitignored.)
+
+### 3. Push and schedule
+
 ```bash
 npm install -g windmill-cli
 wmill workspace add monitorclt <workspace-id> https://<your-windmill>
-
-# rules live as a Variable, so a weight change is an audited act by a named
-# user rather than a silent redeploy
-wmill variable create f/monitorclt/probate_match_rules \
-    --value "$(cat ../match_rules.json)"
-
-./sync.sh          # stages crossref.py + load_run.py, then `wmill sync push`
+./sync.sh          # stages crossref.py, load_run.py and the variable, then pushes
 ```
 
-Then in the Windmill UI: create three `postgresql` resources (one per role), and
-schedule `f/monitorclt/probate_crossref` weekly per county.
+Then schedule `f/monitorclt/probate_crossref` weekly per county, and give it the
+three resources as flow inputs — `loader_database`, `reviewer_database`,
+`outreach_database`.
+
+To change a weight after calibration: edit `../match_rules.json`, re-run
+`./sync.sh`. The variable moves with it, and Windmill keeps the version history.
 
 `sync.sh` copies `crossref.py` and `load_run.py` up from the tool directory at
 push time and `.gitignore` keeps the copies out of git. They have one home. The

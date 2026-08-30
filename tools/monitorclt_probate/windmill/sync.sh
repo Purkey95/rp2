@@ -21,14 +21,28 @@ for module in crossref.py load_run.py; do
     echo "staged $module"
 done
 
-# match_rules.json is deliberately NOT copied: in Windmill it lives as the
-# Variable f/monitorclt/probate_match_rules, so a weight change is an audited act
-# by a named user instead of a silent redeploy. Seed it once with:
+# The rules become the Variable f/monitorclt/probate_match_rules rather than a
+# file in the image, so a weight change is an audited act by a named user
+# instead of a silent redeploy. Generated from match_rules.json here so the two
+# cannot drift: json.dumps emits a JSON string, and JSON is valid YAML.
 #
-#   wmill variable create f/monitorclt/probate_match_rules \
-#       --value "$(cat "$TOOL/match_rules.json")"
-#
-# and update it the same way when calibration moves a weight.
+# is_secret is false on purpose. Windmill defaults new variables to secret, but
+# these weights decide who ends up on a lead list -- they are policy, and policy
+# that cannot be read cannot be reviewed. Nothing in the file is a credential.
+python3 - "$TOOL/match_rules.json" "$DEST/probate_match_rules.variable.yaml" <<'PY'
+import json
+import sys
+
+source, destination = sys.argv[1], sys.argv[2]
+with open(source, encoding="utf-8") as f:
+    rules = f.read()
+json.loads(rules)  # refuse to push a variable the matcher could not parse
+with open(destination, "w", encoding="utf-8") as f:
+    f.write("value: {0}\n".format(json.dumps(rules)))
+    f.write("is_secret: false\n")
+    f.write('description: "match_rules.json -- scoring policy for the probate matcher"\n')
+PY
+echo "staged probate_match_rules.variable.yaml"
 
 if [ "${1:-}" = "--stage-only" ]; then
     echo "staged only; not pushing"

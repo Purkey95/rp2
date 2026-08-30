@@ -1,0 +1,15 @@
+# Copy to f/monitorclt/probate_db_loader.resource.yaml, fill in, then push:
+#
+#   wmill resource push f/monitorclt/probate_db_loader.resource.yaml \
+#                       f/monitorclt/probate_db_loader
+#
+# f/monitorclt/*.resource.yaml is gitignored: this file holds a password.
+value:
+  host: db.<project-ref>.supabase.co
+  port: 5432
+  dbname: postgres
+  user: wm_loader
+  password: <password for wm_loader>
+  sslmode: require
+resource_type: postgresql
+description: "MonitorCLT probate -- login role holding probate_loader"

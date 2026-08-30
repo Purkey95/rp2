@@ -27,8 +27,14 @@ COMMENT ON COLUMN probate.person.source_ref IS
 
 -- ------------------------------------------------------------ reviewer id ---
 -- Under PostgREST/Supabase the reviewer is the JWT's email claim; under psql it
--- is the database user. Same function either way, so the audit rows say who did
--- it regardless of how they connected.
+-- is the login role. Same function either way, so the audit rows say who did it
+-- regardless of how they connected.
+--
+-- session_user, NOT current_user: record_review() is SECURITY DEFINER, and
+-- inside such a function current_user is the function's owner. Using it would
+-- have signed every decision in the log with the owner's name -- one identity
+-- for the whole team, which is not an audit trail, it is a formality.
+-- session_user stays the role that actually connected.
 
 CREATE OR REPLACE FUNCTION probate.current_reviewer()
 RETURNS text
@@ -38,7 +44,7 @@ AS $$
     SELECT coalesce(
         nullif(current_setting('request.jwt.claims', true)::jsonb ->> 'email', ''),
         nullif(current_setting('request.jwt.claims', true)::jsonb ->> 'sub', ''),
-        current_user
+        session_user
     );
 $$;
 
