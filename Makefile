@@ -41,10 +41,18 @@ static_analysis: $(VENV)/bin/activate
 	$(VENV)/bin/mypy src/ tests/
 	$(VENV)/bin/pylint -r y src tests/*.py
 	$(VENV)/bin/bandit -r src/
+	$(MAKE) static_analysis_tools
+
+# tools/ holds standalone stdlib scripts, checked separately from the package:
+# they use their own mypy config (see tools/mypy.ini for why).
+static_analysis_tools: $(VENV)/bin/activate
+	$(VENV)/bin/mypy --config-file tools/mypy.ini tools/
+	$(VENV)/bin/pylint -r n tools/*/*.py
+	$(VENV)/bin/bandit -q -r tools/
 
 reformat: $(VENV)/bin/activate
 	$(VENV)/bin/isort .
-	$(VENV)/bin/black src/ tests/
+	$(VENV)/bin/black src/ tests/ tools/
 
 archive: clean
 	rm -f rp2.zip || true
@@ -68,4 +76,4 @@ clean:
 	rm -rf $(VENV) .mypy_cache/ build dist/ log/ output/ src/*.egg-info/
 	find . -type f -name '*.pyc' -delete
 
-.PHONY: all archive check clean lint reformat run securitycheck typecheck
+.PHONY: all archive check clean lint reformat run securitycheck static_analysis static_analysis_tools typecheck

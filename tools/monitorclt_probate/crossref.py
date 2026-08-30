@@ -33,6 +33,7 @@ import os
 import re
 import sys
 from collections import defaultdict
+from typing import Dict
 
 TOOL_VERSION = "1.0"
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -150,7 +151,7 @@ def parse_name(raw, name_format, rules):
 
     if "," in tokens:
         cut = tokens.index(",")
-        last_tokens, rest = tokens[:cut], tokens[cut + 1:]
+        last_tokens, rest = tokens[:cut], tokens[cut + 1 :]
         last = " ".join(last_tokens)
         first = rest[0] if rest else ""
         middle = " ".join(rest[1:])
@@ -182,16 +183,8 @@ def split_parties(raw, name_format, rules):
         name = parse_name(part, name_format, rules)
         primary = out[0]
         tokens = [t for t in part.split() if t not in suffixes and t != ","]
-        if (
-            not name["is_organization"]
-            and not primary["is_organization"]
-            and primary["last"]
-            and len(tokens) <= 2
-            and not name["markers"]
-        ):
-            name = _make_name(
-                part, tokens[0], " ".join(tokens[1:]), primary["last"], "", False, [], part
-            )
+        if not name["is_organization"] and not primary["is_organization"] and primary["last"] and len(tokens) <= 2 and not name["markers"]:
+            name = _make_name(part, tokens[0], " ".join(tokens[1:]), primary["last"], "", False, [], part)
         out.append(name)
     return out
 
@@ -212,7 +205,7 @@ def normalize_address(raw, rules):
 
 
 def pin_key(county, pin):
-    return "{0}/{1}".format(clean_text(county), re.sub(r"[^A-Z0-9]", "", clean_text(pin)))
+    return f"{clean_text(county)}/{re.sub('[^A-Z0-9]', '', clean_text(pin))}"
 
 
 # --------------------------------------------------------------- indexing ---
@@ -346,9 +339,9 @@ def score_link(estate, parcel, decedent, party, rules, frequency, deed_index):
 
     return {
         "left_source": "estate_case",
-        "left_id": "{0}/{1}".format(estate.get("county"), estate.get("file_number")),
+        "left_id": f"{estate.get('county')}/{estate.get('file_number')}",
         "right_source": "parcel",
-        "right_id": "{0}/{1}".format(parcel.get("county"), parcel.get("pin")),
+        "right_id": f"{parcel.get('county')}/{parcel.get('pin')}",
         "match_tier": tier,
         "score": score,
         "evidence": evidence,
@@ -358,10 +351,7 @@ def score_link(estate, parcel, decedent, party, rules, frequency, deed_index):
         "owner_name": parcel.get("owner_name"),
         "situs_address": parcel.get("situs_address"),
         "assessed_value": parcel.get("assessed_value"),
-        "deed_instruments": sorted(
-            d.get("instrument_number") or "{0}/{1}".format(d.get("book"), d.get("page"))
-            for d in deeds
-        ),
+        "deed_instruments": sorted(d.get("instrument_number") or f"{d.get('book')}/{d.get('page')}" for d in deeds),
     }
 
 
@@ -377,7 +367,7 @@ def crossref(estates, parcels, deeds, rules):
         if decedent["is_organization"] or not (decedent["first"] and decedent["last"]):
             skipped.append(
                 {
-                    "left_id": "{0}/{1}".format(estate.get("county"), estate.get("file_number")),
+                    "left_id": f"{estate.get('county')}/{estate.get('file_number')}",
                     "decedent_name": estate.get("decedent_name"),
                     "reason": "decedent name not parseable into first + last",
                 }
@@ -414,7 +404,7 @@ def _rollup(estates, links):
 
     rows = []
     for estate in estates:
-        key = "{0}/{1}".format(estate.get("county"), estate.get("file_number"))
+        key = f"{estate.get('county')}/{estate.get('file_number')}"
         found = by_estate.get(key, [])
         confirmed = [link for link in found if link["status"] == "confirmed"]
         pending = [link for link in found if link["status"] == "pending"]
@@ -427,9 +417,7 @@ def _rollup(estates, links):
                 "confirmed_parcels": [link["right_id"] for link in confirmed],
                 "pending_parcels": [link["right_id"] for link in pending],
                 "has_real_property": bool(confirmed),
-                "assessed_value_confirmed": round(
-                    sum(float(link["assessed_value"] or 0) for link in confirmed), 2
-                ),
+                "assessed_value_confirmed": round(sum(float(link["assessed_value"] or 0) for link in confirmed), 2),
             }
         )
     rows.sort(key=lambda row: row["left_id"])
@@ -445,12 +433,10 @@ def _orphan_estate_parcels(parcels, matched_pins, rules):
     fmt = rules.get("name_formats", {}).get("parcel", "last_first")
     rows = []
     for parcel in parcels:
-        key = "{0}/{1}".format(parcel.get("county"), parcel.get("pin"))
+        key = f"{parcel.get('county')}/{parcel.get('pin')}"
         if key in matched_pins:
             continue
-        markers = sorted(
-            {m for party in split_parties(parcel.get("owner_name", ""), fmt, rules) for m in party["markers"]}
-        )
+        markers = sorted({m for party in split_parties(parcel.get("owner_name", ""), fmt, rules) for m in party["markers"]})
         if markers:
             rows.append(
                 {
@@ -471,63 +457,47 @@ def format_report(result):
     run = result["run"]
     lines = [
         "MonitorCLT probate -> property cross-reference",
-        "  tool {0} / rules {1} | {2} estate cases, {3} parcels, {4} deeds".format(
-            run["tool_version"], run["rules_version"], run["estate_cases"], run["parcels"], run["deeds"]
-        ),
+        f"  tool {run['tool_version']} / rules {run['rules_version']} | {run['estate_cases']} estate cases, {run['parcels']} parcels, {run['deeds']} deeds",
         "",
     ]
-    counts = defaultdict(int)
+    counts: Dict[str, int] = defaultdict(int)
     for link in result["matches"]:
         counts[link["status"]] += 1
-    lines.append(
-        "  candidates: {0} confirmed, {1} pending review, {2} rejected".format(
-            counts["confirmed"], counts["pending"], counts["rejected"]
-        )
-    )
+    lines.append(f"  candidates: {counts['confirmed']} confirmed, {counts['pending']} pending review, {counts['rejected']} rejected")
     holding = [row for row in result["estates"] if row["has_real_property"]]
-    lines.append(
-        "  estates with confirmed real property: {0} of {1}".format(len(holding), len(result["estates"]))
-    )
+    lines.append(f"  estates with confirmed real property: {len(holding)} of {len(result['estates'])}")
     lines.append("")
 
     for row in result["estates"]:
         if not (row["confirmed_parcels"] or row["pending_parcels"]):
             continue
-        lines.append("{0}  {1}".format(row["left_id"], row["decedent_name"]))
+        lines.append(f"{row['left_id']}  {row['decedent_name']}")
         if row["personal_rep_name"]:
-            lines.append("    representative: {0}".format(row["personal_rep_name"]))
+            lines.append(f"    representative: {row['personal_rep_name']}")
         for link in result["matches"]:
             if link["left_id"] != row["left_id"] or link["status"] == "rejected":
                 continue
-            lines.append(
-                "    [{0:<9}] {1:.3f} {2:<26} {3}".format(
-                    link["status"], link["score"], link["right_id"], link["situs_address"] or ""
-                )
-            )
-            lines.append("        owner: {0}".format(link["owner_name"]))
-            lines.append("        tier: {0} | evidence: {1}".format(link["match_tier"], ", ".join(link["evidence"])))
+            lines.append(f"    [{link['status']:<9}] {link['score']:.3f} {link['right_id']:<26} {link['situs_address'] or ''}")
+            lines.append(f"        owner: {link['owner_name']}")
+            lines.append(f"        tier: {link['match_tier']} | evidence: {', '.join(link['evidence'])}")
             if link["flags"]:
-                lines.append("        flags: {0}".format(", ".join(link["flags"])))
+                lines.append(f"        flags: {', '.join(link['flags'])}")
         lines.append("")
 
     if result["skipped_estates"]:
         lines.append("skipped estate cases:")
         for row in result["skipped_estates"]:
-            lines.append("    {0}  {1} -- {2}".format(row["left_id"], row["decedent_name"], row["reason"]))
+            lines.append(f"    {row['left_id']}  {row['decedent_name']} -- {row['reason']}")
         lines.append("")
 
     if result["unmatched_estate_parcels"]:
         lines.append("estate-marked parcels with no matching estate case (input gap):")
         for row in result["unmatched_estate_parcels"]:
-            lines.append("    {0}  {1}".format(row["right_id"], row["owner_name"]))
+            lines.append(f"    {row['right_id']}  {row['owner_name']}")
         lines.append("")
 
-    lines.append(
-        "Confirmed is a records match, not a conclusion: verify chain of title, liens,"
-    )
-    lines.append(
-        "heirs, and the representative's authority before any outreach, and contact the"
-    )
+    lines.append("Confirmed is a records match, not a conclusion: verify chain of title, liens,")
+    lines.append("heirs, and the representative's authority before any outreach, and contact the")
     lines.append("personal representative or estate attorney -- nobody else.")
     return "\n".join(lines)
 

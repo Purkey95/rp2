@@ -37,12 +37,13 @@ import json
 import os
 import sys
 from collections import defaultdict
+from typing import Any, Dict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 if HERE not in sys.path:
     sys.path.insert(0, HERE)
 
-import crossref  # noqa: E402  (path must be set first)
+import crossref  # noqa: E402  (path must be set first)  # pylint: disable=wrong-import-position
 
 TOOL_VERSION = "1.0"
 TRUE_VALUES = {"1", "TRUE", "T", "YES", "Y", "MATCH"}
@@ -66,7 +67,7 @@ def _build_resolver(records, id_field, label):
     for record in records:
         key = _norm_key(record.get(id_field))
         if key:
-            table[key].add("{0}/{1}".format(record.get("county"), record.get(id_field)))
+            table[key].add(f"{record.get('county')}/{record.get(id_field)}")
 
     def resolve(value):
         key = _norm_key(value)
@@ -76,11 +77,7 @@ def _build_resolver(records, id_field, label):
         if not found:
             return None
         if len(found) > 1:
-            raise ValueError(
-                "{0} {1!r} exists in {2} counties; label it as COUNTY/{1}".format(
-                    label, value, len(found)
-                )
-            )
+            raise ValueError(f"{label} {value!r} exists in {len(found)} counties; label it as COUNTY/{value}")
         return sorted(found)[0]
 
     return resolve
@@ -112,9 +109,7 @@ def load_labels(path, estates, parcels):
                 unresolved.append(
                     {
                         "row": row,
-                        "reason": "no {0} record in the input".format(
-                            "estate case" if not left else "parcel"
-                        ),
+                        "reason": f"no {'estate case' if not left else 'parcel'} record in the input",
                     }
                 )
                 continue
@@ -220,7 +215,7 @@ def breakdown(links, labels, threshold, rules, key):
     Evidence rows overlap by design -- one link contributes to every label it
     carries. That is the point: it shows which corroboration keeps its promises.
     """
-    rows = defaultdict(lambda: {"tp": 0, "fp": 0, "unlabeled": 0})
+    rows: Dict[str, Dict[str, int]] = defaultdict(lambda: {"tp": 0, "fp": 0, "unlabeled": 0})
     for link in links:
         if status_at(link, threshold, rules) != "confirmed":
             continue
@@ -235,7 +230,7 @@ def breakdown(links, labels, threshold, rules, key):
                 rows[value]["fp"] += 1
     out = []
     for name in sorted(rows):
-        row = dict(rows[name])
+        row: Dict[str, Any] = dict(rows[name])
         row["name"] = name
         row["precision"] = _ratio(row["tp"], row["tp"] + row["fp"])
         out.append(row)
@@ -276,11 +271,7 @@ def recommend(points, target_precision):
     """
     scored = [p for p in points if p["f1"]]
     best_f1 = max(scored, key=lambda p: (p["f1"], p["threshold"])) if scored else None
-    clearing = [
-        p
-        for p in points
-        if p["precision"] is not None and p["precision"] >= target_precision and p["recall"]
-    ]
+    clearing = [p for p in points if p["precision"] is not None and p["precision"] >= target_precision and p["recall"]]
     cheapest = min(clearing, key=lambda p: p["threshold"]) if clearing else None
     return {
         "best_f1": best_f1,
@@ -320,7 +311,7 @@ def evaluate(result, labels, unresolved, rules, target_precision):
 
 
 def _pct(value):
-    return "  n/a " if value is None else "{0:5.1f}%".format(value * 100)
+    return "  n/a " if value is None else f"{value * 100:5.1f}%"
 
 
 def _format_errors(point):
@@ -329,29 +320,21 @@ def _format_errors(point):
     if point["false_positives"]:
         lines.append("FALSE POSITIVES (auto-confirmed, labeled non-match)")
         for row in point["false_positives"]:
-            lines.append(
-                "  {0:.3f}  {1} -> {2}".format(row["score"], row["left_id"], row["right_id"])
-            )
-            lines.append(
-                "         tier {0} | {1}".format(row["match_tier"], ", ".join(row["evidence"]))
-            )
+            lines.append(f"  {row['score']:.3f}  {row['left_id']} -> {row['right_id']}")
+            lines.append(f"         tier {row['match_tier']} | {', '.join(row['evidence'])}")
         lines.append("")
 
     if point["blocked_out"]:
         lines.append("MISSED -- never became a candidate (blocking/parsing, not weights)")
         for row in point["blocked_out"]:
-            lines.append("  {0} -> {1}".format(row["left_id"], row["right_id"]))
+            lines.append(f"  {row['left_id']} -> {row['right_id']}")
         lines.append("")
 
     if point["scored_low"]:
         lines.append("MISSED -- scored but not auto-confirmed (weights)")
         for row in point["scored_low"]:
-            lines.append(
-                "  {0:.3f} [{1:<9}] {2} -> {3}".format(
-                    row["score"], row["status"], row["left_id"], row["right_id"]
-                )
-            )
-            lines.append("         {0}".format(", ".join(row["evidence"])))
+            lines.append(f"  {row['score']:.3f} [{row['status']:<9}] {row['left_id']} -> {row['right_id']}")
+            lines.append(f"         {', '.join(row['evidence'])}")
         lines.append("")
     return lines
 
@@ -362,26 +345,14 @@ def format_report(ev):
     counts = point["counts"]
     lines = [
         "MonitorCLT probate cross-reference -- calibration report",
-        "  tool {0} / rules {1} | auto_confirm {2}, review_floor {3}".format(
-            run["tool_version"], run["rules_version"], run["auto_confirm"], run["review_floor"]
-        ),
-        "  {0} labeled pairs ({1} true matches) | {2} candidates generated, {3} unlabeled".format(
-            run["labeled_pairs"],
-            run["labeled_positive"],
-            run["candidates_generated"],
-            run["candidates_unlabeled"],
-        ),
+        f"  tool {run['tool_version']} / rules {run['rules_version']} | auto_confirm {run['auto_confirm']}, review_floor {run['review_floor']}",
+        f"  {run['labeled_pairs']} labeled pairs ({run['labeled_positive']} true matches)"
+        f" | {run['candidates_generated']} candidates generated, {run['candidates_unlabeled']} unlabeled",
         "",
         "AT THE SHIPPED THRESHOLD",
-        "  auto-confirm    precision {0}  recall {1}  F1 {2}".format(
-            _pct(point["precision"]), _pct(point["recall"]), point["f1"]
-        ),
-        "  through review  recall    {0}   <- ceiling a reviewer could reach".format(
-            _pct(point["review_recall"])
-        ),
-        "  tp {0}  fp {1}  fn {2}  tn {3}".format(
-            counts["tp"], counts["fp"], counts["fn"], counts["tn"]
-        ),
+        f"  auto-confirm    precision {_pct(point['precision'])}  recall {_pct(point['recall'])}  F1 {point['f1']}",
+        f"  through review  recall    {_pct(point['review_recall'])}   <- ceiling a reviewer could reach",
+        f"  tp {counts['tp']}  fp {counts['fp']}  fn {counts['fn']}  tn {counts['tn']}",
         "",
     ]
 
@@ -391,26 +362,15 @@ def format_report(ev):
         if ev[key]:
             lines.append(title)
             for row in ev[key]:
-                lines.append(
-                    "  {0:<26} {1}  tp {2:<4} fp {3:<4} unlabeled {4}".format(
-                        row["name"], _pct(row["precision"]), row["tp"], row["fp"], row["unlabeled"]
-                    )
-                )
+                lines.append(f"  {row['name']:<26} {_pct(row['precision'])}  tp {row['tp']:<4} fp {row['fp']:<4} unlabeled {row['unlabeled']}")
             lines.append("")
 
     lines.append("THRESHOLD SWEEP")
     lines.append("  thresh  precision  recall     F1     tp   fp   fn")
     for p in ev["sweep"]:
         lines.append(
-            "  {0:.2f}    {1}     {2}   {3:.4f}   {4:<4} {5:<4} {6}".format(
-                p["threshold"],
-                _pct(p["precision"]),
-                _pct(p["recall"]),
-                p["f1"],
-                p["counts"]["tp"],
-                p["counts"]["fp"],
-                p["counts"]["fn"],
-            )
+            f"  {p['threshold']:.2f}    {_pct(p['precision'])}     {_pct(p['recall'])}   {p['f1']:.4f}"
+            f"   {p['counts']['tp']:<4} {p['counts']['fp']:<4} {p['counts']['fn']}"
         )
     lines.append("")
 
@@ -418,42 +378,27 @@ def format_report(ev):
     lines.append("RECOMMENDATION")
     if rec["best_f1"]:
         lines.append(
-            "  best F1          {0:.2f}  (F1 {1:.4f}, precision {2}, recall {3})".format(
-                rec["best_f1"]["threshold"],
-                rec["best_f1"]["f1"],
-                _pct(rec["best_f1"]["precision"]),
-                _pct(rec["best_f1"]["recall"]),
-            )
+            f"  best F1          {rec['best_f1']['threshold']:.2f}  (F1 {rec['best_f1']['f1']:.4f},"
+            f" precision {_pct(rec['best_f1']['precision'])}, recall {_pct(rec['best_f1']['recall'])})"
         )
     cheapest = rec["lowest_threshold_meeting_target"]
     if cheapest:
         lines.append(
-            "  precision >= {0:.0%}  {1:.2f}  (precision {2}, recall {3})  <- ship this one".format(
-                rec["target_precision"],
-                cheapest["threshold"],
-                _pct(cheapest["precision"]),
-                _pct(cheapest["recall"]),
-            )
+            f"  precision >= {rec['target_precision']:.0%}  {cheapest['threshold']:.2f}"
+            f"  (precision {_pct(cheapest['precision'])}, recall {_pct(cheapest['recall'])})  <- ship this one"
         )
     else:
-        lines.append(
-            "  no threshold reaches precision {0:.0%} with any recall -- the weights, "
-            "not the cutoff, are the problem".format(rec["target_precision"])
-        )
+        lines.append(f"  no threshold reaches precision {rec['target_precision']:.0%} with any recall -- the weights, not the cutoff, are the problem")
 
     if ev["unresolved_labels"]:
         lines.append("")
-        lines.append("UNUSED LABEL ROWS ({0})".format(len(ev["unresolved_labels"])))
+        lines.append(f"UNUSED LABEL ROWS ({len(ev['unresolved_labels'])})")
         for row in ev["unresolved_labels"][:20]:
-            lines.append("  {0}: {1}".format(row["reason"], json.dumps(row["row"], sort_keys=True)))
+            lines.append(f"  {row['reason']}: {json.dumps(row['row'], sort_keys=True)}")
 
     lines.append("")
-    lines.append(
-        "Precision here is measured against your labels only. Label the hard cases --"
-    )
-    lines.append(
-        "common surnames, remarriages, junior/senior pairs -- or this flatters itself."
-    )
+    lines.append("Precision here is measured against your labels only. Label the hard cases --")
+    lines.append("common surnames, remarriages, junior/senior pairs -- or this flatters itself.")
     return "\n".join(lines)
 
 

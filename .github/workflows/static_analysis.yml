@@ -37,3 +37,14 @@ jobs:
       - name: Type check with mypy
         run: |
           mypy src/ tests/
+      # tools/ holds standalone stdlib scripts, checked separately from the
+      # package: they use their own mypy config (see tools/mypy.ini for why).
+      - name: Lint tools with pylint
+        run: |
+          pylint -r n tools/*/*.py
+      - name: Security check tools with bandit
+        run: |
+          bandit -q -r tools/
+      - name: Type check tools with mypy
+        run: |
+          mypy --config-file tools/mypy.ini tools/

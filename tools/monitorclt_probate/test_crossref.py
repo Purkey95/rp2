@@ -8,12 +8,13 @@ import json
 import os
 import sys
 import unittest
+from typing import Any, Dict, List
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 if HERE not in sys.path:
     sys.path.insert(0, HERE)
 
-import crossref  # noqa: E402  (path must be set first)
+import crossref  # noqa: E402  (path must be set first)  # pylint: disable=wrong-import-position
 
 SAMPLE = os.path.join(HERE, "sample")
 
@@ -57,9 +58,7 @@ def link_for(estate_row, parcel_row, deeds=(), rule_set=None):
     deed_index = crossref.index_deeds(list(deeds), rule_set)
     decedent = crossref.parse_name(estate_row["decedent_name"], "first_last", rule_set)
     _, party = parcel_index[decedent["key_fl"]][0]
-    return crossref.score_link(
-        estate_row, parcel_row, decedent, party, rule_set, frequency, deed_index
-    )
+    return crossref.score_link(estate_row, parcel_row, decedent, party, rule_set, frequency, deed_index)
 
 
 class TestNormalization(unittest.TestCase):
@@ -118,9 +117,7 @@ class TestScoring(unittest.TestCase):
         self.assertIn("name_only_needs_human_review", link["flags"])
 
     def test_mailing_address_confirms(self):
-        link = link_for(
-            estate(), parcel(owner_mailing_address="4210 ELM ST CHARLOTTE NC 28205")
-        )
+        link = link_for(estate(), parcel(owner_mailing_address="4210 ELM ST CHARLOTTE NC 28205"))
         self.assertEqual(link["status"], "confirmed")
         self.assertIn("mailing_address_match", link["evidence"])
 
@@ -148,10 +145,7 @@ class TestScoring(unittest.TestCase):
 
     def test_common_name_is_penalized_below_the_review_floor(self):
         rule_set = rules()
-        parcels = [
-            parcel(pin="099-001-{0:02d}".format(i), owner_name="SMITH DAVID", owner_mailing_address="")
-            for i in range(1, 10)
-        ]
+        parcels = [parcel(pin=f"099-001-{i:02d}", owner_name="SMITH DAVID", owner_mailing_address="") for i in range(1, 10)]
         result = crossref.crossref([estate(decedent_name="David Smith")], parcels, [], rule_set)
         self.assertTrue(result["matches"])
         for link in result["matches"]:
@@ -187,13 +181,14 @@ class TestScoring(unittest.TestCase):
 
     def test_organization_owner_cannot_be_confirmed(self):
         rule_set = rules()
-        result = crossref.crossref(
-            [estate()], [parcel(owner_name="PUBLIC PROPERTIES LLC")], [], rule_set
-        )
+        result = crossref.crossref([estate()], [parcel(owner_name="PUBLIC PROPERTIES LLC")], [], rule_set)
         self.assertEqual(result["matches"], [])
 
 
 class TestEndToEnd(unittest.TestCase):
+    # Declared for the type checker: setUpClass assigns this on the class.
+    result: Dict[str, Any]
+
     @classmethod
     def setUpClass(cls):
         cls.result = crossref.crossref(
@@ -205,8 +200,15 @@ class TestEndToEnd(unittest.TestCase):
 
     def test_every_link_maps_onto_the_entity_match_table(self):
         columns = {
-            "left_source", "left_id", "right_source", "right_id",
-            "match_tier", "score", "evidence", "flags", "status",
+            "left_source",
+            "left_id",
+            "right_source",
+            "right_id",
+            "match_tier",
+            "score",
+            "evidence",
+            "flags",
+            "status",
         }
         for link in self.result["matches"]:
             self.assertTrue(columns.issubset(link.keys()))
@@ -216,14 +218,17 @@ class TestEndToEnd(unittest.TestCase):
             self.assertIn(link["status"], ("confirmed", "pending", "rejected"))
 
     def test_expected_dispositions_on_the_sample(self):
-        statuses = {}
+        statuses: Dict[str, List[Any]] = {}
         for link in self.result["matches"]:
             statuses.setdefault(link["status"], []).append(link["right_id"])
-        self.assertEqual(sorted(statuses["confirmed"]), [
-            "MECKLENBURG/017-455-02",
-            "MECKLENBURG/045-121-08",
-            "MECKLENBURG/213-002-44",
-        ])
+        self.assertEqual(
+            sorted(statuses["confirmed"]),
+            [
+                "MECKLENBURG/017-455-02",
+                "MECKLENBURG/045-121-08",
+                "MECKLENBURG/213-002-44",
+            ],
+        )
 
     def test_rollup_answers_does_this_estate_hold_real_property(self):
         holding = {row["left_id"] for row in self.result["estates"] if row["has_real_property"]}
@@ -249,9 +254,7 @@ class TestEndToEnd(unittest.TestCase):
             crossref.load_records(os.path.join(SAMPLE, "deeds.jsonl")),
             rules(),
         )
-        self.assertEqual(
-            json.dumps(again, sort_keys=True), json.dumps(self.result, sort_keys=True)
-        )
+        self.assertEqual(json.dumps(again, sort_keys=True), json.dumps(self.result, sort_keys=True))
 
 
 if __name__ == "__main__":

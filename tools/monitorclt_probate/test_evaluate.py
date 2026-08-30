@@ -8,13 +8,14 @@ import os
 import sys
 import tempfile
 import unittest
+from typing import Any, Dict, List
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 if HERE not in sys.path:
     sys.path.insert(0, HERE)
 
-import crossref  # noqa: E402  (path must be set first)
-import evaluate  # noqa: E402
+import crossref  # noqa: E402  (path must be set first)  # pylint: disable=wrong-import-position
+import evaluate  # noqa: E402  # pylint: disable=wrong-import-position
 
 SAMPLE = os.path.join(HERE, "sample")
 
@@ -32,13 +33,10 @@ def load_sample():
 
 
 def write_labels(rows):
-    handle = tempfile.NamedTemporaryFile(
-        "w", suffix=".csv", delete=False, encoding="utf-8", newline=""
-    )
-    handle.write("file_number,pin,is_match\n")
-    for row in rows:
-        handle.write(",".join(row) + "\n")
-    handle.close()
+    with tempfile.NamedTemporaryFile("w", suffix=".csv", delete=False, encoding="utf-8", newline="") as handle:
+        handle.write("file_number,pin,is_match\n")
+        for row in rows:
+            handle.write(",".join(row) + "\n")
     return handle.name
 
 
@@ -53,9 +51,7 @@ class TestLabelLoading(unittest.TestCase):
         finally:
             os.unlink(path)
         self.assertEqual(unresolved, [])
-        self.assertEqual(
-            labels, {("MECKLENBURG/26 E 001234", "MECKLENBURG/045-121-08"): True}
-        )
+        self.assertEqual(labels, {("MECKLENBURG/26 E 001234", "MECKLENBURG/045-121-08"): True})
 
     def test_pins_differing_only_in_punctuation_still_resolve(self):
         path = write_labels([("26E001234", "04512108", "1")])
@@ -95,14 +91,21 @@ class TestLabelLoading(unittest.TestCase):
 
 
 class TestScoring(unittest.TestCase):
+    # Declared for the type checker: setUpClass assigns these on the class.
+    estates: List[Any]
+    parcels: List[Any]
+    deeds: List[Any]
+    rules: Dict[str, Any]
+    result: Dict[str, Any]
+    labels: Dict[Any, Any]
+    unresolved: List[Any]
+
     @classmethod
     def setUpClass(cls):
         cls.estates, cls.parcels, cls.deeds = load_sample()
         cls.rules = rules()
         cls.result = crossref.crossref(cls.estates, cls.parcels, cls.deeds, cls.rules)
-        cls.labels, cls.unresolved = evaluate.load_labels(
-            os.path.join(SAMPLE, "labels.csv"), cls.estates, cls.parcels
-        )
+        cls.labels, cls.unresolved = evaluate.load_labels(os.path.join(SAMPLE, "labels.csv"), cls.estates, cls.parcels)
 
     def test_status_at_the_shipped_threshold_matches_what_crossref_decided(self):
         threshold = self.rules["thresholds"]["auto_confirm"]
@@ -143,9 +146,7 @@ class TestScoring(unittest.TestCase):
     def test_a_true_match_that_never_blocked_in_counts_as_blocked_out(self):
         labels = dict(self.labels)
         labels[("MECKLENBURG/26 E 001240", "MECKLENBURG/133-070-13")] = True
-        point = evaluate.confusion(
-            self.result["matches"], labels, self.rules["thresholds"]["auto_confirm"], self.rules
-        )
+        point = evaluate.confusion(self.result["matches"], labels, self.rules["thresholds"]["auto_confirm"], self.rules)
         self.assertEqual(
             point["blocked_out"],
             [{"left_id": "MECKLENBURG/26 E 001240", "right_id": "MECKLENBURG/133-070-13"}],
