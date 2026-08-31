@@ -148,3 +148,41 @@ carry into a shop.
 ## Related
 
 - [[kids-ebike-selection-criteria]] — the four gates used above.
+
+## Where to try these — Davidson / Huntersville / Charlotte
+
+**Three of the four cannot be test-ridden.** Tuttio, Macfox and Spacewalk are
+direct-to-consumer with no local dealer. "Get Adam on one first" and "buy the
+ARC-I" are mutually exclusive plans.
+
+### Bike shops (the 24" pedal option)
+
+| Shop | Location | Contact | Note |
+|---|---|---|---|
+| **Spirited Cyclist** | 112 Eden St, Davidson | (704) 948-9300 · Tue–Sat 11–5 | Specialized dealer (Riprock 24); also services e-motos and Sur-Rons. Start here. |
+| **The Cycle Path** | 20900 N Main St, Cornelius | (704) 896-3331 | Cannondale, Specialized, Santa Cruz, Diamondback |
+| **Trek of Charlotte – Lake Norman** | 146 Mooresville Commons Way Ste 5L | (704) 663-8812 · M–F 10–6, Sat 10–5 | Precaliber 24, ~$429. Exit 35 off I-77 |
+| **REI Charlotte** | 9755 Northlake Centre Pkwy | (704) 921-0320 | Co-op Cycles REV 24 |
+
+**Conflict:** other listings give Spirited Cyclist a Jetton St address in
+Davidson and a Huntersville store at 9905 Rose Commons Dr; the shop's own
+contact page lists only Eden St. Call before driving.
+
+### The sizing catch
+
+REI is the only retailer here that publishes an **inseam** range rather than a
+height range: the REV 24 is specified for a **24–28" inseam**. Adam's estimated
+23–25" puts him at the very bottom of the 24"-wheel window — so a 20"-wheel
+bike may still be correct. This is the conversation to have in a shop, not
+online, and it reinforces that the inseam measurement comes first.
+
+### Secondary stops
+
+- **Best Buy** — the Fitz16 at $549.99 is the only shortlist bike with retail
+  distribution, and the only one with a real returns counter. Call the
+  Northlake store for floor stock.
+- **Evinmotors**, 8601 Monroe Rd, Charlotte, (704) 639-8000, Tue–Fri 9:30–6,
+  Sat 9–3 — Sur-Ron dealer. Beyond budget and far too much machine, but useful
+  for calibrating what a throttle-only moto-style electric actually is.
+- **Pedego Lake Norman**, 19911 Zion Ave Ste D3, Cornelius, (704) 997-5051,
+  Tue–Sat 10–5:30, Sun 11–4 — adult cruisers only, no kids' line.
