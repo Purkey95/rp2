@@ -1,7 +1,7 @@
 ---
 type: index
 created: 2026-07-08
-updated: 2026-07-08
+updated: 2026-08-31
 ---
 
 # Wiki Index
@@ -20,8 +20,12 @@ first when answering queries.
 
 ## Concepts
 
-*(none yet)*
+- [[kids-ebike-selection-criteria]] — four gates for picking a child's electric
+  bike: category (pedal bike vs. mini dirt bike), seat height vs. inseam,
+  manageable weight, and certification plus who controls the speed limiter.
 
 ## Syntheses & Answers
 
-*(none yet)*
+- [[kids-ebike-shortlist-for-adam]] — six sub-$1,000 candidates screened for an
+  85 lb, 4'5"–4'6" rider; verified specs, three corrections to earlier claims,
+  and a category-first recommendation. (2026-08-31)
