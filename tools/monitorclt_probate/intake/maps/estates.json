@@ -1,0 +1,22 @@
+{
+  "_comment": "Estate cases from an NCAOC Remote Public Access extract or a manual eCourts Portal export. NO automated portal access -- the Portal's terms forbid it; this reads a file. Column names below are a documented GUESS written against sample/intake/estates_export.csv and are TO VERIFY against the real extract's data dictionary. Fix this map, not the code.",
+  "record_type": "estate_case",
+  "natural_key": ["county", "file_number"],
+  "required": ["file_number", "decedent_name"],
+  "since_field": "filing_date",
+  "filters": [
+    {"column": "CaseNumber", "regex": "^\\d{2}\\s?E\\s?\\d+", "_why": "estate file numbers only; a mixed civil extract carries CVD/CVS/SP rows too"}
+  ],
+  "fields": {
+    "county":             {"arg": "county"},
+    "file_number":        {"from": "CaseNumber"},
+    "decedent_name":      {"from": "DecedentName"},
+    "date_of_death":      {"from": "DateOfDeath", "type": "date"},
+    "filing_date":        {"from": "FileDate", "type": "date"},
+    "case_status":        {"from": "CaseStatus"},
+    "personal_rep_name":  {"from": "PersonalRepresentative"},
+    "pr_mailing_address": {"from": "PRAddress"},
+    "source_url":         {"template": "{base}/{CaseNumber}"},
+    "retrieved_at":       {"arg": "retrieved_at"}
+  }
+}

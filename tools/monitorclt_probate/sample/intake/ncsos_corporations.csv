@@ -1,0 +1,3 @@
+SOSID,CorpName,EntityType,Status,DomesticForeign,DateFormed,PrinOfficeAddr1,PrinOfficeAddr2,PrinOfficeCity,PrinOfficeState,PrinOfficeZip,MailAddr1,MailAddr2,MailCity,MailState,MailZip,RegAgentName,RegAgentAddr1,RegAgentCity,RegAgentState,RegAgentZip
+1234567,"Nonesuch Holdings, LLC",Limited Liability Company,Current-Active,Domestic,06/01/2015,4210 Elm Street,Apt 5,Charlotte,NC,28205,PO Box 12,,Charlotte,NC,28201,Placeholder Registered Agents Inc,1 Agent Row Suite 100,Raleigh,NC,27601
+3456789,Other Ventures LLC,Limited Liability Company,Current-Active,Domestic,11/02/2021,900 Capital Blvd,,Raleigh,NC,27603,,,,,,Placeholder Registered Agents Inc,1 Agent Row Suite 100,Raleigh,NC,27601

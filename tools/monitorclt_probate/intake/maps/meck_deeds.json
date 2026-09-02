@@ -1,0 +1,20 @@
+{
+  "_comment": "Mecklenburg Register of Deeds bulk index (sold by the ROD; fees by volume). Column names are a documented GUESS written against sample/intake/meck_deeds.csv and are TO VERIFY against the ROD's export layout. grantor_name is verbatim; parcel_pin is as printed on the instrument even when malformed. Fix this map, not the code.",
+  "record_type": "deed",
+  "natural_key": ["county", "book", "page", "instrument_number"],
+  "required": ["instrument_number", "recorded_date"],
+  "since_field": "recorded_date",
+  "fields": {
+    "county":            {"arg": "county"},
+    "instrument_number": {"from": "InstrumentNumber"},
+    "book":              {"from": "Book"},
+    "page":              {"from": "Page"},
+    "recorded_date":     {"from": "RecordedDate", "type": "date"},
+    "instrument_type":   {"from": "InstrumentType"},
+    "grantor_name":      {"from": "Grantor"},
+    "grantee_name":      {"from": "Grantee"},
+    "parcel_pin":        {"from": "ParcelID"},
+    "source_url":        {"template": "{base}/{Book}/{Page}"},
+    "retrieved_at":      {"arg": "retrieved_at"}
+  }
+}

@@ -13,3 +13,6 @@ file_number,pin,is_match,note
 26 E 001237,099-001-08,0,a different David Smith
 26 E 001238,412-880-31,0,Alice C Example is a different person
 26 E 001239,07-190-225,1,out-of-county parcel genuinely in the estate
+26 E 001234,133-070-13,1,his LLC holds this parcel -- an interest in the entity; capped at pending by design
+26 E 001235,133-070-14,0,she was only the registered agent; the LLC is a client's
+26 E 001236,017-455-03,1,held as trustee at his own mailing address; capped at pending by design

@@ -28,6 +28,7 @@ def load_sample():
         crossref.load_records(os.path.join(SAMPLE, "estate_cases.jsonl")),
         crossref.load_records(os.path.join(SAMPLE, "parcels.jsonl")),
         crossref.load_records(os.path.join(SAMPLE, "deeds.jsonl")),
+        crossref.load_records(os.path.join(SAMPLE, "business_entities.jsonl")),
     )
 
 
@@ -44,7 +45,7 @@ def write_labels(rows):
 
 class TestLabelLoading(unittest.TestCase):
     def setUp(self):
-        self.estates, self.parcels, _ = load_sample()
+        self.estates, self.parcels, _, _ = load_sample()
 
     def test_bare_ids_resolve_to_county_qualified_ids(self):
         path = write_labels([("26 E 001234", "045-121-08", "1")])
@@ -97,9 +98,11 @@ class TestLabelLoading(unittest.TestCase):
 class TestScoring(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.estates, cls.parcels, cls.deeds = load_sample()
+        cls.estates, cls.parcels, cls.deeds, cls.entities = load_sample()
         cls.rules = rules()
-        cls.result = crossref.crossref(cls.estates, cls.parcels, cls.deeds, cls.rules)
+        cls.result = crossref.crossref(
+            cls.estates, cls.parcels, cls.deeds, cls.rules, entities=cls.entities
+        )
         cls.labels, cls.unresolved = evaluate.load_labels(
             os.path.join(SAMPLE, "labels.csv"), cls.estates, cls.parcels
         )
@@ -126,12 +129,12 @@ class TestScoring(unittest.TestCase):
         ev = evaluate.evaluate(self.result, self.labels, [], self.rules, 0.95)
         self.assertEqual(ev["sweep"][0]["threshold"], self.rules["thresholds"]["review_floor"])
 
-    def test_sample_labels_give_perfect_precision_and_half_recall(self):
+    def test_sample_labels_give_perfect_precision_and_full_review_recall(self):
         ev = evaluate.evaluate(self.result, self.labels, [], self.rules, 0.95)
         point = ev["at_current_threshold"]
-        self.assertEqual(point["counts"], {"tp": 3, "fp": 0, "fn": 3, "tn": 8})
+        self.assertEqual(point["counts"], {"tp": 3, "fp": 0, "fn": 5, "tn": 9})
         self.assertEqual(point["precision"], 1.0)
-        self.assertEqual(point["recall"], 0.5)
+        self.assertEqual(point["recall"], 0.375)
         self.assertEqual(point["review_recall"], 1.0)
 
     def test_missed_matches_are_split_by_cause(self):
@@ -139,6 +142,40 @@ class TestScoring(unittest.TestCase):
         point = ev["at_current_threshold"]
         self.assertEqual(point["blocked_out"], [])  # every true match was a candidate
         self.assertEqual(len(point["scored_low"]), 3)
+        self.assertEqual(len(point["capped"]), 3)
+
+    def test_capped_links_survive_the_sweep(self):
+        for link in self.result["matches"]:
+            if crossref.cap_flags(link["evidence"]):
+                for threshold in (0.0, 0.45, 0.85, 1.0):
+                    self.assertIn(evaluate.status_at(link, threshold, self.rules), ("pending", "rejected"))
+
+    def test_capped_positive_is_reviewable_but_never_a_true_positive(self):
+        point = evaluate.confusion(self.result["matches"], self.labels, 0.0, self.rules)
+        capped_positive = [r for r in point["capped"] if r["is_match"]]
+        self.assertEqual(len(capped_positive), 2)
+        scored_low_ids = {(r["left_id"], r["right_id"]) for r in point["scored_low"]}
+        for row in capped_positive:
+            self.assertNotIn((row["left_id"], row["right_id"]), scored_low_ids)
+        self.assertEqual(point["review_recall"], 1.0)
+
+    def test_capped_negative_is_never_a_false_positive_at_any_threshold(self):
+        for threshold in (0.0, 0.45, 0.65, 0.85):
+            point = evaluate.confusion(self.result["matches"], self.labels, threshold, self.rules)
+            self.assertEqual(point["counts"]["fp"], 0)
+            self.assertFalse(
+                [r for r in point["false_positives"] if r["right_id"] == "MECKLENBURG/133-070-14"]
+            )
+
+    def test_a_confirmed_capped_link_fails_loudly(self):
+        link = next(l for l in self.result["matches"] if "entity_official_link" in l["evidence"])
+        original = crossref.disposition
+        crossref.disposition = lambda *a, **k: ("confirmed", [])
+        try:
+            with self.assertRaises(RuntimeError):
+                evaluate.status_at(link, 0.85, self.rules)
+        finally:
+            crossref.disposition = original
 
     def test_a_true_match_that_never_blocked_in_counts_as_blocked_out(self):
         labels = dict(self.labels)
@@ -150,7 +187,7 @@ class TestScoring(unittest.TestCase):
             point["blocked_out"],
             [{"left_id": "MECKLENBURG/26 E 001240", "right_id": "MECKLENBURG/133-070-13"}],
         )
-        self.assertEqual(point["counts"]["fn"], 4)
+        self.assertEqual(point["counts"]["fn"], 6)
 
     def test_evidence_breakdown_credits_every_label_a_link_carries(self):
         ev = evaluate.evaluate(self.result, self.labels, [], self.rules, 0.95)
@@ -168,6 +205,7 @@ class TestScoring(unittest.TestCase):
         self.assertIn("AT THE SHIPPED THRESHOLD", text)
         self.assertIn("THRESHOLD SWEEP", text)
         self.assertIn("RECOMMENDATION", text)
+        self.assertIn("CAPPED", text)
 
 
 if __name__ == "__main__":

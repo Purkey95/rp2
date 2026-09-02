@@ -17,6 +17,7 @@ takes **no incarceration, probation, parole, or arrest data as input at all** �
 | **Estate case** (Clerk of Superior Court, estates division) | county + file number | decedent, date of death, filing date, status, personal representative and mailing address |
 | **Parcel / assessor** (county tax + GIS, public record) | county + PIN | owner string, situs and tax-mailing address, land use, assessed value, deed book/page |
 | **Deed** (Register of Deeds) | book/page or instrument no. | grantor, grantee, recording date, instrument type, PIN as printed |
+| **Business entity** (NC Secretary of State, optional) | SOS id | entity name, status, addresses, company officials, registered agent — the only way a parcel owned by the decedent's LLC becomes reachable |
 
 Sources are systems of record and are never mutated by matching. Every assertion
 that two records are the same person lives in `entity_match` with its evidence,
@@ -48,6 +49,30 @@ suffixes, `PUBLIC JOHN Q & JANE R` (the second owner inherits the printed
 surname), organizations, and `ESTATE OF …` prefixes (which flip the remainder
 back to natural order). All tunable in `match_rules.json` — no code change.
 
+6. **Capped paths.** Two kinds of parcel never enter the pipeline above and
+   are reached separately, and **neither can ever be auto-confirmed**
+   (`crossref.CAP_AT_PENDING` — a code constant, not a rule, so calibration
+   cannot tune it away):
+   - **Held through an entity.** The owner string names an LLC or corporation;
+     `--entities` supplies NC SOS records naming its officials. A decedent who
+     is an official of the entity on title links with `entity_official_link`
+     (`+0.10`), a registered agent with `registered_agent_link` (`−0.10` — it is
+     usually a law office), the estate's mailing address at the entity's
+     principal office `+0.15`, suffix disagreement (INC on the parcel, LLC at the
+     SOS) `−0.15`, and an entity name that resolves to more than one SOS id
+     `−0.15` (ambiguity is reported, never guessed at). Entity names are matched
+     exactly after stripping legal-form noise; nothing fuzzy. Flag
+     `held_via_entity`.
+   - **Held by a named trustee.** `PUBLIC JOHN Q TRUSTEE` is a person in a role,
+     so the name enters blocking and is scored normally. Flag `held_in_trust`.
+     `PUBLIC FAMILY TRUST` — no person named — stays an organization and stays
+     unreachable; trusts are not registered anywhere this tool reads.
+
+   A capped link is an interest in the entity or the trust, not the parcel.
+   The review floor still rejects the weak ones; the strong ones sit in
+   `pending` for a human, and the schema's `CHECK` refuses a confirmed row that
+   carries either flag without `reviewed_at`.
+
 `post_death_conveyance` is flagged when a deed from the decedent is recorded
 *after* the date of death: identity corroborated, but the parcel may already have
 left the estate. Parcels whose owner reads `ESTATE OF …` with no matching estate
@@ -57,17 +82,47 @@ you have not pulled.
 ## Run
 
 ```bash
-python3 crossref.py --estates sample/estate_cases.jsonl \
-                    --parcels sample/parcels.jsonl \
-                    --deeds   sample/deeds.jsonl \
+python3 crossref.py --estates  sample/estate_cases.jsonl \
+                    --parcels  sample/parcels.jsonl \
+                    --deeds    sample/deeds.jsonl \
+                    --entities sample/business_entities.jsonl \
                     --json out.json
 python3 test_crossref.py
 ```
 
-Each row of `matches` in the JSON maps 1:1 onto `probate.entity_match`, so loading
-a run is a straight insert; `probate.v_estate_property` is the lead list
-(confirmed only) and `probate.v_review_queue` is what a human still has to clear.
-The sample data is synthetic.
+Each row of `matches` in the JSON maps 1:1 onto `probate.entity_match`;
+`probate.v_estate_property` is the lead list (confirmed only) and
+`probate.v_review_queue` is what a human still has to clear. The sample data is
+synthetic.
+
+**Getting records in.** Nothing here fetches anything: county sources have terms,
+the estates portal forbids automated access outright, and the SOS bulk data is a
+subscription (see `agents/sources.md`). `intake/adapt.py` turns a vendor CSV into
+the JSONL above through a map file — the only place a rename happens — and
+refuses, with reasons and a non-zero exit, rather than guess at a field:
+
+```bash
+python3 intake/adapt.py --input export.csv --map intake/maps/estates.json \
+        --out estate_cases.jsonl --county MECKLENBURG --source-url-base https://...
+python3 intake/adapt.py --input corps.csv --map intake/maps/ncsos.json \
+        --child officials=officials.csv --out business_entities.jsonl --source-url-base https://...
+```
+
+The maps in `intake/maps/` were written against the fixtures in `sample/intake/`
+and are marked `TO VERIFY` against each vendor's real layout.
+
+**Loading a run.** `load_run.py` writes one transaction of SQL for `psql`. It is
+not quite the "straight insert" it looks like: a confirmed row must name a
+reviewer (it gets the rule run, `rules@1.1/run:N`, never an invented person),
+and because `entity_match` is unique per pair rather than per run, a re-run
+must not overwrite a human's decision — reviewed rows take fresh evidence and
+keep their status. The load ends by listing every pair where the matcher now
+disagrees with a person.
+
+```bash
+python3 load_run.py --run out.json --estates ... --parcels ... --deeds ... --entities ... > load.sql
+psql "$DSN" -v ON_ERROR_STOP=1 -1 -f load.sql
+```
 
 ## The workflow this belongs to
 
@@ -91,6 +146,13 @@ to sell, and NC DAC's public database covers state prison/probation/parole — n
 county jails — so it is an incomplete signal even on its own terms. Criminal-history
 data also carries fair-housing exposure (HUD has warned that criminal-record-based
 housing restrictions can produce unjustified disparate impacts under the FHA).
+
+Two more things it does not do, by construction rather than by policy. A
+`held_via_entity` or `held_in_trust` match is not a finding that the estate
+holds the parcel — the entity or the trust does, and what interest the estate
+has in *that* is for the estate attorney. And a trust with no named trustee on
+the owner string is not reachable at all: there is no registry to resolve it
+against.
 
 If a narrow, documented need ever arises — e.g. an heir or representative may need
 counsel or alternative communication — treat it as restricted manual research
@@ -131,8 +193,11 @@ rather than a guess. The report gives:
   is a *recall-then-review* design where a wrong `confirmed` costs far more than
   a `pending`
 
-On the synthetic sample it reports 100% precision and 50% recall at auto-confirm,
-with 100% recall through the review queue — the intended shape, and a reminder
-that these numbers describe the sample, not Mecklenburg. Label the hard cases
+On the synthetic sample it reports 100% precision and 37.5% recall at
+auto-confirm, with 100% recall through the review queue — the intended shape,
+and a reminder that these numbers describe the sample, not Mecklenburg. Capped
+pairs (entity- and trustee-held) are listed in their own section: they count as
+misses at auto-confirm, because they never reach the lead list, but they are not
+a weights problem and no threshold reaches them. Label the hard cases
 (common surnames, remarriages, junior/senior pairs) or the harness flatters
 itself.
