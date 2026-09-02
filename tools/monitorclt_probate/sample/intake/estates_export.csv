@@ -1,0 +1,5 @@
+CaseNumber,CaseType,DecedentName,DateOfDeath,FileDate,CaseStatus,PersonalRepresentative,PRAddress
+26 E 001234,Estate,John Q Public,01/14/2026,01/28/2026,OPEN,Jane R Public,"4210 Elm Street Apt 5, Charlotte NC 28205"
+26 E 001236,Estate,Robert Lee Testcase,01/05/2026,01/22/2026,OPEN,Nina Testcase,"17 Willow Bend Drive, Huntersville NC 28078"
+26 CVD 004410,Civil,Not An Estate,,03/02/2026,OPEN,,
+26 E 001241,Estate,Johnson,,03/18/2026,OPEN,,

@@ -40,6 +40,15 @@ Render, in this order:
      date of death. Identity is corroborated; the parcel may already have left
      the estate. This is a different question from the identity question and
      must not be blurred into it.
+   - `held_via_entity` — the parcel is owned by an LLC or corporation, and the
+     decedent was one of its officials (or, weaker, its registered agent; the
+     `via:` line says which). The entity holds title. The estate holds, at
+     most, an interest in the entity. **Never write "the estate holds this
+     parcel"** for such a row; write "the decedent's LLC holds this parcel".
+     The matcher will not confirm it however it scores, and neither may this
+     packet suggest it.
+   - `held_in_trust` — the owner string names the decedent as trustee. The
+     trust holds title; same rule.
 3. **The evidence list in English.** Translate the labels in
    `../../match_rules.json` — `mailing_address_match` becomes "the estate's mailing
    address on file matches the parcel's tax-mailing address". Do not restate the
@@ -52,6 +61,9 @@ Render, in this order:
    - `post_death_conveyance` → was this parcel conveyed out of the estate, and
      when?
    - a common-name penalty → how many people share this name in this county?
+   - `held_via_entity` / `held_in_trust` → does the estate hold an interest in
+     this entity or trust, and what is it? A question for the estate attorney,
+     not a records check; say so in the packet.
 5. **Where to look.** The `source_url` of both records.
 
 ## Rows that are not about identity

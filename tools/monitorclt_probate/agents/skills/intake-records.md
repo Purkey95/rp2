@@ -78,6 +78,35 @@ including when the PIN is malformed. `deed_grantor_link` corroboration and the
 deed from the decedent recorded after the date of death is the signal that a
 parcel may already have left the estate.
 
+### Business entities (NC Secretary of State)
+
+Statewide, so no `county`. Two subscription files — the entity table and the
+officials table — joined on SOS id; the map nests officials under each entity.
+Keep the registered agent on the entity record and **never** fold it into
+officials: the matcher scores an agent link weaker than an official link on
+purpose, because an agent is usually the entity's attorney. Entity names and
+official names verbatim — `crossref.normalize_entity_name` and `parse_name` do
+the normalizing, and a name you tidied is a key that no longer meets its parcel.
+
+This is the source that makes an LLC-held parcel reachable at all, and also the
+one whose real column layout nobody has seen yet: `intake/maps/ncsos.json` is
+written against `sample/intake/ncsos_*.csv` and marked `TO VERIFY`.
+
+## The engine does the parsing
+
+Do not read a CSV yourself. `intake/adapt.py` reads it, applies the map, types
+the fields, stamps `county` / `source_url` / `retrieved_at`, validates, and
+writes the good rows and the rejected rows apart:
+
+```bash
+python3 intake/adapt.py --input <vendor>.csv --map intake/maps/<source>.json \
+        --out <type>.jsonl --county MECKLENBURG --source-url-base <url>
+```
+
+A non-zero exit means something was rejected. Report it; do not re-run with
+`--allow-rejects` to make it green. When the vendor's columns differ from the
+fixture, the fix is the map file, and a human applies it.
+
 ## Validate before writing
 
 Per record: required columns present and non-empty; `county` matches the

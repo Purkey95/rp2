@@ -1,0 +1,20 @@
+{
+  "_comment": "Mecklenburg County open data, 'Tax Parcel Ownership Data' (free). Column names are a documented GUESS written against sample/intake/meck_parcels.csv and are TO VERIFY against the dataset's metadata page. The owner string is kept verbatim (two owner columns joined with ' & ' the way the assessor prints it) because crossref.py parses it itself. Fix this map, not the code.",
+  "record_type": "parcel",
+  "natural_key": ["county", "pin"],
+  "required": ["pin", "owner_name"],
+  "fields": {
+    "county":                {"arg": "county"},
+    "pin":                   {"from": "ParcelID"},
+    "situs_address":         {"template": "{SitusAddress}, {SitusCity} {SitusState} {SitusZip}"},
+    "owner_name":            {"join": ["OwnerName1", "OwnerName2"], "sep": " & "},
+    "owner_mailing_address": {"template": "{MailAddress} {MailCity} {MailState} {MailZip}"},
+    "land_use":              {"from": "LandUseCode"},
+    "assessed_value":        {"from": "TotalAssessedValue", "type": "number"},
+    "deed_book":             {"from": "DeedBook"},
+    "deed_page":             {"from": "DeedPage"},
+    "last_sale_date":        {"from": "SaleDate", "type": "date"},
+    "source_url":            {"template": "{base}/{ParcelID}"},
+    "retrieved_at":          {"arg": "retrieved_at"}
+  }
+}

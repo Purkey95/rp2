@@ -87,8 +87,8 @@ implementation today:
 
 | Skill | Wraps | Why it exists |
 |---|---|---|
-| [`intake-records`](skills/intake-records.md) | nothing — new | Acquire and normalize estate cases, parcels, deeds |
-| [`load-run`](skills/load-run.md) | nothing — new | Run JSON → `probate.*`, idempotently |
+| [`intake-records`](skills/intake-records.md) | `intake/adapt.py` + a map per source | Acquire and normalize estate cases, parcels, deeds, SOS entities |
+| [`load-run`](skills/load-run.md) | `load_run.py` | Run JSON → `probate.*`, idempotently, human decisions preserved |
 | [`triage-review-queue`](skills/triage-review-queue.md) | `probate.v_review_queue` | Turn pending rows into questions a human can answer |
 | [`calibrate-proposal`](skills/calibrate-proposal.md) | `evaluate.py` | Proposed rule diffs, never applied |
 | [`draft-pr-outreach`](skills/draft-pr-outreach.md) | `probate.v_estate_property` | Drafts only, never sent |
@@ -133,7 +133,7 @@ produces a system nobody can debug and nobody should trust.
 |---|---|---|
 | 0 | The specs in this directory. No automation | Roster agreed; `AGENTS.md` loaded into shared memory |
 | 1 | Intake — one county, one source (estate cases), human-triggered | Two weeks; a human spot-checks 20 records against the source and finds zero fabricated or dropped fields |
-| 2 | Runner | A loaded run is identical to a hand-run of `crossref.py`; the confirmed-row `CHECK` question in `skills/load-run.md` is settled |
+| 2 | Runner | A loaded run is identical to a hand-run of `crossref.py`; the confirmed-row `CHECK` is settled in `skills/load-run.md` and implemented in `load_run.py` |
 | 3 | Queue triage | The reviewer confirms the packet saved time and never nudged toward a confirm |
 | 4 | Calibration proposals | A proposal is adopted only after `evaluate.py` holds target precision on a label set that **grew** since the last change |
 | 5 | Outreach drafts | NC real-estate/probate attorney sign-off on both template and process, per `../README.md` |

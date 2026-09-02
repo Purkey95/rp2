@@ -7,7 +7,7 @@ be wrong on a schedule.
 | Trigger | What runs | Bot | Guard |
 |---|---|---|---|
 | Weekday 06:00 | `intake-records` — estate cases, per county | Intake | Missing required column is an error, not a blank. Report and stop; do not partially load |
-| Weekly Mon 05:00 | `intake-records` — parcels, deeds | Intake | Assessor and register data do not change daily; pulling them daily is cost with no signal |
+| Weekly Mon 05:00 | `intake-records` — parcels, deeds, SOS entities | Intake | Assessor and register data do not change daily; the SOS subscription updates weekly. Pulling daily is cost with no signal |
 | **On successful intake** | `crossref.py` → `load-run` → file to vault | Runner, then Scribe | Only on success. A run over a partial pull produces `pending` rows that look like real questions |
 | Weekday 08:00 | `triage-review-queue`, only if `v_review_queue` is non-empty | Queue | Silent when empty. Escalate any `pending` older than N days rather than re-sending the same packet |
 | Monthly | `calibrate-proposal` | Calibrator | Output is a proposal. Nothing applies it but a human |

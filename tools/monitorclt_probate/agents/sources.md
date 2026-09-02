@@ -24,25 +24,24 @@ authoritative.
 | `field_map` | Source column → `../schema.sql` column. The only place a rename is allowed to happen |
 | `known_quirks` | Pagination limits, encoding, how the owner string handles multiple owners, suffix handling |
 
-## Worked example — Mecklenburg estate cases
+## Mecklenburg, and the statewide SOS — what is established, what is not
 
-| Field | Value |
-|---|---|
-| `county` | `MECKLENBURG` |
-| `record_type` | `estate_case` |
-| `custodian` | Clerk of Superior Court, estates division |
-| `access_method` | TO VERIFY — check for a bulk export before building against a portal |
-| `endpoint` | TO VERIFY |
-| `publishes` | TO VERIFY — estate filings are business-day; confirm the lag before setting the 06:00 routine |
-| `name_format` | `first_last` (court order), per `../match_rules.json` |
-| `terms` | TO VERIFY before any automated access |
-| `field_map` | → `county`, `file_number`, `decedent_name`, `date_of_death`, `filing_date`, `case_status`, `personal_rep_name`, `pr_mailing_address`, `source_url`, `retrieved_at` |
-| `known_quirks` | Record the **personal representative**, not only the decedent — `../README.md` step 1, and the rollup in `crossref.py` carries `personal_rep_name` because step 4 is addressed to that person |
+Verified in September 2026 from the custodians' public pages; endpoints and
+column names are `TO VERIFY` until someone has the actual file in hand. Each row
+below has a map in `intake/maps/` written against a fixture in `sample/intake/`.
 
-Parcel and deed rows follow the same shape. Note that `../match_rules.json`
-declares `parcel` and `deed` as `last_first` while `estate_case` is
-`first_last`; if a county departs from that, the fix is a rules change proposed
-through Calibrator, not a transformation hidden in intake.
+| Field | Estate cases | Parcels | Deeds | Business entities |
+|---|---|---|---|---|
+| `county` | `MECKLENBURG` | `MECKLENBURG` | `MECKLENBURG` | — (statewide) |
+| `record_type` | `estate_case` | `parcel` | `deed` | `business_entity` |
+| `custodian` | Clerk of Superior Court, estates division (NC Judicial Branch) | County assessor / GIS | Register of Deeds | NC Secretary of State, Business Registration |
+| `access_method` | **File only.** The eCourts Portal (Mecklenburg since 2023-10-09, all counties since 2025-10-13) prohibits automated access. Licensed route: NCAOC Remote Public Access program — online access and data extracts; whether estates are in an extract is `TO VERIFY` with NCAOC. Pre-2023-10 records by email request to the estates division | **Open data, free.** "Tax Parcel Ownership Data" on the county open-data site: owner name, mailing and situs address, assessed value | **Bulk index, sold by the ROD**, fees by volume and format | **Paid weekly CSV Data Subscription** ("Business Registration" contract): name, home state, addresses, domestic/foreign, officials, status, filings. Online search forbids scripted queries |
+| `endpoint` | `nccourts.gov/services/remote-public-access-program` (`TO VERIFY`) | `maps.mecknc.gov/opendata` (`TO VERIFY`) | `TO VERIFY` — contact the ROD | `sosnc.gov/online_services/data_subscriptions` |
+| `publishes` | Business days; lag `TO VERIFY` | `TO VERIFY` — assessor data changes slowly; weekly is plenty | Daily recording; weekly pull | Weekly |
+| `name_format` | `first_last` | `last_first` | `last_first` | `first_last` (`TO VERIFY`; a comma form parses either way) |
+| `terms` | Portal ToS forbid bots; RPA licence terms govern extracts | Open data licence `TO VERIFY` | ROD terms `TO VERIFY` | Subscription terms; no technical support offered |
+| `field_map` | `intake/maps/estates.json` | `intake/maps/meck_parcels.json` | `intake/maps/meck_deeds.json` | `intake/maps/ncsos.json` (+ officials child file) |
+| `known_quirks` | A mixed civil extract carries CVD/CVS/SP rows; the map keeps `^\d{2} E` only. Record the **personal representative** — `../README.md` step 1, and step 4 is addressed to that person | Two owner columns; joined with ` & ` so `crossref.py` can split them itself | PIN as printed, even when malformed | Registered agent stays on the entity row and is never merged into officials; it is usually a law office and never corroborates |
 
 ## Choosing an access method
 

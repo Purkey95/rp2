@@ -1,0 +1,31 @@
+{
+  "_comment": "NC Secretary of State Business Registration data subscription (paid, weekly CSV; the online search forbids scripted queries, so this reads the subscription files). Two files: the corporations table and the company-officials table, joined on SOSID. Column names are a documented GUESS written against sample/intake/ncsos_corporations.csv and ncsos_officials.csv and are TO VERIFY against the data dictionary on the subscription server. The registered agent stays on the entity record and is never merged into officials. Fix this map, not the code.",
+  "record_type": "business_entity",
+  "natural_key": ["sos_id"],
+  "required": ["sos_id", "entity_name"],
+  "fields": {
+    "sos_id":                   {"from": "SOSID"},
+    "entity_name":              {"from": "CorpName"},
+    "entity_type":              {"from": "EntityType"},
+    "status":                   {"from": "Status"},
+    "domestic":                 {"from": "DomesticForeign", "type": "bool"},
+    "formation_date":           {"from": "DateFormed", "type": "date"},
+    "principal_office_address": {"template": "{PrinOfficeAddr1} {PrinOfficeAddr2}, {PrinOfficeCity} {PrinOfficeState} {PrinOfficeZip}"},
+    "mailing_address":          {"template": "{MailAddr1} {MailAddr2}, {MailCity} {MailState} {MailZip}"},
+    "registered_agent_name":    {"from": "RegAgentName"},
+    "registered_agent_address": {"template": "{RegAgentAddr1}, {RegAgentCity} {RegAgentState} {RegAgentZip}"},
+    "source_url":               {"template": "{base}/{SOSID}"},
+    "retrieved_at":             {"arg": "retrieved_at"}
+  },
+  "children": {
+    "officials": {
+      "join_parent": "SOSID",
+      "join_child": "SOSID",
+      "fields": {
+        "person_name": {"from": "OfficialName"},
+        "title":       {"from": "Title"},
+        "source":      {"template": "{FilingType} {ReportYear}"}
+      }
+    }
+  }
+}

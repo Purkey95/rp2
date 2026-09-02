@@ -42,8 +42,8 @@ the tool does not make that call and neither do I."
 |---|---|
 | **Context** | [`sources.md`](sources.md), `../schema.sql`, per-source quirks in its own memory |
 | **Connections** | County bulk/open-data endpoints and portals, read-only. Local filesystem for the JSONL it writes. **No email, no database write** |
-| **Capabilities** | [`intake-records`](skills/intake-records.md) |
-| **Cadence** | Weekday 06:00 for estates; weekly Monday 05:00 for parcels and deeds |
+| **Capabilities** | [`intake-records`](skills/intake-records.md), which runs `intake/adapt.py` |
+| **Cadence** | Weekday 06:00 for estates; weekly Monday 05:00 for parcels, deeds and SOS entities |
 
 The pipeline's only contact with the outside world, so it carries the strictest
 rule: **fail loudly, never plausibly**. A field the source did not supply stays
@@ -69,11 +69,15 @@ each one names a county, and usually a date range, that intake is missing.
 | **Cadence** | Event-chained: on a successful intake. Never on a clock |
 
 ```bash
-python3 crossref.py --estates <in>/estate_cases.jsonl \
-                    --parcels <in>/parcels.jsonl \
-                    --deeds   <in>/deeds.jsonl \
-                    --rules   match_rules.json \
-                    --json    runs/<run-id>.json
+python3 crossref.py --estates  <in>/estate_cases.jsonl \
+                    --parcels  <in>/parcels.jsonl \
+                    --deeds    <in>/deeds.jsonl \
+                    --entities <in>/business_entities.jsonl \
+                    --rules    match_rules.json \
+                    --json     runs/<run-id>.json
+python3 load_run.py --run runs/<run-id>.json --estates ... --parcels ... \
+                    --deeds ... --entities ... > runs/<run-id>.sql
+psql "$DSN" -v ON_ERROR_STOP=1 -1 -f runs/<run-id>.sql
 ```
 
 `--rules` is passed explicitly even though it is the default, so the run record

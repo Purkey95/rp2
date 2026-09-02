@@ -19,6 +19,9 @@ And it separates the two ways recall dies, which have different fixes:
                  never matched an owner party) -- a *parsing/blocking* problem,
                  no threshold will recover it
   scored low     the pair was scored and fell short -- a *weights* problem
+  capped         the pair was reached through a business entity or a trustee
+                 and is pending by construction (crossref.CAP_AT_PENDING) --
+                 review reaches it, no threshold does
 
 Per-tier and per-evidence precision show which corroboration is pulling its
 weight. The threshold sweep shows where auto_confirm should actually sit: the
@@ -44,7 +47,7 @@ if HERE not in sys.path:
 
 import crossref  # noqa: E402  (path must be set first)
 
-TOOL_VERSION = "1.0"
+TOOL_VERSION = "1.1"
 TRUE_VALUES = {"1", "TRUE", "T", "YES", "Y", "MATCH"}
 FALSE_VALUES = {"0", "FALSE", "F", "NO", "N", "NONMATCH", "NON-MATCH"}
 
@@ -137,7 +140,16 @@ def status_at(link, threshold, rules):
     swept = dict(rules)
     swept["thresholds"] = dict(rules["thresholds"])
     swept["thresholds"]["auto_confirm"] = threshold
-    return crossref.disposition(link["score"], evidence, party, same_county, swept)[0]
+    status = crossref.disposition(link["score"], evidence, party, same_county, swept)[0]
+    # The cap is keyed on evidence precisely so it survives this reconstruction.
+    # If it ever does not, that is a bug in crossref, not a data point.
+    if status == "confirmed" and crossref.cap_flags(evidence):
+        raise RuntimeError(
+            "capped link confirmed at threshold {0}: {1} -> {2}".format(
+                threshold, link["left_id"], link["right_id"]
+            )
+        )
+    return status
 
 
 def confusion(links, labels, threshold, rules):
@@ -145,7 +157,7 @@ def confusion(links, labels, threshold, rules):
     candidates = {(link["left_id"], link["right_id"]): link for link in links}
     counts = {"tp": 0, "fp": 0, "tn": 0, "fn": 0}
     reviewable = 0
-    blocked_out, scored_low, false_positives = [], [], []
+    blocked_out, scored_low, false_positives, capped = [], [], [], []
 
     for (left, right), is_match in sorted(labels.items()):
         link = candidates.get((left, right))
@@ -160,7 +172,23 @@ def confusion(links, labels, threshold, rules):
         status = status_at(link, threshold, rules)
         if status in ("confirmed", "pending") and is_match:
             reviewable += 1
-        if status == "confirmed":
+        if crossref.cap_flags(link["evidence"]):
+            # Pending by construction: a true match here is a miss at auto-confirm
+            # (it never reaches the lead list) but not a weights problem, and a
+            # non-match can never be a false positive.
+            counts["fn" if is_match else "tn"] += 1
+            capped.append(
+                {
+                    "left_id": left,
+                    "right_id": right,
+                    "score": link["score"],
+                    "status": status,
+                    "is_match": is_match,
+                    "flags": link["flags"],
+                    "evidence": link["evidence"],
+                }
+            )
+        elif status == "confirmed":
             if is_match:
                 counts["tp"] += 1
             else:
@@ -198,6 +226,7 @@ def confusion(links, labels, threshold, rules):
         "review_recall": _ratio(reviewable, positives),
         "blocked_out": blocked_out,
         "scored_low": scored_low,
+        "capped": capped,
         "false_positives": false_positives,
     }
 
@@ -353,6 +382,21 @@ def _format_errors(point):
             )
             lines.append("         {0}".format(", ".join(row["evidence"])))
         lines.append("")
+
+    if point["capped"]:
+        lines.append(
+            "CAPPED -- pending by construction (held_via_entity / held_in_trust); "
+            "review reaches these, no threshold does"
+        )
+        for row in point["capped"]:
+            lines.append(
+                "  {0:.3f} [{1:<9}] {2} -> {3}  labeled {4}".format(
+                    row["score"], row["status"], row["left_id"], row["right_id"],
+                    "match" if row["is_match"] else "non-match",
+                )
+            )
+            lines.append("         {0}".format(", ".join(row["evidence"])))
+        lines.append("")
     return lines
 
 
@@ -462,6 +506,7 @@ def main(argv=None):
     parser.add_argument("--estates", required=True)
     parser.add_argument("--parcels", required=True)
     parser.add_argument("--deeds")
+    parser.add_argument("--entities", help="NC SOS business entity records (.jsonl or .json)")
     parser.add_argument("--labels", required=True, help="CSV: file_number, pin, is_match")
     parser.add_argument("--rules")
     parser.add_argument(
@@ -478,12 +523,13 @@ def main(argv=None):
     estates = crossref.load_records(args.estates)
     parcels = crossref.load_records(args.parcels)
     deeds = crossref.load_records(args.deeds) if args.deeds else []
+    entities = crossref.load_records(args.entities) if args.entities else []
 
     labels, unresolved = load_labels(args.labels, estates, parcels)
     if not labels:
         parser.error("no usable labels: check the header (file_number, pin, is_match)")
 
-    result = crossref.crossref(estates, parcels, deeds, rules)
+    result = crossref.crossref(estates, parcels, deeds, rules, entities=entities)
     ev = evaluate(result, labels, unresolved, rules, args.target_precision)
 
     if args.json_out:

@@ -1,7 +1,7 @@
 {
-  "version": "1.0",
+  "version": "1.1",
 
-  "_comment": "Tunable matching policy. Scores are additive: a candidate starts at its name-match base and every piece of corroborating or contradicting evidence moves it. Nothing here is a proxy for a protected characteristic, and no criminal-justice signal exists as an input.",
+  "_comment": "Tunable matching policy. Scores are additive: a candidate starts at its name-match base and every piece of corroborating or contradicting evidence moves it. Nothing here is a proxy for a protected characteristic, and no criminal-justice signal exists as an input. The pending cap on entity-held and trustee-held links is NOT here on purpose: it lives in crossref.CAP_AT_PENDING, because a cap that calibration could tune away is not a cap.",
 
   "name_base": {
     "name_full_exact": 0.70,
@@ -13,6 +13,13 @@
     "mailing_address_match": 0.15,
     "deed_grantor_link": 0.15,
     "situs_address_match": 0.10,
+    "entity_office_address_match": 0.15,
+    "entity_official_link": 0.10,
+    "entity_address_on_parcel": 0.05,
+    "trustee_owner": 0.0,
+    "registered_agent_link": -0.10,
+    "entity_suffix_conflict": -0.15,
+    "entity_name_ambiguous": -0.15,
     "middle_initial_conflict": -0.30,
     "common_name": -0.15,
     "organization_owner": -0.40,
@@ -22,7 +29,8 @@
   "thresholds": {
     "auto_confirm": 0.85,
     "review_floor": 0.45,
-    "common_name_parcels": 8
+    "common_name_parcels": 8,
+    "common_name_entities": 8
   },
 
   "require_corroboration_to_confirm": true,
@@ -30,24 +38,41 @@
     "estate_marker_on_owner",
     "mailing_address_match",
     "deed_grantor_link",
-    "situs_address_match"
+    "situs_address_match",
+    "entity_office_address_match"
   ],
 
   "name_formats": {
     "estate_case": "first_last",
     "parcel": "last_first",
-    "deed": "last_first"
+    "deed": "last_first",
+    "business_entity": "first_last"
   },
+  "_name_formats_note": "business_entity is TO VERIFY against the NC SOS data dictionary; a comma form (PUBLIC, JOHN Q) parses correctly under either setting.",
 
   "suffixes": ["JR", "SR", "II", "III", "IV", "MD", "DDS", "ESQ", "PHD"],
 
+  "role_tokens": ["TRUSTEE", "TRUSTEES", "COTRUSTEE", "COTRUSTEES", "TTEE", "TTEES"],
+
   "organization_tokens": [
     "LLC", "L L C", "INC", "CORP", "CORPORATION", "COMPANY", "CO", "LP", "LLP",
-    "PLLC", "TRUST", "TRUSTEE", "TRUSTEES", "BANK", "CHURCH", "MINISTRIES",
+    "PLLC", "TRUST", "BANK", "CHURCH", "MINISTRIES",
     "PARTNERS", "PARTNERSHIP", "HOLDINGS", "PROPERTIES", "ASSOCIATION",
     "ASSOCIATES", "FOUNDATION", "COUNTY", "CITY", "STATE", "AUTHORITY",
     "HOA", "CONDOMINIUM", "APARTMENTS", "DEVELOPMENT", "INVESTMENTS", "GROUP"
   ],
+
+  "entity_name_noise_tokens": [
+    "LLC", "PLLC", "INC", "INCORPORATED", "CORP", "CORPORATION", "CO", "COMPANY",
+    "LTD", "LIMITED", "LP", "LLP", "LLLP", "PC", "PA", "THE"
+  ],
+
+  "entity_suffix_families": {
+    "LLC": "LLC", "PLLC": "LLC",
+    "INC": "CORP", "INCORPORATED": "CORP", "CORP": "CORP", "CORPORATION": "CORP",
+    "PC": "CORP", "PA": "CORP",
+    "LP": "LP", "LLP": "LP", "LLLP": "LP"
+  },
 
   "estate_markers": [
     "ESTATE OF",

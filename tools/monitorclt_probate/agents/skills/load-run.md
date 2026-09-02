@@ -80,6 +80,20 @@ Report every row where the new `status` differs from a preserved human `status`.
 That list is the most interesting output of a re-run: it is where the matcher
 and a person now disagree.
 
+## The command
+
+```bash
+python3 load_run.py --run runs/<run-id>.json \
+        --estates <in>/estate_cases.jsonl --parcels <in>/parcels.jsonl \
+        --deeds <in>/deeds.jsonl --entities <in>/business_entities.jsonl > load.sql
+psql "$DSN" -v ON_ERROR_STOP=1 -1 -f load.sql
+```
+
+`load_run.py` writes the SQL; `psql` runs it as one transaction. The loader
+implements every rule on this page, including both constraints below; the
+closing `SELECT` in the output is the disagreement list. Runner runs this
+command and forwards what `psql` prints. It does not edit the SQL.
+
 ## Order
 
 1. Insert `probate.match_run` from `result["run"]` — `tool_version`,

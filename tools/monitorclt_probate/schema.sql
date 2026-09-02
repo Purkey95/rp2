@@ -63,7 +63,41 @@ CREATE TABLE probate.deed (
     UNIQUE (county, book, page, instrument_number)
 );
 
+-- NC Secretary of State business registration. Statewide, so no county column:
+-- an SOS id is county-independent. This is how a decedent who held property
+-- through an LLC or corporation becomes reachable at all -- the parcel's owner
+-- string names the entity, the SOS names the people who ran it. A match made
+-- this way is an interest in the entity, not the parcel, and is never
+-- auto-confirmed (see entity_match below).
+CREATE TABLE probate.business_entity (
+    id                       bigserial PRIMARY KEY,
+    sos_id                   text        NOT NULL UNIQUE,
+    entity_name              text        NOT NULL,   -- verbatim SOS name
+    entity_type              text,
+    status                   text,
+    domestic                 boolean,
+    formation_date           date,
+    principal_office_address text,
+    mailing_address          text,
+    registered_agent_name    text,                   -- kept here, never in entity_official
+    registered_agent_address text,                   -- never used for corroboration: usually a law office
+    source_url               text,
+    retrieved_at             timestamptz NOT NULL DEFAULT now()
+);
+
+-- Officers, members, managers, partners, as the SOS filing listed them.
+CREATE TABLE probate.entity_official (
+    id                  bigserial PRIMARY KEY,
+    entity_id           bigint      NOT NULL REFERENCES probate.business_entity (id) ON DELETE CASCADE,
+    person_name         text        NOT NULL,   -- verbatim
+    title               text,
+    source              text        NOT NULL,   -- the filing that listed them, e.g. 'ANNUAL REPORT 2025'
+    retrieved_at        timestamptz NOT NULL DEFAULT now(),
+    UNIQUE (entity_id, person_name, title, source)
+);
+
 CREATE INDEX ON probate.parcel (county, pin);
+CREATE INDEX ON probate.entity_official (person_name);
 CREATE INDEX ON probate.deed (county, parcel_pin);
 CREATE INDEX ON probate.estate_case (county, filing_date);
 
@@ -124,6 +158,8 @@ CREATE TABLE probate.entity_match (
     evidence            jsonb       NOT NULL DEFAULT '[]'::jsonb,
     flags               jsonb       NOT NULL DEFAULT '[]'::jsonb,
     status              probate.match_status NOT NULL DEFAULT 'pending',
+    via_source          text,                       -- 'business_entity' when reached through an entity
+    via_id              text,                       -- that entity's sos_id
     reviewer            text,
     reviewed_at         timestamptz,
     review_note         text,
@@ -131,7 +167,18 @@ CREATE TABLE probate.entity_match (
     UNIQUE (left_source, left_id, right_source, right_id),
     -- a confirmed match is a human's signature or an auditable rule run; either
     -- way it must name a person record.
-    CHECK (status <> 'confirmed' OR person_id IS NOT NULL OR reviewer IS NOT NULL)
+    CHECK (status <> 'confirmed' OR person_id IS NOT NULL OR reviewer IS NOT NULL),
+    CHECK ((via_source IS NULL) = (via_id IS NULL)),
+    -- A parcel reached through an entity or a named trustee is held by the entity
+    -- or the trust; the estate's interest in it is a legal question. A rule run
+    -- can never confirm such a row -- only a signed human review can. The matcher
+    -- enforces this from evidence (crossref.CAP_AT_PENDING); this is the second
+    -- wall, for anything that writes the table without going through it.
+    CHECK (
+        status <> 'confirmed'
+        OR reviewed_at IS NOT NULL
+        OR NOT (flags ?| ARRAY['held_via_entity', 'held_in_trust'])
+    )
 );
 
 CREATE INDEX ON probate.entity_match (status, score DESC);
@@ -158,7 +205,9 @@ SELECT e.county,
        m.match_tier,
        m.score,
        m.evidence,
-       m.flags
+       m.flags,
+       m.via_source,       -- non-null only after a human confirmed an entity-held row
+       m.via_id
 FROM probate.entity_match m
 JOIN probate.estate_case e
   ON m.left_source = 'estate_case'
@@ -170,7 +219,8 @@ WHERE m.status = 'confirmed';
 
 -- What a human still has to look at, worst-corroborated last.
 CREATE VIEW probate.v_review_queue AS
-SELECT m.id, m.left_id, m.right_id, m.match_tier, m.score, m.evidence, m.flags, m.created_at
+SELECT m.id, m.left_id, m.right_id, m.match_tier, m.score, m.evidence, m.flags,
+       m.via_source, m.via_id, m.created_at
 FROM probate.entity_match m
 WHERE m.status = 'pending'
 ORDER BY m.score DESC, m.left_id, m.right_id;
