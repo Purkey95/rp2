@@ -4,7 +4,8 @@ Public-records monitoring and entity resolution for real property. Starts with
 Mecklenburg County, NC; built so the next county is a plugin.
 
 **What it does:** watches the estates division, the parcel roll, the deed index,
-foreclosure filings, the delinquent-tax list and code enforcement; keeps every
+foreclosure filings, the delinquent-tax list, code enforcement and the business
+registry; keeps every
 record's full history; links people across sources with a calibrated, explainable
 resolver; puts the uncertain links in front of a reviewer whose decisions train the
 model; ranks parcels by a transparent stack of public-record signals; and lets
@@ -25,15 +26,21 @@ python3 -m monitorclt init
 python3 -m monitorclt contract --county MECKLENBURG --fixtures fixtures/mecklenburg --golden
 python3 -m monitorclt ingest   --county MECKLENBURG --fixtures fixtures/mecklenburg
 python3 -m monitorclt resolve
-python3 -m monitorclt review-queue
+python3 -m monitorclt groups                # estate-centric review: every candidate per estate
+python3 -m monitorclt review-queue          # pair queue, ordered by review value
 python3 -m monitorclt serve                 # reviewer UI at http://127.0.0.1:8765/review
 python3 -m monitorclt import-labels fixtures/mecklenburg/labels.csv
 python3 -m monitorclt train
 python3 -m monitorclt evaluate --target-precision 0.95
 python3 -m monitorclt export --actor you --csv leads.csv
 python3 -m monitorclt rank --limit 20
-python3 -m monitorclt status
+python3 -m monitorclt outcome declined --lead-id <lead> --by you   # suppresses on the spot
+python3 -m monitorclt outcomes-report
+python3 -m monitorclt run-daily --county MECKLENBURG --fixtures fixtures/mecklenburg
 ```
+
+Operations, bringing a live source online, building a real labeled set, and splitting
+into its own repository are in `docs/RUNBOOK.md`.
 
 `--fixtures` serves recorded bodies instead of hitting the network. A live
 deployment passes `--endpoint source=url` per connector (or configures it in the
@@ -68,6 +75,9 @@ fetch ──> raw_capture ──> parse ──> record_version ──> mention �
 | Policy | `policy.py` | Deny-by-default export: confirmed only, corroborated, not suppressed, inside retention, contact is the personal representative; fixed export fields; every decision in `export_log`; `why_do_you_have_this()`. |
 | Outputs | `watch.py`, `signals.py`, `ids.py` | Watchlists (county / ZIP / event kind / value / polygon / radius), HMAC-signed webhooks, digests, stable lead ids, the parcel signal stack. |
 | Quality | `quality.py` | Freshness, delta anomalies, parse failures, schema drift, blocked-out rate, rolling precision. |
+| Persons | `persons.py` | Conservative clustering of a confirmed person's other mentions (deeds, tax, foreclosure) by shared address or parcel; a person page with every parcel and record. |
+| Outcomes | `outcomes.py` | What happened after outreach; declines suppress immediately, "not in estate" becomes a negative signal, and a conversion report by signal and evidence. |
+| Pipeline | `pipeline.py` | `run-daily`: ingest → resolve → cluster → watchlists → deliver → status, non-zero exit and an alert webhook on any problem. |
 
 Read `ARCHITECTURE.md` for the reasoning behind each layer and what changed from v1.
 

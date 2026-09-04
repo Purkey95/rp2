@@ -91,6 +91,8 @@ class Name:
     suffix: str = ""
     is_organization: bool = False
     markers: List[str] = field(default_factory=list)
+    trust: bool = False  # the string named a trust; first/middle/last are the settlor/trustee if parseable
+    order_uncertain: bool = False  # natural vs surname-first order could not be determined
 
     @property
     def middle_initial(self) -> str:
@@ -115,6 +117,7 @@ class Name:
     def to_dict(self) -> Dict[str, Any]:
         data = asdict(self)
         data.update({"normalized": self.normalized, "key_fl": self.key_fl, "key_full": self.key_full, "middle_initial": self.middle_initial})
+        data["block_keys"] = sorted(block_keys(self))
         return data
 
 
@@ -151,6 +154,17 @@ def parse_name(raw: Optional[str], name_format: str = "last_first", rules: Optio
     tokens = [t for t in tokens if t not in noise]
 
     org_tokens = set(rules.get("organization_tokens", DEFAULT_RULES["organization_tokens"]))
+    trust, trust_natural_order, tokens = _strip_trust(tokens)
+    if trust:
+        remainder_orgs = [t for t in tokens if t in org_tokens]
+        if remainder_orgs or len([t for t in tokens if t != ","]) < 2:
+            joined = " ".join(t for t in tokens if t != ",") or clean_text(raw)
+            return Name(raw=raw or "", clean=joined, is_organization=True, markers=markers, trust=True)
+        person = parse_name(" ".join(tokens), "first_last" if trust_natural_order else name_format, rules)
+        person.raw = raw or ""
+        person.trust = True
+        person.order_uncertain = trust_natural_order and name_format == "last_first"
+        return person
     if any(t in org_tokens for t in tokens):
         joined = " ".join(t for t in tokens if t != ",")
         return Name(raw=raw or "", clean=joined, is_organization=True, markers=markers)
@@ -188,14 +202,19 @@ def split_parties(raw: Optional[str], name_format: str = "last_first", rules: Op
     if not parts:
         return []
     suffixes = set(rules.get("suffixes", DEFAULT_RULES["suffixes"]))
+    trust_words = TRUST_ROLE_TOKENS | TRUST_NAME_TOKENS
+    any_trust = any(t in ("TRUST", "TRUSTEE", "TRUSTEES", "TTEE", "TTEES") for t in body.split())
     out = [parse_name(parts[0], name_format, rules)]
     for part in parts[1:]:
         name = parse_name(part, name_format, rules)
         primary = out[0]
-        tokens = [t for t in part.split() if t not in suffixes and t != ","]
-        if not name.is_organization and not primary.is_organization and primary.last and len(tokens) <= 2 and not name.markers:
-            name = Name(raw=part, clean=part, first=tokens[0], middle=" ".join(tokens[1:]), last=primary.last)
+        tokens = [t for t in part.split() if t not in suffixes and t != "," and t not in trust_words]
+        if not name.is_organization and not primary.is_organization and primary.last and 0 < len(tokens) <= 2 and not name.markers:
+            name = Name(raw=part, clean=part, first=tokens[0], middle=" ".join(tokens[1:]), last=primary.last, trust=name.trust)
         out.append(name)
+    if any_trust:
+        for name in out:
+            name.trust = True
     return out
 
 
@@ -213,3 +232,193 @@ def name_agreement(a: Name, b: Name) -> str:
 def suffix_conflict(a: Name, b: Name) -> bool:
     """JR vs SR on the same name is two people, usually a parent and child."""
     return bool(a.suffix and b.suffix and a.suffix != b.suffix)
+
+
+# ------------------------------------------------------------------ trusts ---
+
+TRUST_ROLE_TOKENS = {"TRUSTEE", "TRUSTEES", "TTEE", "TTEES", "TR", "TRS", "SUCCESSOR"}
+TRUST_NAME_TOKENS = {
+    "TRUST",
+    "REVOCABLE",
+    "IRREVOCABLE",
+    "LIVING",
+    "FAMILY",
+    "AGREEMENT",
+    "UDT",
+    "UA",
+    "U/A",
+    "DTD",
+    "DATED",
+    "THE",
+    "OF",
+    "AS",
+    "UNDER",
+    "DECLARATION",
+    "INTER",
+    "VIVOS",
+    "RESIDUARY",
+    "MARITAL",
+    "BYPASS",
+    "QTIP",
+    "SURVIVORS",
+}
+
+
+def _strip_trust(tokens: List[str]) -> "tuple[bool, bool, List[str]]":
+    """Remove trust vocabulary. Returns (was_trust, natural_order_likely, remaining_tokens).
+
+    "PUBLIC JOHN Q TRUSTEE" keeps the source's order (a trustee suffix on an assessor row).
+    "JOHN Q PUBLIC REVOCABLE LIVING TRUST" is almost always written in natural order.
+    """
+    if not any(t in TRUST_ROLE_TOKENS or t in TRUST_NAME_TOKENS for t in tokens):
+        return False, False, tokens
+    if not any(t in ("TRUST", "TRUSTEE", "TRUSTEES", "TTEE", "TTEES") for t in tokens):
+        return False, False, tokens
+    natural = any(t in ("TRUST", "REVOCABLE", "IRREVOCABLE", "LIVING", "FAMILY") for t in tokens) and not any(t in TRUST_ROLE_TOKENS for t in tokens)
+    kept = [t for t in tokens if t not in TRUST_ROLE_TOKENS and t not in TRUST_NAME_TOKENS and not re.fullmatch(r"\d{1,2}/\d{1,2}/\d{2,4}|\d{4}|\d{1,2}", t)]
+    return True, natural, kept
+
+
+# --------------------------------------------------------------- nicknames ---
+
+_NICKNAME_GROUPS = [
+    ("WILLIAM", "BILL", "BILLY", "WILL", "WILLIE", "LIAM"),
+    ("ROBERT", "BOB", "BOBBY", "ROB", "ROBBIE", "BERT"),
+    ("JAMES", "JIM", "JIMMY", "JAMIE"),
+    ("JOHN", "JACK", "JOHNNY", "JOHNNIE"),
+    ("RICHARD", "DICK", "RICK", "RICKY", "RICH"),
+    ("MICHAEL", "MIKE", "MIKEY", "MICK"),
+    ("CHARLES", "CHUCK", "CHARLIE", "CHAS"),
+    ("THOMAS", "TOM", "TOMMY"),
+    ("EDWARD", "ED", "EDDIE", "TED", "TEDDY", "NED"),
+    ("JOSEPH", "JOE", "JOEY"),
+    ("DANIEL", "DAN", "DANNY"),
+    ("ANTHONY", "TONY"),
+    ("DAVID", "DAVE", "DAVEY"),
+    ("STEVEN", "STEPHEN", "STEVE"),
+    ("KENNETH", "KEN", "KENNY"),
+    ("RONALD", "RON", "RONNIE"),
+    ("DONALD", "DON", "DONNIE"),
+    ("GERALD", "JERRY", "GERRY"),
+    ("LAWRENCE", "LARRY"),
+    ("HAROLD", "HAL", "HARRY"),
+    ("WALTER", "WALT", "WALLY"),
+    ("HENRY", "HANK", "HARRY"),
+    ("SAMUEL", "SAM", "SAMMY"),
+    ("BENJAMIN", "BEN", "BENNY"),
+    ("ALEXANDER", "ALEX", "AL"),
+    ("ALBERT", "AL", "BERT"),
+    ("RAYMOND", "RAY"),
+    ("EUGENE", "GENE"),
+    ("FRANCIS", "FRANK", "FRANKIE"),
+    ("FREDERICK", "FRED", "FREDDIE"),
+    ("LEONARD", "LEN", "LEONARD", "LENNY"),
+    ("NICHOLAS", "NICK", "NICKY"),
+    ("PATRICK", "PAT", "PADDY"),
+    ("PETER", "PETE"),
+    ("TIMOTHY", "TIM", "TIMMY"),
+    ("MARGARET", "PEGGY", "MAGGIE", "MEG", "MARGE", "PEG", "MARGIE"),
+    ("ELIZABETH", "LIZ", "BETH", "BETTY", "BETSY", "ELIZA", "LIBBY", "LISA"),
+    ("KATHERINE", "CATHERINE", "KATHRYN", "KATHY", "CATHY", "KATE", "KATIE", "KAY"),
+    ("DOROTHY", "DOT", "DOTTIE", "DOLLY"),
+    ("SUSAN", "SUE", "SUSIE", "SUZANNE"),
+    ("DEBORAH", "DEBRA", "DEBBIE", "DEB"),
+    ("PATRICIA", "PAT", "PATTY", "PATTI", "TRISH", "TRICIA"),
+    ("BARBARA", "BARB", "BARBIE", "BABS"),
+    ("JENNIFER", "JEN", "JENNY"),
+    ("REBECCA", "BECKY", "BECCA"),
+    ("VIRGINIA", "GINNY", "GINGER"),
+    ("FLORENCE", "FLO", "FLOSSIE"),
+    ("FRANCES", "FRAN", "FRANNIE"),
+    ("HELEN", "NELL", "NELLIE"),
+    ("ELEANOR", "ELLIE", "NORA"),
+    ("JACQUELINE", "JACKIE"),
+    ("CHRISTOPHER", "CHRIS", "KIT"),
+    ("CHRISTINE", "CHRISTINA", "CHRIS", "TINA"),
+    ("MARY", "MOLLY", "POLLY", "MAE"),
+    ("SARAH", "SARA", "SALLY"),
+    ("ANN", "ANNE", "ANNIE", "NANCY", "NAN"),
+    ("SANDRA", "SANDY"),
+    ("LINDA", "LYNN"),
+    ("TERESA", "THERESA", "TERRY", "TESS"),
+    ("VICTORIA", "VICKY", "VICKI", "TORI"),
+]
+_CANONICAL: Dict[str, str] = {}
+for _group in _NICKNAME_GROUPS:
+    for _alias in _group:
+        _CANONICAL.setdefault(_alias, _group[0])
+
+
+def canonical_first(first: str) -> str:
+    """WILLIAM for BILL, KATHERINE for CATHY; the name itself when unknown."""
+    return _CANONICAL.get(first, first)
+
+
+# ---------------------------------------------------------------- phonetic ---
+
+_SOUNDEX = {**dict.fromkeys("BFPV", "1"), **dict.fromkeys("CGJKQSXZ", "2"), **dict.fromkeys("DT", "3"), "L": "4", **dict.fromkeys("MN", "5"), "R": "6"}
+
+
+def soundex(word: str) -> str:
+    word = "".join(ch for ch in word.upper() if ch.isalpha())
+    if not word:
+        return ""
+    out = word[0]
+    last = _SOUNDEX.get(word[0], "")
+    for ch in word[1:]:
+        code = _SOUNDEX.get(ch, "")
+        if code and code != last:
+            out += code
+        if ch not in "HW":
+            last = code
+    return (out + "000")[:4]
+
+
+# --------------------------------------------------------------- relations ---
+
+
+def first_name_relation(a: str, b: str) -> str:
+    """exact | nickname | initial | different, for two forenames.
+
+    Deliberately no phonetic tier for forenames: JOHN and JANE share a soundex code,
+    and a forename collision is exactly the error a reviewer cannot see past.
+    """
+    if not a or not b:
+        return "different"
+    if a == b:
+        return "exact"
+    if canonical_first(a) == canonical_first(b):
+        return "nickname"
+    if (len(a) == 1 or len(b) == 1) and a[0] == b[0]:
+        return "initial"
+    return "different"
+
+
+def last_name_relation(a: str, b: str) -> str:
+    if not a or not b:
+        return "different"
+    if a == b:
+        return "exact"
+    if soundex(a) == soundex(b):
+        return "phonetic"
+    return "different"
+
+
+def block_keys(name: Name) -> List[str]:
+    """Every key under which this name should be findable. Exact first|last is always
+    among them; nickname, initial and phonetic keys widen recall and are tagged so the
+    resolver can tell how the candidate was found. Phonetic widening applies to the
+    surname only (SMITH/SMYTHE); forenames must agree exactly, by nickname, or by initial."""
+    if name.is_organization or not (name.first and name.last):
+        return []
+    keys = set()
+    pairs = [(name.first, name.last)]
+    if name.order_uncertain and name.middle:
+        # "JOHN Q PUBLIC" read as surname-first would have been (Q, JOHN) -- include the swap.
+        pairs.append((name.last, name.first))
+    for first, last in pairs:
+        keys.add("{0}|{1}".format(first, last))
+        keys.add("{0}|{1}".format(canonical_first(first), last))
+        keys.add("{0}.|{1}".format(first[0], last))
+        keys.add("~{0}|{1}".format(canonical_first(first), soundex(last)))  # surname phonetic only
+    return sorted(keys)

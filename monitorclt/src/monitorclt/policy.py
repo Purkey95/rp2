@@ -22,7 +22,14 @@ from .normalize.names import clean_text
 from .resolve.resolver import get_match
 from .store import Store, dumps, loads
 
-POLICY_VERSION = "2.0"
+POLICY_VERSION = "2.1"
+
+# Contact cadence: how many times a lead for the same estate may leave the system in a
+# window. An explicit export (CSV, API, CLI) is the proxy for a contact attempt; outcomes
+# refine it. Watchlist notifications are alerts to subscribers, not contact lists, and are
+# not counted -- they still pass every other rule.
+CADENCE = {"window_days": 30, "max_exports": 1}
+CONTACT_CHANNELS = ("csv", "api", "cli")
 
 # The only person-level fields an export may carry. Everything else is redacted.
 EXPORT_FIELDS = (
@@ -200,6 +207,20 @@ def check_export(store: Store, match_id: int, actor: str, channel: str, base_url
     pol = store.one("SELECT ttl_days FROM retention_policy WHERE scope = ?", (left.get("source"),)) if left else None
     if pol and left_rec and left_rec["observed_at"] < _cutoff(store, int(pol["ttl_days"])):
         reasons.append("retention_expired")
+
+    last_outcome = store.scalar("SELECT outcome FROM outcome WHERE match_id = ? ORDER BY id DESC LIMIT 1", (match_id,))
+    if last_outcome in ("declined", "invalid_contact", "not_in_estate", "already_sold", "closed"):
+        reasons.append("outcome:" + str(last_outcome))
+    if channel in CONTACT_CHANNELS:
+        window = _cutoff(store, int(CADENCE["window_days"]))
+        prior = store.scalar(
+            "SELECT COUNT(*) FROM export_log e JOIN entity_match em ON em.id = e.match_id WHERE e.allowed = 1 AND e.at >= ? AND em.left_id = ? AND e.channel IN ({0})".format(
+                ", ".join("?" for _ in CONTACT_CHANNELS)
+            ),
+            [window, m["left_id"]] + list(CONTACT_CHANNELS),
+        )
+        if int(prior or 0) >= int(CADENCE["max_exports"]):
+            reasons.append("cadence_exceeded:{0}_in_{1}d".format(prior, CADENCE["window_days"]))
 
     row = None
     if not reasons:

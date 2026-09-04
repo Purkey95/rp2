@@ -12,7 +12,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 
 from .normalize.addresses import parse_address
-from .normalize.names import Name, split_parties
+from .normalize.names import Name, block_keys, split_parties
 from .normalize.pins import county_norm, parcel_id, pin_norm
 from .sources.base import SourceSpec
 from .store import Store, dumps, loads
@@ -103,27 +103,27 @@ def index_mentions(store: Store, spec: SourceSpec, county: str, natural_key: str
         for position, party in enumerate(split_parties(str(raw), spec.name_format)):
             if not party.key_fl.strip("|") and not party.is_organization:
                 continue
-            ids.append(
-                store.insert(
-                    "mention",
-                    {
-                        "source": spec.name,
-                        "county": county_norm(county),
-                        "natural_key": natural_key,
-                        "record_version_id": version_id,
-                        "role": role,
-                        "position": position,
-                        "raw_name": str(raw),
-                        "parsed": dumps(party.to_dict()),
-                        "key_fl": party.key_fl,
-                        "is_organization": 1 if party.is_organization else 0,
-                        "address_norm": _address_for_role(role, address_by_kind),
-                        "parcel_id": pid,
-                        "person_id": None,
-                        "current": 1,
-                    },
-                )
+            mention_id = store.insert(
+                "mention",
+                {
+                    "source": spec.name,
+                    "county": county_norm(county),
+                    "natural_key": natural_key,
+                    "record_version_id": version_id,
+                    "role": role,
+                    "position": position,
+                    "raw_name": str(raw),
+                    "parsed": dumps(party.to_dict()),
+                    "key_fl": party.key_fl,
+                    "is_organization": 1 if party.is_organization else 0,
+                    "address_norm": _address_for_role(role, address_by_kind),
+                    "parcel_id": pid,
+                    "person_id": None,
+                    "current": 1,
+                },
             )
+            write_blocks(store, mention_id, party)
+            ids.append(mention_id)
     return ids
 
 
@@ -153,7 +153,42 @@ def mention_name(row: Dict[str, Any]) -> Name:
         suffix=p.get("suffix", ""),
         is_organization=bool(p.get("is_organization")),
         markers=list(p.get("markers", [])),
+        trust=bool(p.get("trust")),
+        order_uncertain=bool(p.get("order_uncertain")),
     )
+
+
+def write_blocks(store: Store, mention_id: int, name: Name) -> List[str]:
+    keys = block_keys(name)
+    if name.is_organization and name.clean:
+        keys = ["ORG|" + name.clean]
+    store.executemany("INSERT OR IGNORE INTO mention_block (mention_id, key) VALUES (?, ?)", [(mention_id, k) for k in keys])
+    return keys
+
+
+def rebuild_blocks(store: Store) -> int:
+    """Recompute block keys for every current mention (after a rules or nickname-table change)."""
+    store.execute("DELETE FROM mention_block")
+    n = 0
+    for row in store.query("SELECT id, parsed FROM mention WHERE current = 1"):
+        write_blocks(store, int(row["id"]), mention_name(row))
+        n += 1
+    store.commit()
+    return n
+
+
+def candidates_by_blocks(store: Store, keys: List[str], source: str, role: str) -> List[Dict[str, Any]]:
+    """Current mentions of source/role sharing any block key; each row carries the keys it was found by."""
+    if not keys:
+        return []
+    rows = store.query(
+        "SELECT m.*, GROUP_CONCAT(b.key, ' ') AS found_by FROM mention m JOIN mention_block b ON b.mention_id = m.id "
+        "WHERE b.key IN ({0}) AND m.source = ? AND m.role = ? AND m.current = 1 GROUP BY m.id ORDER BY m.id".format(", ".join("?" for _ in keys)),
+        list(keys) + [source, role],
+    )
+    for r in rows:
+        r["found_by"] = sorted((r["found_by"] or "").split())
+    return rows
 
 
 def mentions_by_key(store: Store, key_fl: str, source: Optional[str] = None, role: Optional[str] = None) -> List[Dict[str, Any]]:

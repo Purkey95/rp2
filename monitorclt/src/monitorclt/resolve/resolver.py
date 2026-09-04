@@ -13,9 +13,10 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
-from .. import entities, history
+from .. import entities, geocode, history
 from ..events import MATCH_CONFIRMED
-from ..normalize.names import Name
+from ..normalize.geo import as_point
+from ..normalize.names import Name, block_keys
 from ..normalize.pins import county_norm, parcel_id
 from ..store import Store, dumps, loads
 from . import features as F
@@ -37,6 +38,34 @@ class LinkKind:
 
 
 ESTATE_TO_PARCEL = LinkKind("estate_case->parcel", "estate_case", "decedent", "parcel", "owner", related_role="personal_rep")
+
+
+class _Preload:
+    """Everything the loop needs, read once. Per-candidate SQL is what made v1-style loops slow on a full roll."""
+
+    def __init__(self, store: Store, kind: LinkKind) -> None:
+        self.records: Dict[Tuple[str, str, str], Dict[str, Any]] = {}
+        for src in (kind.subject_source, kind.candidate_source):
+            for rec in history.current_records(store, src):
+                self.records[(src, rec["county"], rec["natural_key"])] = rec["payload"]
+        self.parcels: Dict[str, Dict[str, Any]] = {}
+        if kind.candidate_source == "parcel":
+            for row in store.query("SELECT * FROM parcel"):
+                self.parcels[row["id"]] = row
+        self.party_keys: Dict[Tuple[str, str, str], List[str]] = defaultdict(list)
+        self.related: Dict[Tuple[str, str], List[str]] = defaultdict(list)
+        rows = store.query(
+            "SELECT source, county, natural_key, role, key_fl FROM mention WHERE current = 1 AND ((source = ? AND role = ?) OR (source = ? AND role = ?)) ORDER BY position",
+            (kind.candidate_source, kind.candidate_role, kind.subject_source, kind.related_role or ""),
+        )
+        for r in rows:
+            if r["source"] == kind.candidate_source:
+                self.party_keys[(r["source"], r["county"], r["natural_key"])].append(r["key_fl"])
+            elif r["key_fl"].strip("|"):
+                self.related[(r["county"], r["natural_key"])].append(r["key_fl"])
+
+    def record(self, source: str, county: str, key: str) -> Dict[str, Any]:
+        return self.records.get((source, county, key), {})
 
 
 def _deed_index(store: Store) -> Tuple[Dict[str, List[Dict[str, Any]]], Dict[str, List[Dict[str, Any]]]]:
@@ -66,6 +95,7 @@ def resolve(
     model: Optional[LinkModel] = None,
     rules: Optional[Dict[str, Any]] = None,
     params: Optional[Dict[str, Any]] = None,
+    geocoder: Optional[geocode.Geocoder] = None,
 ) -> Dict[str, Any]:
     rules = rules or load_rules()
     model = model or LinkModel.active(store, rules, kind.name)
@@ -82,9 +112,13 @@ def resolve(
     subjects = store.query("SELECT * FROM mention WHERE source = ? AND role = ? AND current = 1 ORDER BY id", (kind.subject_source, kind.subject_role))
     frequency = entities.name_frequency(store, kind.candidate_source, kind.candidate_role)
     grantor_idx, grantee_idx = _deed_index(store)
+    pre = _Preload(store, kind)
     threshold_common = int(rules["thresholds"].get("common_name_records", 8))
+    proximity = float(rules["thresholds"].get("proximity_m", 75))
+    audit_rate = float(rules.get("review", {}).get("audit_sample_rate", 0.0))
+    double_rate = float(rules.get("review", {}).get("double_review_rate", 0.0))
 
-    counts = {"subjects": 0, "skipped": 0, "blocked_out": 0, "candidates": 0, "confirmed": 0, "pending": 0, "rejected": 0, "kept_reviewed": 0}
+    counts = {"subjects": 0, "skipped": 0, "blocked_out": 0, "candidates": 0, "confirmed": 0, "pending": 0, "rejected": 0, "kept_reviewed": 0, "widened": 0}
     skipped: List[Dict[str, Any]] = []
     blocked: List[str] = []
     match_ids: List[int] = []
@@ -97,32 +131,32 @@ def resolve(
             counts["skipped"] += 1
             skipped.append({"left_id": left_id, "name": subj["raw_name"], "reason": "not parseable into first + last (or an organization)"})
             continue
-        s_record = history.current(store, kind.subject_source, subj["county"], subj["natural_key"])
-        s_payload = s_record["payload"] if s_record else {}
-        related_keys = []
-        if kind.related_role:
-            related_keys = [
-                m["key_fl"]
-                for m in entities.mentions_for_record(store, kind.subject_source, subj["county"], subj["natural_key"], kind.related_role)
-                if m["key_fl"].strip("|")
-            ]
+        s_payload = pre.record(kind.subject_source, subj["county"], subj["natural_key"])
+        related_keys = pre.related.get((subj["county"], subj["natural_key"]), []) if kind.related_role else []
+        subject_point = geocode.lookup(store, subj["address_norm"], geocoder)
 
-        candidates = entities.mentions_by_key(store, s_name.key_fl, kind.candidate_source, kind.candidate_role)
+        candidates = entities.candidates_by_blocks(store, block_keys(s_name), kind.candidate_source, kind.candidate_role)
+        candidates = [c for c in candidates if F.names_related(s_name, entities.mention_name(c))]
         if not candidates:
             counts["blocked_out"] += 1
             blocked.append(left_id)
             continue
 
+        # Several parties on one record can be candidates (co-owners with the same surname);
+        # score each and keep the best per (subject, record) so a weaker party never
+        # overwrites a stronger one.
+        best: Dict[str, Tuple[float, Dict[str, Any], Dict[str, float], Dict[str, bool], str, List[str]]] = {}
         for cand in candidates:
-            counts["candidates"] += 1
             c_name = entities.mention_name(cand)
-            c_record = history.current(store, kind.candidate_source, cand["county"], cand["natural_key"])
-            c_payload = c_record["payload"] if c_record else {}
+            if not F.names_related(s_name, c_name):
+                continue  # a shared block key is an invitation, not a relation
+            counts["candidates"] += 1
+            if cand["key_fl"] != s_name.key_fl:
+                counts["widened"] += 1  # reached through a nickname, initial or phonetic key
+            c_payload = pre.record(kind.candidate_source, cand["county"], cand["natural_key"])
             right_id = cand["parcel_id"] or "{0}/{1}".format(cand["county"], cand["natural_key"])
-            party_keys = [
-                m["key_fl"] for m in entities.mentions_for_record(store, kind.candidate_source, cand["county"], cand["natural_key"], kind.candidate_role)
-            ]
-            parcel = entities.get_parcel(store, right_id) if cand["parcel_id"] else None
+            party_keys = pre.party_keys.get((kind.candidate_source, cand["county"], cand["natural_key"]), [])
+            parcel = pre.parcels.get(right_id) if cand["parcel_id"] else None
             ctx = F.PairContext(
                 subject=s_name,
                 candidate=c_name,
@@ -139,12 +173,20 @@ def resolve(
                 deeds_as_grantee=_deeds_on_parcel(grantee_idx.get(s_name.key_fl, []), right_id),
                 name_frequency=frequency.get(s_name.key_fl, 0),
                 common_name_threshold=threshold_common,
+                found_by=cand["found_by"],
+                subject_point=subject_point,
+                candidate_point=as_point((parcel or {}).get("lat"), (parcel or {}).get("lon")),
+                proximity_m=proximity,
             )
             feats = F.compute(ctx)
             prob = model.predict(feats)
             gates = G.evaluate(feats, rules)
             status, flags = G.disposition(prob, gates, feats, rules)
-            flags = sorted(set(flags + F.flags_for(ctx, feats)))
+            flags = sorted(set(flags + F.flags_for(ctx, feats) + _sampling_flags(left_id, right_id, status, audit_rate, double_rate)))
+            if right_id not in best or prob > best[right_id][0]:
+                best[right_id] = (prob, cand, feats, gates, status, flags)
+
+        for right_id, (prob, cand, feats, gates, status, flags) in best.items():
             match_id, final_status, kept = _upsert_match(store, run_id, kind, subj, cand, left_id, right_id, feats, prob, gates, status, flags, rules)
             match_ids.append(match_id)
             counts[final_status] += 1
@@ -169,6 +211,24 @@ def resolve(
         "blocked_out": blocked,
         "match_ids": match_ids,
     }
+
+
+def _sampling_flags(left_id: str, right_id: str, status: str, audit_rate: float, double_rate: float) -> List[str]:
+    """Deterministic sampling by pair hash, so the same pair is always in or out of a sample.
+
+    audit_sample: a rules-confirmed match a reviewer should look at anyway, to measure
+    auto-confirm precision without selection bias. double_review: a pending match that
+    two reviewers should decide independently, to measure label agreement.
+    """
+    import hashlib
+
+    h = int(hashlib.sha1((left_id + "|" + right_id).encode("utf-8")).hexdigest()[:8], 16) / 0xFFFFFFFF  # nosec B324 - sampling, not security
+    out = []
+    if status == "confirmed" and h < audit_rate:
+        out.append("audit_sample")
+    if status == "pending" and (1 - h) < double_rate:
+        out.append("double_review")
+    return out
 
 
 def _upsert_match(

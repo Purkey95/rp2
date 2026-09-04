@@ -115,6 +115,22 @@ CODE_ENFORCEMENT = SourceSpec(
     description="Code enforcement / housing cases: violation type, address, status.",
 )
 
+BUSINESS_ENTITY = SourceSpec(
+    name="business_entity",
+    mode="incremental",
+    key_fields=("sos_id",),
+    effective_field="formed_date",
+    name_format="first_last",
+    mention_roles={"entity_name": "entity", "registered_agent_name": "registered_agent", "manager_names": "manager"},
+    address_fields={"principal_address": "principal", "agent_address": "agent"},
+    required_fields=("sos_id", "entity_name"),
+    event_rules=[
+        ev.on_create(ev.ENTITY_REGISTERED, "formed_date", ("entity_name", "entity_type", "status")),
+        ev.on_status("status", ("DISSOLVED", "ADMIN DISSOLVED", "REVOKED", "WITHDRAWN"), ev.ENTITY_STATUS_CHANGED, ev.ENTITY_DISSOLVED),
+    ],
+    description="NC Secretary of State business registry: entity, status, registered agent, managers. Turns LLC owners into people.",
+)
+
 DEFAULT_ENDPOINTS: Dict[str, str] = {
     "estate_case": "fixture://estate_cases.html",
     "parcel": "fixture://parcels.jsonl",
@@ -122,6 +138,7 @@ DEFAULT_ENDPOINTS: Dict[str, str] = {
     "foreclosure": "fixture://foreclosures.jsonl",
     "tax_delinquency": "fixture://tax_delinquency.csv",
     "code_enforcement": "fixture://code_enforcement.jsonl",
+    "business_entity": "fixture://business_entities.jsonl",
 }
 
 
@@ -207,7 +224,26 @@ class CodeEnforcementConnector(_Base):
     spec = CODE_ENFORCEMENT
 
 
-CONNECTORS = [EstateCaseConnector, ParcelConnector, DeedConnector, ForeclosureConnector, TaxDelinquencyConnector, CodeEnforcementConnector]
+class BusinessEntityConnector(_Base):
+    spec = BUSINESS_ENTITY
+
+    def clean(self, record: Dict[str, Any]) -> Dict[str, Any]:
+        rec = super().clean(record)
+        managers = rec.get("manager_names")
+        if isinstance(managers, list):
+            rec["manager_names"] = " & ".join(str(x) for x in managers)
+        return rec
+
+
+CONNECTORS = [
+    EstateCaseConnector,
+    ParcelConnector,
+    DeedConnector,
+    ForeclosureConnector,
+    TaxDelinquencyConnector,
+    CodeEnforcementConnector,
+    BusinessEntityConnector,
+]
 
 
 def connectors(endpoints: Optional[Dict[str, str]] = None) -> List[Connector]:

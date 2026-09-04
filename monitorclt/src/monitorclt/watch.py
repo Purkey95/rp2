@@ -11,6 +11,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import os
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from . import entities, policy
@@ -23,9 +24,27 @@ from .store import Store, dumps, loads
 Sender = Callable[[str, Dict[str, str], bytes], int]  # (url, headers, body) -> HTTP status
 
 
+def resolve_secret(ref: Optional[str]) -> Optional[str]:
+    """Secrets are stored as references, never as values. "env:NAME" reads the environment at
+    delivery time; anything else is treated as a legacy literal and flagged by `secret_kind`."""
+    if not ref:
+        return None
+    if ref.startswith("env:"):
+        return os.environ.get(ref[4:])
+    return ref
+
+
+def secret_kind(ref: Optional[str]) -> str:
+    if not ref:
+        return "none"
+    return "env" if ref.startswith("env:") else "literal"
+
+
 def create_watchlist(
     store: Store, name: str, owner: str, filters: Dict[str, Any], channel: str = "digest", endpoint: Optional[str] = None, secret: Optional[str] = None
 ) -> int:
+    if secret and not secret.startswith("env:"):
+        raise ValueError("secret must be a reference like env:MY_WEBHOOK_SECRET, not the secret itself")
     wid = store.insert(
         "watchlist",
         {
@@ -47,7 +66,7 @@ def watchlists(store: Store, active_only: bool = True) -> List[Dict[str, Any]]:
     rows = store.query("SELECT * FROM watchlist" + (" WHERE active = 1" if active_only else "") + " ORDER BY id")
     for r in rows:
         r["filters"] = loads(r["filters"], {})
-        r.pop("secret", None)
+        r["secret_kind"] = secret_kind(r.pop("secret", None))
     return rows
 
 
@@ -165,8 +184,9 @@ def verify(secret: str, body: bytes, signature: str) -> bool:
 def webhook_request(watchlist: Dict[str, Any], notifications: List[Dict[str, Any]], now: str) -> Tuple[Dict[str, str], bytes]:
     body = json.dumps({"watchlist": watchlist["name"], "sent_at": now, "notifications": [n["payload"] for n in notifications]}, sort_keys=True).encode("utf-8")
     headers = {"Content-Type": "application/json", "X-MonitorCLT-Event-Count": str(len(notifications))}
-    if watchlist.get("secret"):
-        headers["X-MonitorCLT-Signature"] = sign(watchlist["secret"], body)
+    secret = resolve_secret(watchlist.get("secret"))
+    if secret:
+        headers["X-MonitorCLT-Signature"] = sign(secret, body)
     return headers, body
 
 

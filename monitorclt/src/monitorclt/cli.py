@@ -16,7 +16,22 @@ import os
 import sys
 from typing import Any, Dict, List, Optional
 
-from . import __version__, counties, evaluate, ingest, policy, quality, review, signals, watch  # noqa: F401  (counties registers plugins)
+from . import (  # noqa: F401  (counties registers plugins)
+    __version__,
+    counties,
+    entities,
+    evaluate,
+    geocode,
+    ingest,
+    outcomes,
+    persons,
+    pipeline,
+    policy,
+    quality,
+    review,
+    signals,
+    watch,
+)
 from .resolve import resolve
 from .resolve.model import load_rules
 from .sources.base import registry
@@ -98,7 +113,12 @@ def cmd_resolve(args: argparse.Namespace) -> int:
 
 def cmd_review_queue(args: argparse.Namespace) -> int:
     store = _store(args)
-    q = review.queue(store, args.limit)
+    if args.audit:
+        q = review.audit_queue(store, args.limit)
+    elif args.double:
+        q = review.double_review_queue(store, args.double, args.limit)
+    else:
+        q = review.queue(store, args.limit, order=args.order, reviewer=args.reviewer)
     if args.json:
         _print(q, True)
         return 0
@@ -108,8 +128,108 @@ def cmd_review_queue(args: argparse.Namespace) -> int:
                 m["id"], m["probability"], m["left_id"], m["right_id"], ", ".join(m["evidence"]), ", ".join(m["flags"])
             )
         )
-    print("{0} pending".format(len(q)))
+    print("{0} in queue".format(len(q)))
     return 0
+
+
+def cmd_groups(args: argparse.Namespace) -> int:
+    store = _store(args)
+    gs = review.groups(store, args.limit)
+    if args.json:
+        _print(gs, True)
+        return 0
+    for g in gs:
+        subj = g["subject"]
+        print(
+            "{0}  {1}  (PR: {2})  {3} candidates, {4} pending".format(
+                g["left_id"], subj.get("decedent_name"), subj.get("personal_rep_name"), len(g["candidates"]), g["pending"]
+            )
+        )
+        for c in g["candidates"]:
+            parcel = c.get("parcel") or {}
+            print(
+                "    [{0:<9}] {1:.3f} {2:<24} {3:<32} {4}".format(
+                    c["status"], c["probability"], c["right_id"], (c.get("owner_name") or "")[:32], parcel.get("situs_norm") or ""
+                )
+            )
+    return 0
+
+
+def cmd_decide_group(args: argparse.Namespace) -> int:
+    store = _store(args)
+    r = review.decide_group(store, args.left_id, args.confirm or [], args.reviewer, args.note, not args.keep_others)
+    print("{0}: confirmed {1}, rejected {2}".format(r["left_id"], r["confirmed"] or "none", len(r["rejected"])))
+    return 0
+
+
+def cmd_agreement(args: argparse.Namespace) -> int:
+    store = _store(args)
+    r = review.agreement_report(store)
+    if args.json:
+        _print(r, True)
+        return 0
+    print(
+        "double-reviewed matches: {0}; pairwise comparisons: {1}; agreement: {2}".format(
+            r["double_reviewed"], r["comparisons"], "n/a" if r["agreement"] is None else "{0:.1%}".format(r["agreement"])
+        )
+    )
+    for pair in r["by_pair"]:
+        print("  {0} vs {1}: {2:.1%} over {3}".format(pair["reviewers"][0], pair["reviewers"][1], pair["agreement"], pair["n"]))
+    for d in r["disagreements"]:
+        print("  disagreement on match {0}: {1}".format(d["match_id"], dict(zip(d["reviewers"], d["decisions"]))))
+    return 0
+
+
+def cmd_outcome(args: argparse.Namespace) -> int:
+    store = _store(args)
+    r = outcomes.record_outcome(store, args.outcome, args.by, args.match_id, args.lead_id, args.note)
+    print("outcome {0} recorded for lead {1}{2}".format(r["outcome"], r["lead_id"], " -> " + ", ".join(r["effects"]) if r["effects"] else ""))
+    return 0
+
+
+def cmd_outcomes_report(args: argparse.Namespace) -> int:
+    store = _store(args)
+    rep = outcomes.conversion_report(store)
+    _print(rep if args.json else outcomes.format_conversion(rep), args.json)
+    return 0
+
+
+def cmd_cluster(args: argparse.Namespace) -> int:
+    store = _store(args)
+    _print(persons.cluster_persons(store), True)
+    return 0
+
+
+def cmd_rebuild_blocks(args: argparse.Namespace) -> int:
+    store = _store(args)
+    print("rebuilt block keys for {0} mentions".format(entities.rebuild_blocks(store)))
+    return 0
+
+
+def cmd_geocode(args: argparse.Namespace) -> int:
+    store = _store(args)
+    n = geocode.warm_from_parcels(store)
+    print("warmed geocode cache from {0} parcels".format(n))
+    if args.static:
+        provider = geocode.StaticGeocoder.from_json(args.static)
+        hits = 0
+        for row in store.query("SELECT DISTINCT address_norm FROM mention WHERE address_norm IS NOT NULL AND current = 1"):
+            if geocode.lookup(store, row["address_norm"], provider):
+                hits += 1
+        store.commit()
+        print("static provider resolved {0} mention addresses".format(hits))
+    return 0
+
+
+def cmd_run_daily(args: argparse.Namespace) -> int:
+    store = _store(args)
+    policy.default_retention(store)
+    transport = FixtureTransport(args.fixtures) if args.fixtures else HttpTransport()
+    report = pipeline.run_daily(store, args.county, transport, alert_webhook=args.alert_webhook, base_url=args.base_url, sources=args.source)
+    print(pipeline.summary(report))
+    if args.json:
+        _print(report, True)
+    return 0 if report["ok"] else 1
 
 
 def cmd_decide(args: argparse.Namespace) -> int:
@@ -252,7 +372,7 @@ def cmd_serve(args: argparse.Namespace) -> int:
     from .api import serve
 
     store = _store(args)
-    serve(store, args.host, args.port, args.token)
+    serve(store, args.host, args.port, args.token, args.trust_proxy_header)
     return 0
 
 
@@ -280,8 +400,57 @@ def build_parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("review-queue", help="what a human still has to clear")
     s.add_argument("--limit", type=int, default=50)
+    s.add_argument("--order", choices=list(review.ORDERS), default="value", help="probability | uncertainty | value (default)")
+    s.add_argument("--reviewer", help="hide items this reviewer skipped")
+    s.add_argument("--audit", action="store_true", help="sampled auto-confirms awaiting an audit look")
+    s.add_argument("--double", metavar="REVIEWER", help="items awaiting a second opinion from REVIEWER")
     s.add_argument("--json", action="store_true")
     s.set_defaults(fn=cmd_review_queue)
+
+    s = sub.add_parser("groups", help="estate-centric view: every candidate per estate")
+    s.add_argument("--limit", type=int, default=20)
+    s.add_argument("--json", action="store_true")
+    s.set_defaults(fn=cmd_groups)
+
+    s = sub.add_parser("decide-group", help="confirm chosen parcels for one estate, reject the other pending ones")
+    s.add_argument("left_id")
+    s.add_argument("--confirm", action="append", help="right_id to confirm (repeatable; none = reject all pending)")
+    s.add_argument("--reviewer", required=True)
+    s.add_argument("--note")
+    s.add_argument("--keep-others", action="store_true", help="do not reject the unselected pending candidates")
+    s.set_defaults(fn=cmd_decide_group)
+
+    s = sub.add_parser("agreement", help="inter-reviewer agreement on double-reviewed matches")
+    s.add_argument("--json", action="store_true")
+    s.set_defaults(fn=cmd_agreement)
+
+    s = sub.add_parser("outcome", help="record what happened after outreach (declined auto-suppresses)")
+    s.add_argument("outcome", choices=list(outcomes.OUTCOMES))
+    s.add_argument("--match-id", type=int)
+    s.add_argument("--lead-id")
+    s.add_argument("--by", required=True)
+    s.add_argument("--note")
+    s.set_defaults(fn=cmd_outcome)
+
+    s = sub.add_parser("outcomes-report", help="conversion by parcel signal and by match evidence")
+    s.add_argument("--json", action="store_true")
+    s.set_defaults(fn=cmd_outcomes_report)
+
+    sub.add_parser("cluster", help="attach same-person mentions across sources to confirmed persons").set_defaults(fn=cmd_cluster)
+    sub.add_parser("rebuild-blocks", help="recompute blocking keys after a nickname/rules change").set_defaults(fn=cmd_rebuild_blocks)
+
+    s = sub.add_parser("geocode", help="warm the geocode cache from parcels and an optional static table")
+    s.add_argument("--static", help="JSON file: {address: [lat, lon]}")
+    s.set_defaults(fn=cmd_geocode)
+
+    s = sub.add_parser("run-daily", help="ingest -> resolve -> cluster -> watchlists -> deliver -> status; exit 1 on any problem")
+    s.add_argument("--county", required=True)
+    s.add_argument("--fixtures")
+    s.add_argument("--source", action="append")
+    s.add_argument("--alert-webhook")
+    s.add_argument("--base-url", default="monitorclt://")
+    s.add_argument("--json", action="store_true")
+    s.set_defaults(fn=cmd_run_daily)
 
     s = sub.add_parser("decide", help="record a reviewer decision (becomes a label)")
     s.add_argument("match_id", type=int)
@@ -361,6 +530,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--host", default="127.0.0.1")
     s.add_argument("--port", type=int, default=8765)
     s.add_argument("--token")
+    s.add_argument("--trust-proxy-header", help="take reviewer identity from this header set by an identity-aware proxy (e.g. x-forwarded-user)")
     s.set_defaults(fn=cmd_serve)
     return p
 

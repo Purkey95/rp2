@@ -1,13 +1,13 @@
 import unittest
 
 from mclt_helpers import fresh_store, ingested, resolved
+
+from monitorclt import review
 from monitorclt.normalize.names import parse_name
 from monitorclt.resolve import features as F
 from monitorclt.resolve import gates as G
 from monitorclt.resolve import resolve, resolver
 from monitorclt.resolve.model import LinkModel, load_rules
-
-from monitorclt import review
 
 
 def by_pair(store):

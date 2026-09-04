@@ -32,6 +32,7 @@ monitorclt = ["resolve/rules.json", "ui/*.html", "py.typed"]
 
 [tool.black]
 line-length = 160
+target-version = ["py38"]
 
 [tool.isort]
 profile = "black"

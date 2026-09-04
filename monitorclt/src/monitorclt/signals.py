@@ -43,7 +43,11 @@ SIGNALS: Dict[str, Signal] = {
         "post_death_conveyance", -20, "A deed from the decedent was recorded after the date of death; the parcel may have left the estate."
     ),
     "recent_owner_change": Signal("recent_owner_change", -15, "Owner string changed within the last 180 days."),
-    "entity_owner": Signal("entity_owner", 0, "Owner is an organization (informational)."),
+    "entity_owner": Signal("entity_owner", 0, "Owner is an organization (informational); enriched from the business registry when found."),
+    "entity_dissolved": Signal("entity_dissolved", 12, "Owning entity is dissolved or revoked in the business registry."),
+    "outcome_not_in_estate": Signal("outcome_not_in_estate", -40, "Outreach established the parcel is not in the estate."),
+    "outcome_already_sold": Signal("outcome_already_sold", -40, "Outreach established the parcel has already been sold."),
+    "outcome_declined": Signal("outcome_declined", -100, "The authorized contact declined; suppressed."),
 }
 
 
@@ -121,9 +125,33 @@ def parcel_signals(store: Store, parcel: Dict[str, Any]) -> List[Dict[str, Any]]
     recent = store.one("SELECT observed_at FROM event WHERE parcel_id = ? AND kind = 'owner_changed' ORDER BY id DESC LIMIT 1", (pid,))
     if recent and (_days_between(recent["observed_at"], now) or 0) <= 180:
         add("recent_owner_change", {"observed_at": recent["observed_at"]})
-    if store.one("SELECT 1 FROM mention WHERE source = 'parcel' AND role = 'owner' AND current = 1 AND parcel_id = ? AND is_organization = 1", (pid,)):
-        add("entity_owner", {})
+    org = store.one("SELECT parsed FROM mention WHERE source = 'parcel' AND role = 'owner' AND current = 1 AND parcel_id = ? AND is_organization = 1", (pid,))
+    if org:
+        detail: Dict[str, Any] = {}
+        entity = business_entity_for(store, loads(org["parsed"], {}).get("clean", ""))
+        if entity:
+            detail = {k: entity.get(k) for k in ("entity_name", "entity_type", "status", "registered_agent_name", "manager_names", "principal_address")}
+            if str(entity.get("status") or "").upper() in ("DISSOLVED", "ADMIN DISSOLVED", "REVOKED", "WITHDRAWN"):
+                add("entity_dissolved", {"status": entity.get("status")})
+        add("entity_owner", detail)
+    for kind, name in (("outcome_not_in_estate", "outcome_not_in_estate"), ("outcome_already_sold", "outcome_already_sold")):
+        if store.one("SELECT 1 FROM event WHERE parcel_id = ? AND kind = ?", (pid, kind)):
+            add(name, {})
+    if store.one("SELECT 1 FROM outcome o JOIN entity_match m ON m.id = o.match_id WHERE m.right_id = ? AND o.outcome = 'declined'", (pid,)):
+        add("outcome_declined", {})
     return found
+
+
+def business_entity_for(store: Store, org_clean: str) -> Optional[Dict[str, Any]]:
+    """The registry record whose name matches an owner string, via the ORG| block key."""
+    if not org_clean:
+        return None
+    row = store.one(
+        "SELECT r.payload FROM mention_block b JOIN mention m ON m.id = b.mention_id JOIN record_version r ON r.id = m.record_version_id "
+        "WHERE b.key = ? AND m.source = 'business_entity' AND m.role = 'entity' AND m.current = 1 ORDER BY m.id DESC LIMIT 1",
+        ("ORG|" + org_clean,),
+    )
+    return loads(row["payload"], {}) if row else None
 
 
 def _current_for_parcel(store: Store, source: str, pid: str) -> List[Dict[str, Any]]:

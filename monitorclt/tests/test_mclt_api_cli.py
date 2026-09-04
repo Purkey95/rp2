@@ -118,6 +118,18 @@ class CliTests(unittest.TestCase):
         self.assertEqual(self.run_cli("suppress", "person", "Jane R Public", "--reason", "opt-out"), 0)
         self.assertEqual(self.run_cli("purge"), 0)
         self.assertEqual(self.run_cli("provenance", "nope"), 1)
+        self.assertEqual(self.run_cli("groups"), 0)
+        self.assertEqual(self.run_cli("review-queue", "--order", "uncertainty", "--reviewer", "alice"), 0)
+        self.assertEqual(self.run_cli("review-queue", "--audit"), 0)
+        self.assertEqual(self.run_cli("review-queue", "--double", "bob"), 0)
+        self.assertEqual(self.run_cli("decide-group", "MECKLENBURG/26 E 001238", "--reviewer", "alice"), 0)
+        self.assertEqual(self.run_cli("agreement"), 0)
+        self.assertEqual(self.run_cli("outcome", "reached", "--match-id", "3", "--by", "alice"), 0)
+        self.assertEqual(self.run_cli("outcomes-report"), 0)
+        self.assertEqual(self.run_cli("cluster"), 0)
+        self.assertEqual(self.run_cli("rebuild-blocks"), 0)
+        self.assertEqual(self.run_cli("geocode"), 0)
+        self.assertEqual(self.run_cli("run-daily", "--county", "MECKLENBURG", "--fixtures", FIXTURES), 0)
 
     def test_endpoint_override_imports_legacy_jsonl(self):
         legacy = os.path.normpath(os.path.join(FIXTURES, "..", "..", "..", "tools", "monitorclt_probate", "sample"))

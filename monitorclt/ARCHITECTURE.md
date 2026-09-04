@@ -146,6 +146,59 @@ Things not in the original ten that turned out to matter:
 - **Failed runs keep their watermark.** A transport failure never advances the
   watermark or retires rows, so an outage cannot look like a mass disappearance.
 
+## Round two: process improvements
+
+Built after a review of the first cut, in the order that moved the process most.
+
+**Matching recall.** Trust strings ("PUBLIC JOHN Q TRUSTEE", "JOHN Q PUBLIC REVOCABLE
+LIVING TRUST") now yield a person with `trust=True` instead of an organization;
+`trust_owner` is a feature and `trust_held` a flag. Blocking widened from exact
+FIRST|LAST to a key set per mention (`mention_block`): exact, canonical nickname
+(BILL→WILLIAM), first initial, and surname soundex with exact forename. Forename
+phonetics were tried and removed: JOHN and JANE share a soundex code. Candidates
+found only by a weak key carry `name_initial_only` / `name_phonetic_match` and a gate
+(`no_weak_name_only`) requires two corroborating items before auto-confirm. When two
+parties on one record are both candidates the best-scoring one is kept, so a co-owner
+never overwrites the decedent. `sale_after_death` (last sale later than the date of
+death, no deed from the decedent) is a negative feature and a flag. `coordinates_match`
+compares a geocoded subject address with the parcel's coordinates when the text does
+not match; `geocode.py` caches by normalized address behind a pluggable provider and
+seeds itself from parcels with coordinates.
+
+**Person clustering** (`persons.py`). A confirmed person collects their deed, tax,
+foreclosure and code-enforcement mentions when the name agrees without a middle
+conflict *and* an address or parcel is shared. Name alone never merges.
+
+**Review process** (`review.py`). Estate-centric groups (`groups`, `decide_group`):
+one estate, every candidate, pick the parcels, the rest are rejected with better
+negative labels. Queue ordering by `value` (uncertainty × log assessed value) by
+default. Deterministic audit sampling of rules-confirmed matches into an audit queue,
+so auto-confirm precision is measured without selection bias. Double-review sampling
+and an inter-reviewer agreement report.
+
+**Outcomes** (`outcomes.py`). `record_outcome` writes the audit row; `declined` and
+`invalid_contact` suppress the contact (and, for declines, the address and parcel)
+immediately; `not_in_estate` / `already_sold` become negative parcel signals; the
+conversion report groups exported leads by signal and by evidence. The policy layer
+denies export after a terminal outcome and enforces a contact cadence (one export per
+estate per 30 days by default).
+
+**Business registry** (`business_entity` source). LLC owners are enriched with the
+registered agent, managers and status; a dissolved owner is its own signal.
+
+**Operations.** Webhook secrets are stored as `env:NAME` references only (a literal is
+rejected). The API accepts identity from an identity-aware proxy header
+(`--trust-proxy-header`). `pipeline.run_daily` chains the steps, exits non-zero on any
+connector failure or quality anomaly, and posts a summary to an alert webhook. The
+resolver preloads records, parcels and party keys once per run instead of querying per
+candidate.
+
+**Development process.** A dedicated CI workflow runs the suite on Python 3.8–3.12 on
+Linux and Windows, the connector contract tests, a fixture `run-daily`, and
+black/isort/flake8. `CLAUDE.md` carries the conventions; `docs/RUNBOOK.md` carries the
+procedures that need outside access: bringing a live source online, building the
+labeled set, splitting the repository.
+
 ## What is deliberately not here yet
 
 - **Live connectors.** Endpoints default to fixtures; real county portals need
@@ -159,5 +212,5 @@ Things not in the original ten that turned out to matter:
 - **Orchestration.** `ingest → resolve → watchlist run → deliver → status --strict`
   is a cron line today; a Dagster/Prefect asset graph would add lineage and
   backfills.
-- **Learned blocking.** Blocking is still FIRST|LAST. Nickname tables and
-  phonetic keys would raise recall on the blocked-out cases the evaluator surfaces.
+- **Learned blocking.** Blocking now uses nickname, initial and surname-phonetic keys;
+  learning which keys pay off from the labeled set is the next step.

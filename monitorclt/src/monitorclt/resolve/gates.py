@@ -22,6 +22,10 @@ def evaluate(features: Dict[str, float], rules: Dict[str, Any]) -> Dict[str, boo
         gates["corroboration_required"] = any(features.get(k) for k in corroborating)
     if cfg.get("no_hard_conflict", True):
         gates["no_hard_conflict"] = not any(features.get(k) for k in conflicts)
+    if cfg.get("no_weak_name_only", True):
+        weak = features.get("name_initial_only") or features.get("name_phonetic_match")
+        strong = sum(1 for k in corroborating if features.get(k))
+        gates["no_weak_name_only"] = not weak or strong >= 2
     return gates
 
 

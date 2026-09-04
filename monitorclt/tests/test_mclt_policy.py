@@ -1,9 +1,9 @@
 import unittest
 
 from mclt_helpers import resolved
-from monitorclt.resolve import resolver
 
 from monitorclt import history, policy, review
+from monitorclt.resolve import resolver
 
 
 class ExportPolicyTests(unittest.TestCase):

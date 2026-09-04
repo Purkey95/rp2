@@ -39,11 +39,19 @@
   .empty { text-align:center; padding:60px 0; color:var(--muted); }
   ul.list { margin:0; padding-left:18px; }
   .gate.ok::before { content:"✓ "; color:var(--ok); } .gate.fail::before { content:"✗ "; color:var(--bad); }
+  .tabs button { padding:5px 10px; font-size:13px; border-radius:6px; margin-right:4px; }
+  .tabs button.on { background:var(--ink); color:#fff; border-color:var(--ink); }
+  .cand { display:grid; grid-template-columns:28px 1fr 110px 90px; gap:10px; align-items:start; padding:10px 8px; border-top:1px solid var(--line); }
+  .cand.chosen { background:#eef6f0; }
+  .cand .p { font-weight:600; text-align:right; }
+  .cand .st { font-size:12px; color:var(--muted); text-align:right; }
+  .cand input { margin-top:4px; width:16px; height:16px; }
 </style>
 </head>
 <body>
 <header>
-  <h1>MonitorCLT · Review queue</h1>
+  <h1>MonitorCLT · Review</h1>
+  <nav class="tabs"><button data-mode="groups" class="on">Estates</button><button data-mode="pairs">Pairs</button><button data-mode="audit">Audit sample</button></nav>
   <span id="count" class="muted"></span>
   <span class="spacer"></span>
   <label class="muted">Reviewer <input id="reviewer" placeholder="your name" size="14"></label>
@@ -57,7 +65,78 @@
   try { reviewerInput.value = localStorage.getItem('monitorclt.reviewer') || ''; } catch (e) {}
   reviewerInput.addEventListener('change', () => { try { localStorage.setItem('monitorclt.reviewer', reviewerInput.value); } catch (e) {} });
 
-  let queue = [], current = null, opened = 0;
+  let queue = [], current = null, opened = 0, mode = 'groups', groupsList = [], currentGroup = null;
+  document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => {
+    mode = b.dataset.mode; document.querySelectorAll('.tabs button').forEach((x) => x.classList.toggle('on', x === b)); load().catch(showError);
+  }));
+  const showError = (e) => { $('#main').innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; };
+  async function load() { if (mode === 'groups') return loadGroups(); if (mode === 'audit') return loadAudit(); return loadQueue(); }
+
+  async function loadGroups() {
+    groupsList = (await api('/api/review/groups?limit=25')).groups;
+    $('#count').textContent = groupsList.length + ' estates with open candidates';
+    if (!groupsList.length) { $('#main').innerHTML = '<div class="empty">No estates waiting. Nice.</div>'; currentGroup = null; return; }
+    showGroup(groupsList[0]);
+  }
+
+  function showGroup(g) {
+    currentGroup = g; opened = Date.now();
+    const subj = g.subject || {}; const sp = (g.subject_mention && g.subject_mention.parsed) || {};
+    const tokens = [sp.first, sp.last].filter((t) => t && t.length > 1);
+    const rows = g.candidates.map((c) => {
+      const parcel = c.parcel || {};
+      const chips = c.evidence.map((e) => '<span class="chip">' + esc(e.replace(/_/g, ' ')) + '</span>').join('') + c.flags.map((f) => '<span class="chip flag">' + esc(f.replace(/_/g, ' ')) + '</span>').join('');
+      const checked = c.status === 'confirmed' ? 'checked' : '';
+      const disabled = c.status !== 'pending' && c.decided_by === 'reviewer' ? 'disabled' : '';
+      return '<label class="cand ' + (checked ? 'chosen' : '') + '"><input type="checkbox" data-right="' + esc(c.right_id) + '" ' + checked + ' ' + disabled + '>' +
+        '<div><div>' + highlight(c.owner_name || '', tokens) + ' <span class="muted">· ' + esc(parcel.situs_norm || c.right_id) + '</span></div>' +
+        '<div class="muted">' + esc(parcel.land_use || '') + ' ' + money(parcel.assessed_value) + (parcel.owner_mailing_norm ? ' · mails to ' + esc(parcel.owner_mailing_norm) : '') + '</div><div class="chips">' + chips + '</div></div>' +
+        '<div class="p">' + (c.probability * 100).toFixed(1) + '%</div><div class="st">' + esc(c.status) + (c.decided_by === 'reviewer' ? '<br>by ' + esc(c.reviewer) : '') + '</div></label>';
+    }).join('');
+    $('#main').innerHTML = `
+      <div class="card" style="margin-bottom:14px">
+        <h2>${esc(g.left_id)} · pick the parcel(s) this estate holds</h2>
+        <table>
+          <tr><td>decedent</td><td><b>${esc(subj.decedent_name)}</b></td></tr>
+          <tr><td>died / filed</td><td>${esc(subj.date_of_death || '?')} / ${esc(subj.filing_date || '?')}</td></tr>
+          <tr><td>personal representative</td><td>${esc(subj.personal_rep_name || '—')}</td></tr>
+          <tr><td>PR mailing address</td><td>${esc(subj.pr_mailing_address || '—')}</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h2>${g.candidates.length} candidates · ${g.pending} pending</h2>
+        ${rows}
+        <div class="actions">
+          <button class="confirm" id="btn-group">Confirm checked, reject the rest (c)</button>
+          <button id="btn-none">None of these (r)</button>
+          <button id="btn-skip">Skip (s)</button>
+          <input class="note" id="note" placeholder="note for the audit trail (optional)">
+          <span class="muted">${groupsList.length} estates</span>
+        </div>
+      </div>`;
+    $('#btn-group').onclick = () => decideGroup(false);
+    $('#btn-none').onclick = () => decideGroup(true);
+    $('#btn-skip').onclick = () => { groupsList.push(groupsList.shift()); showGroup(groupsList[0]); };
+  }
+
+  async function decideGroup(none) {
+    if (!currentGroup) return;
+    const reviewer = reviewerInput.value.trim();
+    if (!reviewer) { reviewerInput.focus(); reviewerInput.style.borderColor = '#a3352b'; return; }
+    const confirm = none ? [] : Array.from(document.querySelectorAll('.cand input:checked')).map((i) => i.dataset.right);
+    document.querySelectorAll('button').forEach((b) => b.disabled = true);
+    try {
+      await api('/api/review/groups/decide', {method: 'POST', body: JSON.stringify({left_id: currentGroup.left_id, confirm, reviewer, note: $('#note').value})});
+    } catch (e) { alert(e.message); }
+    await loadGroups();
+  }
+
+  async function loadAudit() {
+    queue = (await api('/api/review/audit?limit=50')).queue;
+    $('#count').textContent = queue.length + ' sampled auto-confirms to check';
+    if (!queue.length) { $('#main').innerHTML = '<div class="empty">Nothing sampled for audit right now.</div>'; current = null; return; }
+    await show(queue[0].id);
+  }
   const esc = (v) => String(v == null ? '' : v).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const money = (v) => v == null ? '' : '$' + Number(v).toLocaleString();
 
@@ -69,7 +148,7 @@
   }
 
   async function loadQueue() {
-    queue = (await api('/api/review/queue?limit=50')).queue;
+    queue = (await api('/api/review/queue?limit=50&order=value')).queue;
     $('#count').textContent = queue.length + ' pending';
     if (!queue.length) { $('#main').innerHTML = '<div class="empty">Queue is empty. Nice.</div>'; current = null; return; }
     await show(queue[0].id);
@@ -151,9 +230,13 @@
 
   document.addEventListener('keydown', (e) => {
     if (e.target.tagName === 'INPUT') return;
+    if (mode === 'groups') {
+      if (e.key === 'c') decideGroup(false); else if (e.key === 'r') decideGroup(true); else if (e.key === 's' && groupsList.length) { groupsList.push(groupsList.shift()); showGroup(groupsList[0]); }
+      return;
+    }
     if (e.key === 'c') decide('confirm'); else if (e.key === 'r') decide('reject'); else if (e.key === 's') decide('skip');
   });
-  loadQueue().catch((e) => { $('#main').innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; });
+  load().catch(showError);
 })();
 </script>
 </body>

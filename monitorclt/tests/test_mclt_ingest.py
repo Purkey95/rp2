@@ -2,12 +2,12 @@ import json
 import unittest
 
 from mclt_helpers import COUNTY, FIXTURES, fixture_bytes, fresh_store, ingested
+
+from monitorclt import history, ingest, quality
 from monitorclt.counties import mecklenburg
 from monitorclt.sources.contract import check, validate
 from monitorclt.sources.html_tables import find_table, parse_tables
 from monitorclt.sources.transport import FixtureTransport
-
-from monitorclt import history, ingest, quality
 
 
 class IngestTests(unittest.TestCase):
@@ -25,7 +25,7 @@ class IngestTests(unittest.TestCase):
         s = ingested()
         for r in ingest.ingest_county(s, COUNTY, FixtureTransport(FIXTURES)):
             self.assertEqual((r["rows_new"], r["rows_changed"], r["rows_retired"]), (0, 0, 0), r["connector"])
-        self.assertEqual(s.scalar("SELECT COUNT(*) FROM raw_capture"), 6)
+        self.assertEqual(s.scalar("SELECT COUNT(*) FROM raw_capture"), 7)
 
     def test_snapshot_change_and_retire(self):
         s = ingested()

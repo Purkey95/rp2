@@ -16,7 +16,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from urllib.parse import parse_qs, urlparse
 
-from . import entities, history, policy, quality, review, signals, watch
+from . import entities, history, outcomes, persons, policy, quality, review, signals, watch
 from .normalize.pins import parcel_id
 from .resolve.model import LinkModel, load_rules
 from .store import Store, loads
@@ -30,15 +30,25 @@ Route = Tuple[str, "re.Pattern[str]", Callable[..., Any]]
 class Api:
     """Routing and handlers, independent of the HTTP server so tests can call them directly."""
 
-    def __init__(self, store: Store, token: Optional[str] = None, base_url: str = "http://localhost:8765/") -> None:
+    def __init__(self, store: Store, token: Optional[str] = None, base_url: str = "http://localhost:8765/", trust_proxy_header: Optional[str] = None) -> None:
         self.store = store
         self.token = token
         self.base_url = base_url
+        # When set (e.g. "x-forwarded-user"), an identity-aware proxy in front of the API
+        # supplies the reviewer identity and the shared token is not consulted.
+        self.trust_proxy_header = trust_proxy_header.lower() if trust_proxy_header else None
         self.lock = threading.Lock()
         self.routes: List[Route] = [
             ("GET", re.compile(r"^/api/status$"), self.status),
             ("GET", re.compile(r"^/api/model$"), self.model),
             ("GET", re.compile(r"^/api/review/queue$"), self.queue),
+            ("GET", re.compile(r"^/api/review/groups$"), self.groups),
+            ("POST", re.compile(r"^/api/review/groups/decide$"), self.decide_group),
+            ("GET", re.compile(r"^/api/review/audit$"), self.audit),
+            ("GET", re.compile(r"^/api/review/double$"), self.double),
+            ("GET", re.compile(r"^/api/review/agreement$"), self.agreement),
+            ("POST", re.compile(r"^/api/outcomes$"), self.record_outcome),
+            ("GET", re.compile(r"^/api/outcomes/report$"), self.outcomes_report),
             ("GET", re.compile(r"^/api/matches/(\d+)$"), self.match_detail),
             ("POST", re.compile(r"^/api/matches/(\d+)/decision$"), self.decide),
             ("GET", re.compile(r"^/api/parcels/([^/]+)/([^/]+)$"), self.parcel),
@@ -52,8 +62,16 @@ class Api:
             ("GET", re.compile(r"^/api/leads/([0-9a-f]+)/provenance$"), self.provenance),
         ]
 
+    def identity(self, headers: Dict[str, str], body: Optional[Dict[str, Any]] = None) -> Optional[str]:
+        if self.trust_proxy_header:
+            return headers.get(self.trust_proxy_header)
+        return (body or {}).get("reviewer") or headers.get("x-reviewer")
+
     def dispatch(self, method: str, path: str, query: Dict[str, List[str]], body: Optional[Dict[str, Any]], headers: Dict[str, str]) -> Tuple[int, Any]:
-        if self.token and headers.get("x-monitorclt-token") != self.token:
+        if self.trust_proxy_header:
+            if not headers.get(self.trust_proxy_header):
+                return 401, {"error": "no identity from proxy header {0}".format(self.trust_proxy_header)}
+        elif self.token and headers.get("x-monitorclt-token") != self.token:
             return 401, {"error": "missing or invalid token"}
         for m, pattern, handler in self.routes:
             match = pattern.match(path)
@@ -79,9 +97,44 @@ class Api:
         rules = load_rules()
         return 200, {"model": LinkModel.active(self.store, rules).to_dict(), "thresholds": rules["thresholds"], "gates": rules["gates"]}
 
-    def queue(self, query: Dict[str, List[str]], **_: Any) -> Tuple[int, Any]:
+    def queue(self, query: Dict[str, List[str]], headers: Dict[str, str], **_: Any) -> Tuple[int, Any]:
         limit = int(query.get("limit", ["25"])[0])
-        return 200, {"queue": review.queue(self.store, limit)}
+        order = query.get("order", [load_rules().get("review", {}).get("default_order", "probability")])[0]
+        return 200, {"queue": review.queue(self.store, limit, order=order, reviewer=self.identity(headers)), "order": order}
+
+    def groups(self, query: Dict[str, List[str]], **_: Any) -> Tuple[int, Any]:
+        return 200, {"groups": review.groups(self.store, int(query.get("limit", ["10"])[0]))}
+
+    def decide_group(self, body: Dict[str, Any], headers: Dict[str, str], **_: Any) -> Tuple[int, Any]:
+        reviewer = self.identity(headers, body)
+        if not reviewer:
+            return 400, {"error": "reviewer is required"}
+        if not body.get("left_id"):
+            return 400, {"error": "left_id is required"}
+        return 200, review.decide_group(self.store, body["left_id"], list(body.get("confirm", [])), reviewer, body.get("note"), body.get("reject_others", True))
+
+    def audit(self, query: Dict[str, List[str]], **_: Any) -> Tuple[int, Any]:
+        return 200, {"queue": review.audit_queue(self.store, int(query.get("limit", ["25"])[0]))}
+
+    def double(self, query: Dict[str, List[str]], headers: Dict[str, str], **_: Any) -> Tuple[int, Any]:
+        reviewer = query.get("reviewer", [self.identity(headers) or ""])[0]
+        if not reviewer:
+            return 400, {"error": "reviewer is required"}
+        return 200, {"queue": review.double_review_queue(self.store, reviewer, int(query.get("limit", ["25"])[0]))}
+
+    def agreement(self, **_: Any) -> Tuple[int, Any]:
+        return 200, review.agreement_report(self.store)
+
+    def record_outcome(self, body: Dict[str, Any], headers: Dict[str, str], **_: Any) -> Tuple[int, Any]:
+        actor = self.identity(headers, body) or body.get("recorded_by")
+        if not actor:
+            return 400, {"error": "reviewer / recorded_by is required"}
+        return 201, outcomes.record_outcome(self.store, body.get("outcome", ""), actor, body.get("match_id"), body.get("lead_id"), body.get("note"))
+
+    def outcomes_report(self, **_: Any) -> Tuple[int, Any]:
+        rep = outcomes.conversion_report(self.store)
+        rep["text"] = outcomes.format_conversion(rep)
+        return 200, rep
 
     def match_detail(self, match_id: str, **_: Any) -> Tuple[int, Any]:
         d = review.detail(self.store, int(match_id))
@@ -90,7 +143,7 @@ class Api:
         return 200, d
 
     def decide(self, match_id: str, body: Dict[str, Any], headers: Dict[str, str], **_: Any) -> Tuple[int, Any]:
-        reviewer = body.get("reviewer") or headers.get("x-reviewer")
+        reviewer = self.identity(headers, body)
         if not reviewer:
             return 400, {"error": "reviewer is required"}
         m = review.decide(self.store, int(match_id), body.get("decision", ""), reviewer, body.get("note"), body.get("seconds_spent"))
@@ -118,13 +171,9 @@ class Api:
         }
 
     def person(self, person_id: str, **_: Any) -> Tuple[int, Any]:
-        p = self.store.one("SELECT * FROM person WHERE id = ?", (int(person_id),))
+        p = persons.profile(self.store, int(person_id))
         if p is None:
             return 404, {"error": "no person {0}".format(person_id)}
-        p["aliases"] = self.store.query("SELECT alias_normalized, source FROM person_alias WHERE person_id = ?", (p["id"],))
-        p["addresses"] = self.store.query("SELECT address_norm, address_kind, observed_at FROM person_address WHERE person_id = ?", (p["id"],))
-        p["mentions"] = self.store.query("SELECT id, source, county, natural_key, role, raw_name FROM mention WHERE person_id = ? ORDER BY id", (p["id"],))
-        p["matches"] = self.store.query("SELECT id, kind, left_id, right_id, status, probability FROM entity_match WHERE person_id = ?", (p["id"],))
         return 200, p
 
     def events(self, query: Dict[str, List[str]], **_: Any) -> Tuple[int, Any]:
@@ -211,16 +260,20 @@ class Handler(BaseHTTPRequestHandler):
         self._handle("POST")
 
 
-def make_server(store: Store, host: str = "127.0.0.1", port: int = 8765, token: Optional[str] = None) -> ThreadingHTTPServer:
-    api = Api(store, token, "http://{0}:{1}/".format(host, port))
+def make_server(
+    store: Store, host: str = "127.0.0.1", port: int = 8765, token: Optional[str] = None, trust_proxy_header: Optional[str] = None
+) -> ThreadingHTTPServer:
+    api = Api(store, token, "http://{0}:{1}/".format(host, port), trust_proxy_header)
     handler = type("BoundHandler", (Handler,), {"api": api})
     server = ThreadingHTTPServer((host, port), handler)
     server.api = api  # type: ignore[attr-defined]
     return server
 
 
-def serve(store: Store, host: str = "127.0.0.1", port: int = 8765, token: Optional[str] = None) -> None:  # pragma: no cover - blocking
-    server = make_server(store, host, port, token)
+def serve(
+    store: Store, host: str = "127.0.0.1", port: int = 8765, token: Optional[str] = None, trust_proxy_header: Optional[str] = None
+) -> None:  # pragma: no cover - blocking
+    server = make_server(store, host, port, token, trust_proxy_header)
     print("MonitorCLT serving on http://{0}:{1}/  (reviewer UI at /review, API under /api)".format(host, server.server_address[1]))
     try:
         server.serve_forever()

@@ -2,10 +2,10 @@ import os
 import unittest
 
 from mclt_helpers import FIXTURES, resolved
-from monitorclt.resolve import resolve, resolver
-from monitorclt.resolve.model import load_rules
 
 from monitorclt import evaluate, review
+from monitorclt.resolve import resolve, resolver
+from monitorclt.resolve.model import load_rules
 
 
 class ReviewLoopTests(unittest.TestCase):

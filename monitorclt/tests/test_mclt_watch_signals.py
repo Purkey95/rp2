@@ -1,4 +1,5 @@
 import json
+import os
 import unittest
 
 from mclt_helpers import resolved
@@ -22,7 +23,7 @@ class WatchlistTests(unittest.TestCase):
 
     def test_notifications_dedupe_and_go_through_policy(self):
         s = resolved()
-        wid = watch.create_watchlist(s, "elm", "bob", {"zips": ["28205"]}, "webhook", "https://example.invalid/h", "sekrit")
+        wid = watch.create_watchlist(s, "elm", "bob", {"zips": ["28205"]}, "webhook", "https://example.invalid/h", "env:MCLT_TEST_SECRET")
         r = watch.evaluate_watchlists(s)
         self.assertEqual(r["notifications_created"], 3)  # 2 deeds + 1 confirmed match on 28205 parcels
         self.assertEqual(watch.evaluate_watchlists(s)["notifications_created"], 0)
@@ -36,12 +37,13 @@ class WatchlistTests(unittest.TestCase):
     def test_suppressed_person_never_reaches_a_webhook(self):
         s = resolved()
         policy.add_suppression(s, "person", "Jane R Public", "opt-out")
-        watch.create_watchlist(s, "elm", "bob", {"zips": ["28205"], "kinds": ["match_confirmed"]}, "webhook", "https://x", "k")
+        watch.create_watchlist(s, "elm", "bob", {"zips": ["28205"], "kinds": ["match_confirmed"]}, "webhook", "https://x", "env:MCLT_TEST_SECRET")
         self.assertEqual(watch.evaluate_watchlists(s)["notifications_created"], 0)
 
     def test_signed_delivery(self):
+        os.environ["MCLT_TEST_SECRET"] = "sekrit"
         s = resolved()
-        wid = watch.create_watchlist(s, "elm", "bob", {"zips": ["28205"]}, "webhook", "https://example.invalid/h", "sekrit")
+        wid = watch.create_watchlist(s, "elm", "bob", {"zips": ["28205"]}, "webhook", "https://example.invalid/h", "env:MCLT_TEST_SECRET")
         watch.evaluate_watchlists(s)
         sent = []
 

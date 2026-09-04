@@ -1,0 +1,38 @@
+[
+  {
+    "agent_address": "300 Nonesuch Avenue, Charlotte NC 28204",
+    "county": "MECKLENBURG",
+    "entity_name": "NONESUCH HOLDINGS LLC",
+    "entity_type": "LLC",
+    "formed_date": "2019-04-02",
+    "manager_names": "Peter Example & Alice C Example",
+    "principal_address": "PO BOX 12 CHARLOTTE NC 28201",
+    "registered_agent_name": "Peter Example",
+    "sos_id": "1234567",
+    "status": "CURRENT-ACTIVE"
+  },
+  {
+    "agent_address": "100 N Tryon St Ste 200 Charlotte NC 28202",
+    "county": "MECKLENBURG",
+    "entity_name": "ANYCORP BUILDERS LLC",
+    "entity_type": "LLC",
+    "formed_date": "2011-09-15",
+    "manager_names": "",
+    "principal_address": "100 N Tryon St Ste 200 Charlotte NC 28202",
+    "registered_agent_name": "Corporate Agents of Carolina Inc",
+    "sos_id": "2345678",
+    "status": "ADMIN DISSOLVED"
+  },
+  {
+    "agent_address": "1 Vacant Way, Charlotte NC 28202",
+    "county": "MECKLENBURG",
+    "entity_name": "BIRCH LANE PARTNERS LLC",
+    "entity_type": "LLC",
+    "formed_date": "2014-01-20",
+    "manager_names": "Harold Nobody",
+    "principal_address": "1 Vacant Way, Charlotte NC 28202",
+    "registered_agent_name": "Harold Nobody",
+    "sos_id": "3456789",
+    "status": "CURRENT-ACTIVE"
+  }
+]

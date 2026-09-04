@@ -9,11 +9,10 @@ FIXTURES = os.path.normpath(os.path.join(HERE, "..", "fixtures", "mecklenburg"))
 if SRC not in sys.path:
     sys.path.insert(0, SRC)
 
+from monitorclt import counties, ingest  # noqa: E402
 from monitorclt.clock import Clock  # noqa: E402
 from monitorclt.sources.transport import FixtureTransport  # noqa: E402
 from monitorclt.store import Store  # noqa: E402
-
-from monitorclt import counties, ingest  # noqa: E402
 
 COUNTY = counties.mecklenburg.COUNTY
 

@@ -1,0 +1,49 @@
+name: MonitorCLT
+
+on:
+  push:
+    paths: ["monitorclt/**", ".github/workflows/monitorclt.yml"]
+  pull_request:
+    paths: ["monitorclt/**", ".github/workflows/monitorclt.yml"]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Unit tests (stdlib only, no dependencies to install)
+        working-directory: monitorclt
+        run: python -m unittest discover -s tests -p "test_mclt_*.py" -v
+      - name: Connector contract tests against recorded fixtures
+        working-directory: monitorclt
+        env:
+          PYTHONPATH: src
+        run: python -m monitorclt --db contract.db contract --county MECKLENBURG --fixtures fixtures/mecklenburg --golden
+      - name: Daily pipeline dry run on fixtures must be clean
+        working-directory: monitorclt
+        env:
+          PYTHONPATH: src
+        run: python -m monitorclt --db daily.db run-daily --county MECKLENBURG --fixtures fixtures/mecklenburg
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install black isort flake8
+      - name: black --check
+        run: black --check --line-length 160 --target-version py38 monitorclt/src monitorclt/tests
+      - name: isort --check
+        run: isort --check-only --profile black --line-length 160 monitorclt/src monitorclt/tests
+      - name: flake8 (errors only)
+        run: flake8 monitorclt --count --select=E9,F63,F7,F82,F401,F811,F841 --show-source --statistics

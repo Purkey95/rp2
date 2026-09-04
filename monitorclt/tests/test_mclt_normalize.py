@@ -1,6 +1,7 @@
 import unittest
 
 from mclt_helpers import fresh_store  # noqa: F401  (sets sys.path)
+
 from monitorclt.normalize import addresses, geo, names, pins
 
 

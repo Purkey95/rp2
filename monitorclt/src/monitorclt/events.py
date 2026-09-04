@@ -33,6 +33,11 @@ CODE_CASE_CLOSED = "code_case_closed"
 MATCH_CONFIRMED = "match_confirmed"
 MATCH_REJECTED = "match_rejected"
 PARCEL_RETIRED = "parcel_retired"
+ENTITY_REGISTERED = "entity_registered"
+ENTITY_STATUS_CHANGED = "entity_status_changed"
+ENTITY_DISSOLVED = "entity_dissolved"
+OUTCOME_NOT_IN_ESTATE = "outcome_not_in_estate"
+OUTCOME_ALREADY_SOLD = "outcome_already_sold"
 
 ALL_KINDS = [
     ESTATE_OPENED,
