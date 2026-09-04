@@ -41,6 +41,7 @@ identity-aware proxy, or a shared `--token` for a single operator.
 | `lien` | `ODP/FMSLienData/MapServer/0` (table) | ~25k | snapshot |
 | `vacant_land` | `PLN/VacantLand/MapServer/0` | ~27k | snapshot |
 | `address_point` | `CountyData/MasterAddress/MapServer/0` | ~677k | snapshot, 5000/page; fills `geocode_cache` and parcel coordinates |
+| `deed` | `meckrod.manatron.com` Register of Deeds index (Aumentum) | ~85 deeds/day | incremental on date filed, 20 rows/page |
 
 Capture procedure used for the fixtures (repeat to refresh them): POST to each
 layer's `/query` with `f=json&outFields=*`, save each page verbatim as
@@ -53,9 +54,62 @@ use `dateofsale >= TIMESTAMP` for a daily incremental of sales if the full snaps
 is too heavy (`ParcelXapoConnector.base_where`). The server returned no
 `copyrightText`; confirm the city's open data terms before commercial use.
 
-Still missing for the probate link: estate cases and the deed index. See the next section.
+### The deeds index (Aumentum ROD Web Access)
 
-## 3. Bringing a live source online (estates, deeds)
+`sources/aumentum.py` drives `meckrod.manatron.com` exactly as a browser does, with
+field values recorded from a real session: accept the disclaimer (`__EVENTTARGET =
+ctl00$cph1$lnkAccept`), load `/RealEstate/SearchEntry.aspx`, post the search with the
+Infragistics date state (`|0|01YYYY-M-D-0-0-0-0||...`), document-type checkboxes
+whose index the connector reads off the form (they differ per site), then GET
+`/RealEstate/SearchResults.aspx?pg=N`. The record count and page span come from the
+`_TotalRows`, `_StartRow`, `_EndRow` spans. Default document types: DEED, EXTR EST
+(executor deed), QCD, TR/D, C/D, COM/D, SHF/D, FORECLOS, NOTC FOR, SUB TR, LIS/P,
+EST TAX. The search form also offers a **grantor role** filter (EXR, ADMR, EST,
+DECEASED, P/R) — a direct estate-conveyance query worth adding as a second pull.
+
+Manners: `HttpTransport(cookies=True, min_interval_s=1.0)`, one narrow date window
+per day, never a bulk historical crawl; the site's disclaimer places no restriction
+on automated use. Rows carry only the first grantor and grantee (a `(+)` marks more);
+the full party list is on the document detail page and is not fetched. The
+`fixtures/mecklenburg/live/deed/*.html` pages are a two-day DEED search captured
+2026-09-04.
+
+Other counties: the NCARD directory (ncard.us/find-your-register-of-deeds) lists all
+100 registers. Counties on the same Aumentum application need only a `base_url`;
+Cott (`cotthosting.com`, ~10 counties) and the others need their own adapter.
+
+### Estate cases: what is and is not allowed
+
+- **eCourts Portal** (`portal-nc.tylertech.cloud`) is view-only and its terms
+  prohibit automated access and scraping. Do not point a connector at it. A person
+  may search it (case type "Decedents' Estate – Full Administration" / "Small
+  Estate", by party name or date) and save the page; the estate connector reads a
+  saved page.
+- **Remote Public Access Program** (NCAOC): licensed statewide access. Online access
+  is $495 setup plus $0.39 per transaction; extract access needs a $5,000 bond and
+  currently offers criminal extracts and the civil *tax liens* extracts only. There
+  is no estates extract. Ask the RPA office whether a custom civil/estates extract
+  can be licensed; the "Required Information from Prospective Licensees" form starts
+  the process.
+- **Clerk of Superior Court, Mecklenburg estates division**
+  (Mecklenburg.Estates@nccourts.org) fills requests for estate files, including
+  pre-October-2023 cases that are not in the Portal.
+- **Register of Deeds as a proxy**: executor/administrator deeds (EXTR EST) and the
+  grantor-role filter (EXR, ADMR, EST, DECEASED) identify estates conveying property
+  after the fact, without the court record.
+
+### Regrid
+
+`app.regrid.com` is a commercial product; the web app is not a data source and its
+terms forbid scraping it. Its REST API (self-serve token, paid tiers; the trial token
+is limited to seven counties) returns a standardized parcel schema with owner,
+mailing address, values, sales, and boundaries, with `/parcels/query` filters on
+owner name, FIPS, ZIP and land use, plus bulk delivery and an MCP server. For
+Mecklenburg it adds nothing the assessor roll does not already give for free; it is
+the fallback for counties without an open feature service, and a `RegridConnector`
+against `/parcels/query` is a small addition once a token exists.
+
+## 3. Bringing a live source online (estates, other counties)
 
 Do this once per source, against captured bytes, never against the live site in a loop.
 

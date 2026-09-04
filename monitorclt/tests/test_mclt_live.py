@@ -191,3 +191,126 @@ class LiveProfileTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DeedsIndexTests(unittest.TestCase):
+    """Register of Deeds (Aumentum ROD Web Access) connector against captured result pages."""
+
+    def test_fixture_pages_parse_unique_instruments(self):
+        from monitorclt.sources import aumentum
+
+        c = L.MecklenburgDeedConnector(COUNTY, "fixture://deed")
+        pages = list(c.fetch(FixtureTransport(LIVE), None))
+        self.assertEqual(len(pages), 3)
+        recs = [r for p in pages for r in c.parse(p.body)]
+        self.assertEqual(len(recs), 60)
+        self.assertEqual(len({r["instrument_number"] for r in recs}), 60)
+        self.assertTrue(all(r["recorded_date"] and r["book"] and r["page"] for r in recs))
+        self.assertGreaterEqual(sum(1 for r in recs if r["parcel_pin"]), 45)
+        self.assertTrue(all(r["grantor_name"] and r["grantee_name"] for r in recs))
+        first = pages[0].body.decode("utf-8")
+        self.assertEqual(aumentum.records_found(first), 168)
+        self.assertEqual(aumentum.showing(first), (1, 20))
+        self.assertEqual(aumentum.showing(pages[1].body.decode("utf-8")), (21, 40))
+
+    def test_row_mapping_by_content(self):
+        c = L.MecklenburgDeedConnector(COUNTY)
+        cells = [
+            "7",
+            "View",
+            "",
+            "2026000001",
+            "2026000001 40000- 12",
+            "2026000001",
+            "40000",
+            "12",
+            "09/02/2026",
+            "EXTR EST",
+            "EXTR EST",
+            "[R] PUBLIC JOHN Q ESTATE (+) [E] PUBLIC JANE R",
+            "R",
+            "PUBLIC JOHN Q ESTATE (+)",
+            "E",
+            "PUBLIC JANE R",
+            "LT 4 BLK 9 OAKVIEW PIN/PLSLIDE 069-133-10",
+            "T",
+            "Temp",
+            "V",
+            "N",
+            "OPR1",
+            "1",
+            "0",
+            "RE",
+            "2",
+            "1",
+            "1",
+            "",
+            "P",
+            "P",
+        ]
+        r = c.to_record(cells)
+        self.assertEqual(
+            (r["instrument_number"], r["book"], r["page"], r["recorded_date"], r["instrument_type"]), ("2026000001", "40000", "12", "2026-09-02", "EXTR EST")
+        )
+        self.assertEqual((r["grantor_name"], r["grantee_name"], r["parcel_pin"]), ("PUBLIC JOHN Q ESTATE", "PUBLIC JANE R", "069-133-10"))
+        self.assertTrue(r["more_grantors"] and not r["more_grantees"])
+        self.assertFalse(r["grantor_is_org"])
+        self.assertIsNone(c.to_record(["header", "no numbers here"]))
+
+    def test_search_protocol_encoding(self):
+        import datetime as dt
+
+        from monitorclt.sources import aumentum
+
+        self.assertEqual(aumentum.date_state(dt.date(2026, 9, 2)), '|0|012026-9-2-0-0-0-0||[[[[]],[],[]],[{},[]],"012026-9-2-0-0-0-0"]')
+        html = '<input type="hidden" name="__VIEWSTATE" value="abc" /><input type="checkbox" name="ctl00$cphNoMargin$f$dclDocType$50" value="DEED" /><input type="checkbox" name="ctl00$cphNoMargin$f$dclDocType$214" value="EXTR EST" />'
+        self.assertEqual(aumentum.hidden_fields(html), {"__VIEWSTATE": "abc"})
+        self.assertEqual(aumentum.doc_type_fields(html)["EXTR EST"], "ctl00$cphNoMargin$f$dclDocType$214")
+        c = L.MecklenburgDeedConnector(COUNTY, today=dt.date(2026, 9, 4))
+        self.assertEqual(c.date_range("2026-09-01"), (dt.date(2026, 8, 31), dt.date(2026, 9, 4)))
+        self.assertEqual(c.date_range(None), (dt.date(2026, 8, 28), dt.date(2026, 9, 4)))
+
+    def test_live_conversation_is_replayed_against_a_fake_site(self):
+        """Drive the real fetch() through a scripted transport: disclaimer, form, search, paging."""
+        import datetime as dt
+
+        calls = []
+        entry = ('<input type="hidden" name="__VIEWSTATE" value="v" /><input type="checkbox" name="ctl00$cphNoMargin$f$dclDocType$50" value="DEED" />').encode()
+        page1 = open(os.path.join(LIVE, "deed", "0.html"), "rb").read()
+        page2 = open(os.path.join(LIVE, "deed", "1.html"), "rb").read()
+
+        class Site:
+            def get(self, url, params=None):
+                calls.append(("GET", url))
+                if url.endswith("/RealEstate/SearchEntry.aspx"):
+                    return entry, "text/html"
+                if "pg=2" in url:
+                    return page2, "text/html"
+                if "pg=3" in url:
+                    return b"<html>no rows</html>", "text/html"
+                return b"<input type='hidden' name='__VIEWSTATE' value='h' />", "text/html"
+
+            def post(self, url, fields, referer=None):
+                calls.append(("POST", url, dict(fields)))
+                if url.endswith("SearchEntry.aspx"):
+                    return page1, "text/html"
+                return b"", "text/html"
+
+        c = L.MecklenburgDeedConnector(COUNTY, "https://rod.example.invalid", today=dt.date(2026, 9, 4))
+        c.max_pages = 2
+        pages = list(c.fetch(Site(), "2026-09-01"))
+        self.assertEqual(len(pages), 2)
+        posts = [x for x in calls if x[0] == "POST"]
+        self.assertEqual(posts[0][2]["__EVENTTARGET"], "ctl00$cph1$lnkAccept")
+        search = posts[1][2]
+        self.assertEqual(search["__EVENTTARGET"], "ctl00$cphNoMargin$SearchButtons1$btnSearch")
+        self.assertEqual(search["ctl00$cphNoMargin$f$dclDocType$50"], "DEED")
+        self.assertIn("012026-8-31-0-0-0-0", search["cphNoMargin_f_ddcDateFiledFrom_clientState"])
+        self.assertTrue(any("pg=2" in x[1] for x in calls if x[0] == "GET"))
+        self.assertEqual(pages[0].watermark, "2026-09-04")
+
+    def test_deed_source_in_live_profile(self):
+        s = live_store()
+        self.assertEqual(s.scalar("SELECT COUNT(*) FROM record_version WHERE source = 'deed'"), 60)
+        self.assertGreater(s.scalar("SELECT COUNT(*) FROM mention WHERE source = 'deed' AND role = 'grantor' AND current = 1"), 40)
+        self.assertGreater(s.scalar("SELECT COUNT(*) FROM event WHERE kind = 'deed_recorded' AND source = 'deed'"), 50)

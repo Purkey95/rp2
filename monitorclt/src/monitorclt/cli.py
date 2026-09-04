@@ -80,7 +80,7 @@ def cmd_ingest(args: argparse.Namespace) -> int:
     endpoints = _endpoints(args.endpoint)
     if args.fixtures and args.profile == "live" and not endpoints:
         endpoints = counties.mecklenburg_live.fixture_endpoints()
-    transport = FixtureTransport(args.fixtures) if args.fixtures else HttpTransport()
+    transport = FixtureTransport(args.fixtures) if args.fixtures else HttpTransport(cookies=True, min_interval_s=1.0)
     results = []
     for connector in registry.connectors(args.county, args.profile, endpoints):
         if args.source and connector.name not in args.source:
@@ -226,7 +226,7 @@ def cmd_geocode(args: argparse.Namespace) -> int:
 def cmd_run_daily(args: argparse.Namespace) -> int:
     store = _store(args)
     policy.default_retention(store)
-    transport = FixtureTransport(args.fixtures) if args.fixtures else HttpTransport()
+    transport = FixtureTransport(args.fixtures) if args.fixtures else HttpTransport(cookies=True, min_interval_s=1.0)
     endpoints = counties.mecklenburg_live.fixture_endpoints() if (args.fixtures and args.profile == "live") else None
     report = pipeline.run_daily(
         store, args.county, transport, alert_webhook=args.alert_webhook, base_url=args.base_url, sources=args.source, profile=args.profile, endpoints=endpoints

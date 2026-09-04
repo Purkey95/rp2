@@ -217,11 +217,19 @@ with no external geocoder. New parcel signals: `city_lien`, `vacant_land`,
 `code_finding_of_fact`. `signals.ParcelIndex` groups parcel-keyed records once per
 ranking instead of scanning per parcel.
 
+`sources/aumentum.py` adds the Register of Deeds index. The site is a WebForms
+application with Infragistics controls that rejects hand-built posts; the working
+conversation was recorded once from a real browser session and is replayed with the
+standard library (`HttpTransport` gained cookies, POST and a politeness interval).
+Rows are read by content signature rather than column position because the grid's
+hidden columns are not stable. This is the deed-to-parcel link the resolver's
+`deed_grantor_link` and `deed_grantee_link` evidence was designed for.
+
 ## What is deliberately not here yet
 
-- **Estate and deed connectors.** Parcels, code enforcement, liens, vacant land and
-  address points are live. Estate cases (eCourts) and the deed index (Register of
-  Deeds) are not on an open feature service; they need a terms check and a capture.
+- **Estate connector.** Parcels, code enforcement, liens, vacant land, address points
+  and deeds are live. Estate cases are the one source that cannot be automated on
+  acceptable terms today (see the runbook); the connector reads saved Portal pages.
 - **A Postgres `Store`.** The DDL ships; the query layer is SQLite-flavoured in a
   few places (`INSERT OR IGNORE`, `ON CONFLICT`). A second store class is the plan.
 - **Authentication beyond a shared token.** The API takes `X-MonitorCLT-Token`;

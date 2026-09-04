@@ -7,12 +7,15 @@
   vacant_land       PLN/VacantLand/MapServer/0 (parcels the city flags as vacant)
   address_point     CountyData/MasterAddress/MapServer/0 (676k address points with
                     coordinates and parcel id: the county-wide geocoder)
+  deed              meckrod.manatron.com Register of Deeds index (Aumentum ROD Web
+                    Access), replayed with the standard library; see sources/aumentum.py
 
 Not used, on purpose: the CMPD crime layers on the same server. They are not facts
 about a property and they are the kind of signal this system does not take.
 
-Estates (Clerk of Superior Court) and deeds (Register of Deeds) are not on this
-server; those connectors stay on their own sources.
+Estate cases (Clerk of Superior Court) are not available to automation: the eCourts
+Portal forbids it and the AOC's Remote Public Access extracts do not cover estates.
+That connector stays on saved pages or a licensed feed; see docs/RUNBOOK.md.
 """
 
 from __future__ import annotations
@@ -22,6 +25,7 @@ from typing import Any, Dict, List, Optional
 
 from .. import events as ev
 from ..sources.arcgis import ArcGisLayerConnector, epoch_ms_to_date, strip
+from ..sources.aumentum import AumentumDeedConnector
 from ..sources.base import SourceSpec, registry
 
 GIS = "https://gis.charlottenc.gov/arcgis/rest/services"
@@ -168,6 +172,22 @@ VACANT_LAND = SourceSpec(
     required_fields=("pin",),
     event_rules=[ev.on_create("vacant_land_flagged", None, ("land_use", "total_acres"))],
     description="Parcels the planning department flags as vacant land.",
+)
+
+DEED_LIVE = SourceSpec(
+    name="deed",
+    mode="incremental",
+    key_fields=("instrument_number",),
+    effective_field="recorded_date",
+    name_format="last_first",
+    mention_roles={"grantor_name": "grantor", "grantee_name": "grantee"},
+    address_fields={},
+    parcel_fields=("parcel_pin",),
+    required_fields=("instrument_number", "recorded_date"),
+    event_rules=[
+        ev.on_create(ev.DEED_RECORDED, "recorded_date", ("instrument_type", "grantor_name", "grantee_name", "parcel_pin", "more_grantors", "more_grantees"))
+    ],
+    description="Register of Deeds real estate index (Aumentum ROD Web Access): instrument, book/page, type, first grantor/grantee, PIN from the legal description.",
 )
 
 ADDRESS_POINT = SourceSpec(
@@ -356,7 +376,12 @@ class AddressPointConnector(ArcGisLayerConnector):
         }
 
 
-LIVE_CONNECTORS = [ParcelXapoConnector, CodeEnforcementLiveConnector, LienConnector, VacantLandConnector, AddressPointConnector]
+class MecklenburgDeedConnector(AumentumDeedConnector):
+    spec = DEED_LIVE
+    base_url = "https://meckrod.manatron.com"
+
+
+LIVE_CONNECTORS = [ParcelXapoConnector, CodeEnforcementLiveConnector, LienConnector, VacantLandConnector, AddressPointConnector, MecklenburgDeedConnector]
 
 
 def connectors(endpoints: Optional[Dict[str, str]] = None, county: str = "MECKLENBURG") -> List[ArcGisLayerConnector]:

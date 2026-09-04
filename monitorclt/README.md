@@ -120,11 +120,19 @@ expects and routes `C/O`/`ATTN` parties to a `care_of` mention, which the resolv
 counts as a related party. On the captured sample this yields real estate-marked
 and trust-held parcels with correctly parsed decedents and settlors.
 
-Not on that server, and still needed for the probate link itself: estate cases
-(Clerk of Superior Court, on the statewide eCourts portal) and the deed index
-(Register of Deeds). Those connectors stay on the synthetic fixtures until a source
-with acceptable terms is captured; the runbook has the procedure. The server also
-carries police layers; MonitorCLT does not read them, by design.
+The Register of Deeds index (`meckrod.manatron.com`, Aumentum ROD Web Access) is
+the sixth live source: `sources/aumentum.py` replays the site's own form
+conversation with the standard library (disclaimer, search by date range and
+document types, `?pg=N` paging) and reads the results grid by content, so hidden
+grid columns can change without breaking it. Each row gives instrument, book/page,
+date, type, first grantor and grantee, and the parcel PIN from the legal
+description. Several other North Carolina registers run the same application.
+
+Still not automatable: **estate cases**. The eCourts Portal forbids automated
+access, and the AOC's Remote Public Access extracts cover tax liens and criminal
+data, not estates. The estate connector stays on saved pages or a licensed feed;
+`docs/RUNBOOK.md` has the options. The city GIS server also carries police layers;
+MonitorCLT does not read them, by design.
 
 ## From v1 (`tools/monitorclt_probate`)
 
