@@ -1,5 +1,12 @@
 # MonitorCLT Probate → Real Property Cross-Reference
 
+> **This is v1.** The from-scratch rebuild lives in [`monitorclt/`](../../monitorclt/README.md):
+> bitemporal source history, six sources behind a connector framework, a calibrated
+> resolver trained by reviewer decisions, a reviewer UI, a deny-by-default export
+> policy, watchlists and signed webhooks, a parcel signal stack, and data-quality
+> monitoring. v2 reproduces this tool's dispositions on this sample and uses these
+> files as fixtures. This directory is kept as the reference for the matching rules.
+
 **Can you cross-reference these databases against real estate holdings in probate
 matters?** Yes — and this is the join that actually works: *estate case → parcel →
 deed*. It starts from a probate filing (a decedent, a file number, a personal

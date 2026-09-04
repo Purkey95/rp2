@@ -1,0 +1,29 @@
+[
+  {
+    "amount_due": 4812.33,
+    "county": "MECKLENBURG",
+    "owner_name": "SAMPLE MARY A HEIRS",
+    "pin": "213-002-44",
+    "situs_address": "88 Sycamore Ct, Charlotte NC 28105",
+    "tax_year": 2025,
+    "years_delinquent": 2
+  },
+  {
+    "amount_due": 2190.0,
+    "county": "MECKLENBURG",
+    "owner_name": "SMITH DAVID",
+    "pin": "099-001-04",
+    "situs_address": "220 Nowhere Ave, Charlotte NC 28269",
+    "tax_year": 2025,
+    "years_delinquent": 1
+  },
+  {
+    "amount_due": 9340.1,
+    "county": "MECKLENBURG",
+    "owner_name": "ESTATE OF HENRY W PLACEHOLDER",
+    "pin": "133-070-12",
+    "situs_address": "77 Hypothetical Cir, Charlotte NC 28211",
+    "tax_year": 2024,
+    "years_delinquent": 3
+  }
+]

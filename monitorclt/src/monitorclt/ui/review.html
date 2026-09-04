@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MonitorCLT Review</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --bg:#f7f7f5; --card:#fff; --ink:#1b1b1b; --muted:#6b6b6b; --line:#e3e1dc; --ok:#1f7a4d; --bad:#a3352b; --warn:#9a6b00; --accent:#2a4d8f; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--ink); }
+  header { display:flex; align-items:center; gap:16px; padding:10px 20px; background:#fff; border-bottom:1px solid var(--line); position:sticky; top:0; }
+  header h1 { font-size:16px; margin:0; font-weight:600; }
+  header .spacer { flex:1; }
+  header input { padding:6px 8px; border:1px solid var(--line); border-radius:6px; }
+  main { max-width:1200px; margin:18px auto; padding:0 16px; }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+  .card h2 { margin:0 0 8px; font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+  table { width:100%; border-collapse:collapse; }
+  td { padding:4px 6px; vertical-align:top; border-top:1px solid var(--line); }
+  td:first-child { color:var(--muted); width:38%; }
+  .hl { background:#fff3b0; border-radius:3px; padding:0 2px; }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; margin:6px 0; }
+  .chip { border-radius:999px; padding:3px 10px; font-size:12px; border:1px solid var(--line); background:#fafafa; }
+  .chip.pos { border-color:var(--ok); color:var(--ok); }
+  .chip.neg { border-color:var(--bad); color:var(--bad); }
+  .chip.flag { border-color:var(--warn); color:var(--warn); }
+  .prob { font-size:28px; font-weight:600; }
+  .bar { height:8px; background:#eee; border-radius:4px; overflow:hidden; margin:6px 0 10px; }
+  .bar i { display:block; height:100%; background:var(--accent); }
+  .actions { display:flex; gap:10px; align-items:center; margin-top:14px; flex-wrap:wrap; }
+  button { padding:9px 16px; border-radius:8px; border:1px solid var(--line); background:#fff; cursor:pointer; font-size:14px; }
+  button.confirm { background:var(--ok); color:#fff; border-color:var(--ok); }
+  button.reject { background:var(--bad); color:#fff; border-color:var(--bad); }
+  button:disabled { opacity:.5; cursor:default; }
+  .note { flex:1; min-width:240px; padding:8px; border:1px solid var(--line); border-radius:8px; }
+  .muted { color:var(--muted); }
+  .kbd { font:12px ui-monospace,Menlo,monospace; background:#eee; padding:1px 5px; border-radius:4px; }
+  .empty { text-align:center; padding:60px 0; color:var(--muted); }
+  ul.list { margin:0; padding-left:18px; }
+  .gate.ok::before { content:"✓ "; color:var(--ok); } .gate.fail::before { content:"✗ "; color:var(--bad); }
+</style>
+</head>
+<body>
+<header>
+  <h1>MonitorCLT · Review queue</h1>
+  <span id="count" class="muted"></span>
+  <span class="spacer"></span>
+  <label class="muted">Reviewer <input id="reviewer" placeholder="your name" size="14"></label>
+  <span class="muted"><span class="kbd">c</span> confirm · <span class="kbd">r</span> reject · <span class="kbd">s</span> skip</span>
+</header>
+<main id="main"><div class="empty">Loading…</div></main>
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s);
+  const reviewerInput = $('#reviewer');
+  try { reviewerInput.value = localStorage.getItem('monitorclt.reviewer') || ''; } catch (e) {}
+  reviewerInput.addEventListener('change', () => { try { localStorage.setItem('monitorclt.reviewer', reviewerInput.value); } catch (e) {} });
+
+  let queue = [], current = null, opened = 0;
+  const esc = (v) => String(v == null ? '' : v).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const money = (v) => v == null ? '' : '$' + Number(v).toLocaleString();
+
+  async function api(path, opts) {
+    const r = await fetch(path, Object.assign({headers: {'Content-Type': 'application/json'}}, opts || {}));
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || r.status);
+    return j;
+  }
+
+  async function loadQueue() {
+    queue = (await api('/api/review/queue?limit=50')).queue;
+    $('#count').textContent = queue.length + ' pending';
+    if (!queue.length) { $('#main').innerHTML = '<div class="empty">Queue is empty. Nice.</div>'; current = null; return; }
+    await show(queue[0].id);
+  }
+
+  function highlight(text, tokens) {
+    let out = esc(text);
+    tokens.filter(Boolean).forEach((t) => { out = out.replace(new RegExp('(' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'), '<span class="hl">$1</span>'); });
+    return out;
+  }
+
+  function recordTable(rec, tokens, order) {
+    const keys = order.filter((k) => k in rec).concat(Object.keys(rec).filter((k) => !order.includes(k) && k !== 'county'));
+    return '<table>' + keys.map((k) => '<tr><td>' + esc(k.replace(/_/g, ' ')) + '</td><td>' + highlight(rec[k], tokens) + '</td></tr>').join('') + '</table>';
+  }
+
+  async function show(id) {
+    const d = await api('/api/matches/' + id);
+    current = d; opened = Date.now();
+    const m = d.match, L = d.left, R = d.right;
+    const lp = L.mention.parsed || {}, rp = R.mention.parsed || {};
+    const tokens = [lp.first, lp.last, lp.middle, rp.first, rp.last].filter((t) => t && t.length > 1);
+    const positives = new Set(d.contributions.filter((c) => c.log_odds > 0).map((c) => c.feature));
+    const negatives = new Set(d.contributions.filter((c) => c.log_odds < 0).map((c) => c.feature));
+    const chips = m.evidence.map((e) => '<span class="chip ' + (positives.has(e) ? 'pos' : negatives.has(e) ? 'neg' : '') + '">' + esc(e.replace(/_/g, ' ')) + '</span>').join('')
+      + m.flags.map((f) => '<span class="chip flag">' + esc(f.replace(/_/g, ' ')) + '</span>').join('');
+    const gates = Object.entries(m.gates).map(([g, ok]) => '<li class="gate ' + (ok ? 'ok' : 'fail') + '">' + esc(g.replace(/_/g, ' ')) + '</li>').join('');
+    const deeds = d.deeds.length ? '<ul class="list">' + d.deeds.map((x) => '<li>' + esc(x.recorded_date) + ' ' + esc(x.instrument_type) + ': ' + highlight(x.grantor_name, tokens) + ' → ' + highlight(x.grantee_name, tokens) + ' <span class="muted">' + esc(x.instrument_number) + '</span></li>').join('') + '</ul>' : '<span class="muted">none on file for this parcel</span>';
+    const events = d.parcel_events.length ? '<ul class="list">' + d.parcel_events.map((e) => '<li>' + esc(e.occurred_at || e.observed_at.slice(0, 10)) + ' ' + esc(e.kind.replace(/_/g, ' ')) + '</li>').join('') + '</ul>' : '<span class="muted">no other signals on this parcel</span>';
+    const parcel = R.parcel || {};
+    $('#main').innerHTML = `
+      <div class="card" style="margin-bottom:14px">
+        <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap">
+          <div><div class="prob">${(m.probability * 100).toFixed(1)}%</div><div class="muted">calibrated probability · tier ${esc(m.match_tier.replace(/_/g, ' '))}</div></div>
+          <div style="flex:1;min-width:280px"><div class="bar"><i style="width:${m.probability * 100}%"></i></div><div class="chips">${chips}</div></div>
+          <div><ul class="list" style="list-style:none;padding:0">${gates}</ul></div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="card"><h2>${esc(L.mention.source)} · ${esc(L.mention.role)} · ${esc(m.left_id)}</h2>${recordTable(L.record, tokens, ['decedent_name', 'date_of_death', 'filing_date', 'case_status', 'personal_rep_name', 'pr_mailing_address', 'file_number'])}</div>
+        <div class="card"><h2>${esc(R.mention.source)} · ${esc(R.mention.role)} · ${esc(m.right_id)}</h2>${recordTable(R.record, tokens, ['owner_name', 'situs_address', 'owner_mailing_address', 'pin', 'land_use', 'assessed_value', 'last_sale_date'])}
+          <div class="muted" style="margin-top:6px">${esc(parcel.land_use || '')} ${money(parcel.assessed_value)}</div></div>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <div class="card"><h2>Deeds on this parcel</h2>${deeds}</div>
+        <div class="card"><h2>Other signals on this parcel</h2>${events}</div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h2>Why the model thinks so</h2>
+        <table>${d.contributions.map((c) => '<tr><td>' + esc(c.feature.replace(/_/g, ' ')) + '</td><td>' + (c.log_odds > 0 ? '+' : '') + c.log_odds.toFixed(2) + ' log-odds</td></tr>').join('')}</table>
+        <div class="actions">
+          <button class="confirm" id="btn-confirm">Confirm (c)</button>
+          <button class="reject" id="btn-reject">Reject (r)</button>
+          <button id="btn-skip">Skip (s)</button>
+          <input class="note" id="note" placeholder="note for the audit trail (optional)">
+          <span class="muted">${queue.length} in queue</span>
+        </div>
+      </div>`;
+    $('#btn-confirm').onclick = () => decide('confirm');
+    $('#btn-reject').onclick = () => decide('reject');
+    $('#btn-skip').onclick = () => decide('skip');
+  }
+
+  async function decide(decision) {
+    if (!current) return;
+    const reviewer = reviewerInput.value.trim();
+    if (!reviewer) { reviewerInput.focus(); reviewerInput.style.borderColor = '#a3352b'; return; }
+    const id = current.match.id;
+    const note = $('#note') ? $('#note').value : '';
+    document.querySelectorAll('button').forEach((b) => b.disabled = true);
+    try {
+      await api('/api/matches/' + id + '/decision', {method: 'POST', body: JSON.stringify({decision, reviewer, note, seconds_spent: (Date.now() - opened) / 1000})});
+    } catch (e) { alert(e.message); }
+    queue = queue.filter((q) => q.id !== id);
+    if (decision === 'skip') queue.push(current.match);
+    $('#count').textContent = queue.length + ' pending';
+    if (queue.length) await show(queue[0].id); else $('#main').innerHTML = '<div class="empty">Queue is empty. Nice.</div>';
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.key === 'c') decide('confirm'); else if (e.key === 'r') decide('reject'); else if (e.key === 's') decide('skip');
+  });
+  loadQueue().catch((e) => { $('#main').innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; });
+})();
+</script>
+</body>
+</html>

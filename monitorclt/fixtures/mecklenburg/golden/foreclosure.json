@@ -1,0 +1,26 @@
+[
+  {
+    "county": "MECKLENBURG",
+    "file_number": "26 SP 000310",
+    "filing_date": "2026-03-05",
+    "hearing_date": "2026-04-16",
+    "lender_name": "ANYBANK NA",
+    "owner_name": "David Smith",
+    "parcel_pin": "099-001-04",
+    "property_address": "220 Nowhere Ave, Charlotte NC 28269",
+    "status": "PENDING",
+    "trustee_name": "SUBSTITUTE TRUSTEE SERVICES INC"
+  },
+  {
+    "county": "MECKLENBURG",
+    "file_number": "26 SP 000322",
+    "filing_date": "2026-03-19",
+    "hearing_date": null,
+    "lender_name": "NONESUCH MORTGAGE CO",
+    "owner_name": "Henry W Placeholder",
+    "parcel_pin": "133-070-12",
+    "property_address": "77 Hypothetical Cir, Charlotte NC 28211",
+    "status": "PENDING",
+    "trustee_name": "TRUSTEE SERVICES OF CAROLINA LLC"
+  }
+]

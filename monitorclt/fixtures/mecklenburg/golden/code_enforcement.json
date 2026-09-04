@@ -1,0 +1,24 @@
+[
+  {
+    "case_number": "CE-2026-00871",
+    "closed_date": null,
+    "county": "MECKLENBURG",
+    "opened_date": "2026-02-20",
+    "owner_name": "SAMPLE MARY A HEIRS",
+    "parcel_pin": "213-002-44",
+    "property_address": "88 Sycamore Ct, Matthews NC 28105",
+    "status": "OPEN",
+    "violation_type": "MINIMUM HOUSING"
+  },
+  {
+    "case_number": "CE-2026-00902",
+    "closed_date": null,
+    "county": "MECKLENBURG",
+    "opened_date": "2026-03-02",
+    "owner_name": "ESTATE OF HENRY W PLACEHOLDER",
+    "parcel_pin": "133-070-12",
+    "property_address": "77 Hypothetical Cir, Charlotte NC 28211",
+    "status": "OPEN",
+    "violation_type": "OVERGROWN LOT"
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "case_status": "OPEN",
+    "county": "MECKLENBURG",
+    "date_of_death": "2026-01-14",
+    "decedent_name": "John Q Public",
+    "file_number": "26 E 001234",
+    "filing_date": "2026-01-28",
+    "personal_rep_name": "Jane R Public",
+    "pr_mailing_address": "4210 Elm Street Apt 5, Charlotte NC 28205"
+  },
+  {
+    "case_status": "OPEN",
+    "county": "MECKLENBURG",
+    "date_of_death": "2026-02-02",
+    "decedent_name": "Mary A Sample",
+    "file_number": "26 E 001235",
+    "filing_date": "2026-02-19",
+    "personal_rep_name": "Thomas Sample",
+    "pr_mailing_address": "88 Sycamore Court, Matthews NC 28105"
+  },
+  {
+    "case_status": "OPEN",
+    "county": "MECKLENBURG",
+    "date_of_death": "2026-01-05",
+    "decedent_name": "Robert Lee Testcase",
+    "file_number": "26 E 001236",
+    "filing_date": "2026-01-22",
+    "personal_rep_name": "Nina Testcase",
+    "pr_mailing_address": "17 Willow Bend Drive, Huntersville NC 28078"
+  },
+  {
+    "case_status": "OPEN",
+    "county": "MECKLENBURG",
+    "date_of_death": "2026-03-11",
+    "decedent_name": "David Smith",
+    "file_number": "26 E 001237",
+    "filing_date": "2026-03-30",
+    "personal_rep_name": "Ellen Smith",
+    "pr_mailing_address": "915 Fictional Ridge Road, Charlotte NC 28212"
+  },
+  {
+    "case_status": "OPEN",
+    "county": "MECKLENBURG",
+    "date_of_death": "2026-02-14",
+    "decedent_name": "Alice B Example",
+    "file_number": "26 E 001238",
+    "filing_date": "2026-03-02",
+    "personal_rep_name": "Peter Example",
+    "pr_mailing_address": "300 Nonesuch Avenue, Charlotte NC 28204"
+  },
+  {
+    "case_status": "OPEN",
+    "county": "MECKLENBURG",
+    "date_of_death": "2025-12-20",
+    "decedent_name": "Carlos N Fictional",
+    "file_number": "26 E 001239",
+    "filing_date": "2026-01-09",
+    "personal_rep_name": "Rosa Fictional",
+    "pr_mailing_address": "62 Imaginary Lane, Indian Trail NC 28079"
+  },
+  {
+    "case_status": "OPEN",
+    "county": "MECKLENBURG",
+    "date_of_death": "2026-02-25",
+    "decedent_name": "George T Nobody",
+    "file_number": "26 E 001240",
+    "filing_date": "2026-03-14",
+    "personal_rep_name": "Harold Nobody",
+    "pr_mailing_address": "1 Vacant Way, Charlotte NC 28202"
+  },
+  {
+    "case_status": "OPEN",
+    "county": "MECKLENBURG",
+    "date_of_death": null,
+    "decedent_name": "Johnson",
+    "file_number": "26 E 001241",
+    "filing_date": "2026-03-18",
+    "personal_rep_name": null,
+    "pr_mailing_address": null
+  }
+]
