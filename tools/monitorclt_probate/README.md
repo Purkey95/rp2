@@ -62,7 +62,7 @@ python3 crossref.py --estates sample/estate_cases.jsonl \
                     --parcels sample/parcels.jsonl \
                     --deeds   sample/deeds.jsonl \
                     --json out.json
-python3 test_crossref.py   # likewise test_store.py, test_transfers.py, test_backtest.py, test_evaluate.py
+python3 test_crossref.py   # likewise test_store.py, test_transfers.py, test_backtest.py, test_forecast.py, test_evaluate.py
 ```
 
 Each row of `matches` in the JSON maps 1:1 onto `probate.entity_match`, so loading
@@ -131,6 +131,36 @@ pair the model confirmed is a true positive it earned, a `namesake_conveyance` i
 a false positive it made. Tallied per tier and per evidence label, it is the
 live version of `evaluate.py`'s precision table, built from real conveyances
 instead of hand labels.
+
+## Forecast: what the pipeline will cost
+
+`forecast.py` is the budgeting view. It is not a prediction of who will die or
+file -- it measures three rates from the store and runs them forward:
+
+| Rate | Measured as |
+|---|---|
+| **arrival** | estate filings per month (or week), by county, from `filing_date` |
+| **yield** | share of filings the matcher turned into a confirmed lead, and share that landed in review only |
+| **retirement** | share of active leads that leave per period -- the estate conveyed the parcel -- from the transfer events, dated by the deed |
+
+```bash
+python3 forecast.py --db monitorclt.sqlite --periods 6 --cost-per-lead 45 --cost-per-review 12
+python3 forecast.py --db monitorclt.sqlite --filings 400 --cost-per-lead 45      # the Clerk's number instead of ours
+python3 forecast.py --db monitorclt.sqlite --csv pipeline.csv --html pipeline.html --json pipeline.json
+```
+
+The report is history (filings per period and what became of them, new confirmed
+parcels, retirements, the active lead count), the rates each with the count it
+rests on, and a projection: expected new leads, reviews, retirements, and active
+inventory per period, low / base / high on the observed filings band, with spend
+when you give it a cost per lead, per review, or per active lead-period. `--csv`
+writes actuals and all three scenarios in one flat table for whatever page you
+already keep; `--html` writes a self-contained page of the same numbers.
+
+Two things to know before trusting it. The filing-to-lead lag is bounded below by
+how often you pull -- a monthly pull cannot show a two-week lag -- so pull more
+often than you plan. And every rate is reported with its denominator because on
+nine filings the band is the finding; the decimals are not.
 
 ## Backtest: what the record later proved
 
