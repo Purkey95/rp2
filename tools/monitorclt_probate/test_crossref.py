@@ -92,6 +92,16 @@ class TestNormalization(unittest.TestCase):
         name = crossref.parse_name("ESTATE OF HENRY W PLACEHOLDER", "last_first", rules())
         self.assertEqual((name["first"], name["last"]), ("HENRY", "PLACEHOLDER"))
 
+    def test_trailing_estate_marker_does_not_flip_name_order(self):
+        # Deed indexes print "SMITH DAVID ESTATE OF"; only a *leading* "ESTATE OF"
+        # means the remainder is in natural order.
+        name = crossref.parse_name("SMITH DAVID ESTATE OF", "last_first", rules())
+        self.assertEqual((name["first"], name["last"], name["markers"]), ("DAVID", "SMITH", ["ESTATE OF"]))
+
+    def test_semicolon_separates_parties(self):
+        parties = crossref.split_parties("SMITH DAVID ESTATE OF; SMITH ELLEN EXECUTRIX", "last_first", rules())
+        self.assertEqual([(p["first"], p["last"]) for p in parties], [("DAVID", "SMITH"), ("ELLEN", "SMITH")])
+
     def test_organizations_are_flagged_not_parsed_as_people(self):
         name = crossref.parse_name("NONESUCH HOLDINGS LLC", "last_first", rules())
         self.assertTrue(name["is_organization"])

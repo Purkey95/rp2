@@ -50,7 +50,8 @@ back to natural order). All tunable in `match_rules.json` — no code change.
 
 `post_death_conveyance` is flagged when a deed from the decedent is recorded
 *after* the date of death: identity corroborated, but the parcel may already have
-left the estate. Parcels whose owner reads `ESTATE OF …` with no matching estate
+left the estate. The flag is all a single run can say; the store (below) turns it
+into a `transferred` status and takes the parcel off the lead list. Parcels whose owner reads `ESTATE OF …` with no matching estate
 case are reported separately as an **input gap** — usually a county or date range
 you have not pulled.
 
@@ -61,13 +62,126 @@ python3 crossref.py --estates sample/estate_cases.jsonl \
                     --parcels sample/parcels.jsonl \
                     --deeds   sample/deeds.jsonl \
                     --json out.json
-python3 test_crossref.py
+python3 test_crossref.py   # likewise test_store.py, test_transfers.py, test_backtest.py, test_evaluate.py
 ```
 
 Each row of `matches` in the JSON maps 1:1 onto `probate.entity_match`, so loading
 a run is a straight insert; `probate.v_estate_property` is the lead list
 (confirmed only) and `probate.v_review_queue` is what a human still has to clear.
-The sample data is synthetic.
+The sample data is synthetic; `sample/pull_2026-09/` is the same county
+pulled again five months later (one estate sold, one distributed to its
+executrix, one new filing), for the loader and the backtest.
+
+## Keep a history: the loader
+
+`crossref.py` on its own is stateless -- it cannot tell you what is new today, and
+it cannot notice that a parcel it confirmed last month has since been conveyed.
+`load_run.py` fixes both. Run it once per pull, dated by the pull:
+
+```bash
+python3 load_run.py --db monitorclt.sqlite --as-of 2026-09-01 \
+        --estates pull/estate_cases.jsonl --parcels pull/parcels.jsonl --deeds pull/deeds.jsonl
+```
+
+It runs the cross-reference, writes the run into a SQLite store (`store.py`;
+`schema.sql` carries the same tables for Postgres), and prints the delta against
+the previous run: new confirmed, new pending, status changes, and every parcel
+detected leaving its estate. `--as-of` is the date the inputs describe, so a
+backfill of dated historical pulls builds correct history.
+
+`report.py` reads it back:
+
+```bash
+python3 report.py --db monitorclt.sqlite daily                   # new targets per pull date
+python3 report.py --db monitorclt.sqlite daily --by filing_date  # ...per estate filing date
+python3 report.py --db monitorclt.sqlite leads                   # confirmed and still in the estate
+python3 report.py --db monitorclt.sqlite transfers               # everything that has left an estate
+python3 report.py --db monitorclt.sqlite outcomes                # how the model's calls held up
+```
+
+`daily` counts pairs by the pull that first surfaced them (what arrived today) and
+by the pull that saw them leave; `--by filing_date` is the way to look back before
+the store existed, since one historical pull yields the cohorts by when each
+estate was opened. History starts with the first pull loaded -- there is no
+other source for "what the matcher would have said on a day nobody ran it".
+
+## Transfers: a sold parcel is not a lead
+
+After every load the store re-reads, for each tracked (confirmed or pending) pair,
+every deed on that parcel and the assessor row it snapshotted last time. The
+readings live in `transfers.py` and are deliberately narrow:
+
+| Event | What was seen | Effect on the match |
+|---|---|---|
+| `deed_from_estate` | post-death deed whose grantor is the personal representative, or the decedent's name with an estate marker, or the decedent's name on a fiduciary instrument | **`transferred`** -- off the lead list |
+| `owner_changed` | assessor owner string no longer carries the decedent | **`transferred`** |
+| `owner_restyled` | owner string changed but still names the decedent (`SMITH DAVID` -> `SMITH DAVID ESTATE OF`) | none; recorded |
+| `sale_date_advanced` | `last_sale_date` moved past the date of death | none; recorded |
+| `namesake_conveyance` | plain warranty deed in the decedent's bare name, recorded after death -- a dead person does not sign one, so that owner was somebody else | back to **`pending`** |
+| `ambiguous_conveyance` | decedent-name grantor whose middle initial contradicts the estate | none; recorded |
+
+`transferred` is sticky: the assessor lags the Register of Deeds by weeks, and a
+rule run re-confirming the pair does not put it back. Each event records the
+instrument (or the two snapshots) that showed it, and where the parcel went --
+to the representative, within the family name, to an organization, or to a
+third party -- read from `grantee_name`, which the matcher itself never uses.
+
+The `outcomes` report is the same events turned around: a `deed_from_estate` on a
+pair the model confirmed is a true positive it earned, a `namesake_conveyance` is
+a false positive it made. Tallied per tier and per evidence label, it is the
+live version of `evaluate.py`'s precision table, built from real conveyances
+instead of hand labels.
+
+## Backtest: what the record later proved
+
+`backtest.py` runs the matcher as of a past date and scores it against deeds
+recorded since. Estates filed by the cut-off are the cases; deeds recorded by
+then are the evidence the matcher may see; deeds recorded after it are the
+answer key it never saw. An executor's or administrator's deed, or a deed from
+`ESTATE OF <decedent>`, proves the estate held that parcel (positive); a plain
+warranty deed in the decedent's bare name after death proves a namesake owned
+it (negative). The labels then go through `evaluate.py` unchanged.
+
+```bash
+python3 backtest.py --estates pull/estate_cases.jsonl --parcels pull/parcels.jsonl \
+                    --deeds pull/deeds.jsonl --start 2026-01-01 \
+                    --as-of 2026-03-31 --as-of 2026-06-30 --labels-out backtest_labels.csv
+```
+
+**The catch.** The parcel index you can pull today shows the *buyer*. A parcel
+that sold out of an estate no longer carries the decedent's name, so blocking
+fails and exactly the cases you want to learn from vanish -- run with
+`--rollback none` to see how much. For every parcel with a later deed the
+backtest reconstructs the cut-off owner from the deed chain (the grantee of the
+last deed before the cut-off; failing that, the grantor of the first deed
+after), blanks the fields a cut-off assessor row could not have had, and reports
+how many it reconstructed and how. A parcel that could only be reconstructed
+from a fiduciary grantor -- no earlier deed in the pull -- can only be missed,
+and is reported as the deed chain falling short, not the matcher. Pull deeds
+further back than the estates. A snapshot the store actually took at the time
+is always better than a reconstruction; the backtest is for the months before
+there was a store.
+
+Two more honest limits: positives exist only for estates that *conveyed*
+something after the cut-off, so recall is recall on the subset that later sold
+(an estate still holding its house produces no label); and negatives come only
+from the namesake reading, so a pair nothing ever contradicts stays unlabeled.
+The report says both, every time.
+
+On the sample (`sample/pull_2026-09/`, the September pull) as of 2026-04-15 it
+finds 3 positives and 1 negative: one estate the matcher had in review, one it
+auto-confirms only after the assessor's later `HEIRS` retitle, and one it can
+never block on because the 2018 deed indexed the buyer as `EXAMPLE A B`. That
+last one is the kind of miss worth knowing about, and the reason `--labels-out`
+exists: merge the derived labels with hand labels and let the threshold sweep
+and the per-evidence table say what to change in `match_rules.json`. Bump
+`version` when you do; every run records it, so the store shows the effect.
+
+That is the correction loop, and it is a human one on purpose. The model is
+twelve weights and two thresholds; letting deed-derived labels retune them
+automatically would overfit the handful of estates that happen to have sold,
+and `deed_grantor_link` is both a matcher input and the label source -- only the
+strict cut-off keeps those apart.
 
 ## The workflow this belongs to
 
@@ -80,6 +194,8 @@ The sample data is synthetic.
    records match, not a conclusion.
 4. Contact the **personal representative or estate attorney** — the authorized
    decision-maker — and nobody else.
+5. Load every pull (`load_run.py`) so tomorrow has a yesterday: new targets are
+   counted, and a lead that has since sold is retired before anyone calls about it.
 
 ## What this does not do
 

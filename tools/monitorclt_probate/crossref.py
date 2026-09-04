@@ -129,6 +129,9 @@ def parse_name(raw, name_format, rules):
     to natural order, because that phrasing never precedes a surname-first name.
     """
     body = clean_text(raw)
+    # "ESTATE OF JOHN SMITH" is natural order; "SMITH JOHN ESTATE OF" (how a deed
+    # index prints it) is not. Only a *leading* "... OF" marker flips the format.
+    prefixed = any(m.endswith(" OF") and (body == m or body.startswith(m + " ")) for m in rules.get("estate_markers", []))
     body, markers = strip_markers(body, rules.get("estate_markers", []))
     tokens = [t for t in body.replace(",", " , ").split() if t]
     noise = set(rules.get("noise_tokens", []))
@@ -145,7 +148,7 @@ def parse_name(raw, name_format, rules):
         suffix = suffix or tokens[-1]
         tokens.pop()
 
-    if any(m.endswith(" OF") for m in markers):
+    if prefixed:
         name_format = "first_last"
 
     if "," in tokens:
@@ -171,8 +174,14 @@ def split_parties(raw, name_format, rules):
     printed once. A trailing fragment of one or two tokens is read as forenames
     under the first party's surname; anything longer is parsed on its own.
     """
-    body = clean_text(raw)
-    parts = [p.strip() for p in re.split(r"\s*&\s*|\s+AND\s+|\s*;\s*", body) if p.strip()]
+    # Semicolons separate parties in deed indexes; split on them before
+    # clean_text() turns them into spaces.
+    parts = [
+        p.strip()
+        for chunk in re.split(r";", raw or "")
+        for p in re.split(r"\s*&\s*|\s+AND\s+", clean_text(chunk))
+        if p.strip()
+    ]
     if not parts:
         return []
 

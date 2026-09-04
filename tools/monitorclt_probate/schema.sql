@@ -97,11 +97,15 @@ CREATE TABLE probate.person_address (
 
 -- ---------------------------------------------------------------- matching --
 
-CREATE TYPE probate.match_status AS ENUM ('confirmed', 'pending', 'rejected');
+-- 'transferred': a later record (a deed from the estate, or the assessor's
+-- owner string losing the decedent) shows the parcel has left the estate. It is
+-- sticky -- a rule run re-confirming the pair does not reopen it.
+CREATE TYPE probate.match_status AS ENUM ('confirmed', 'pending', 'rejected', 'transferred');
 
 CREATE TABLE probate.match_run (
     id                  bigserial PRIMARY KEY,
     started_at          timestamptz NOT NULL DEFAULT now(),
+    as_of               date        NOT NULL DEFAULT current_date,  -- the date the inputs describe
     tool_version        text        NOT NULL,
     rules_version       text        NOT NULL,
     params              jsonb       NOT NULL DEFAULT '{}'::jsonb
@@ -123,7 +127,11 @@ CREATE TABLE probate.entity_match (
     score               numeric(4, 3) NOT NULL CHECK (score >= 0 AND score <= 1),
     evidence            jsonb       NOT NULL DEFAULT '[]'::jsonb,
     flags               jsonb       NOT NULL DEFAULT '[]'::jsonb,
+    model_status        probate.match_status,   -- what the rules said on the latest run
     status              probate.match_status NOT NULL DEFAULT 'pending',
+    first_seen_run      bigint      REFERENCES probate.match_run (id),
+    last_seen_run       bigint      REFERENCES probate.match_run (id),
+    transferred_run     bigint      REFERENCES probate.match_run (id),
     reviewer            text,
     reviewed_at         timestamptz,
     review_note         text,
@@ -136,11 +144,52 @@ CREATE TABLE probate.entity_match (
 
 CREATE INDEX ON probate.entity_match (status, score DESC);
 CREATE INDEX ON probate.entity_match (left_source, left_id);
+CREATE INDEX ON probate.entity_match (created_at);
+
+-- ------------------------------------------------------------- monitoring --
+-- The assessor row for every tracked parcel, once per run, so the next run can
+-- see the owner string change. Tracked = confirmed or pending; the full county
+-- index is not versioned here.
+
+CREATE TABLE probate.parcel_snapshot (
+    run_id              bigint      NOT NULL REFERENCES probate.match_run (id),
+    right_id            text        NOT NULL,   -- county/pin
+    owner_name          text,
+    owner_mailing_address text,
+    situs_address       text,
+    land_use            text,
+    assessed_value      numeric(14, 2),
+    deed_book           text,
+    deed_page           text,
+    last_sale_date      date,
+    PRIMARY KEY (run_id, right_id)
+);
+
+-- One row per detected departure of a parcel from its estate, with the record
+-- that showed it. kind: deed_from_estate | owner_changed | owner_restyled |
+-- sale_date_advanced | namesake_conveyance | ambiguous_conveyance. Only the
+-- first two flip the match to 'transferred'; namesake_conveyance sends a
+-- confirmed pair back to review; the rest are evidence only.
+CREATE TABLE probate.parcel_transfer (
+    id                  bigserial PRIMARY KEY,
+    run_id              bigint      NOT NULL REFERENCES probate.match_run (id),
+    as_of               date        NOT NULL,
+    left_id             text        NOT NULL,
+    right_id            text        NOT NULL,
+    kind                text        NOT NULL,
+    basis               text        NOT NULL,   -- deed key, or snapshot:<from>-><to>
+    detail              jsonb       NOT NULL DEFAULT '{}'::jsonb,
+    status_before       probate.match_status NOT NULL,
+    status_after        probate.match_status NOT NULL,
+    detected_at         timestamptz NOT NULL DEFAULT now(),
+    UNIQUE (left_id, right_id, kind, basis)
+);
 
 -- ---------------------------------------------------------------- views -----
 
 -- The lead list. Confirmed links only: a pending candidate is a question, not a
--- lead, and must not reach outreach tooling.
+-- lead, and must not reach outreach tooling. A transferred pair is not
+-- confirmed any more, so it drops out here by construction.
 CREATE VIEW probate.v_estate_property AS
 SELECT e.county,
        e.file_number,
@@ -167,6 +216,41 @@ JOIN probate.parcel p
   ON m.right_source = 'parcel'
  AND p.county || '/' || p.pin = m.right_id
 WHERE m.status = 'confirmed';
+
+-- New targets per day: pairs by the day they first appeared, and by the day
+-- they left. 'confirmed' is the count that became a lead on that day, whether
+-- or not it has since transferred; active is the running lead-list size.
+CREATE VIEW probate.v_daily_cohort AS
+WITH arrivals AS (
+    SELECT created_at::date AS day,
+           count(*) FILTER (WHERE model_status = 'confirmed' OR status = 'confirmed') AS new_confirmed,
+           count(*) FILTER (WHERE status = 'pending') AS new_pending,
+           0::bigint AS transferred
+    FROM probate.entity_match
+    GROUP BY 1
+), departures AS (
+    SELECT r.as_of AS day, 0::bigint, 0::bigint, count(*)
+    FROM probate.entity_match m
+    JOIN probate.match_run r ON r.id = m.transferred_run
+    WHERE m.status = 'transferred'
+    GROUP BY 1
+), days AS (
+    SELECT * FROM arrivals UNION ALL SELECT * FROM departures
+)
+SELECT day,
+       sum(new_confirmed) AS new_confirmed,
+       sum(new_pending)   AS new_pending,
+       sum(transferred)   AS transferred,
+       sum(sum(new_confirmed) - sum(transferred)) OVER (ORDER BY day) AS active_confirmed
+FROM days
+GROUP BY day
+ORDER BY day;
+
+-- Everything that has left an estate, newest first, with the record that showed it.
+CREATE VIEW probate.v_transfers AS
+SELECT t.as_of, t.kind, t.left_id, t.right_id, t.status_before, t.status_after, t.detail
+FROM probate.parcel_transfer t
+ORDER BY t.as_of DESC, t.id DESC;
 
 -- What a human still has to look at, worst-corroborated last.
 CREATE VIEW probate.v_review_queue AS
