@@ -23,7 +23,7 @@ class IngestTests(unittest.TestCase):
 
     def test_idempotent(self):
         s = ingested()
-        for r in ingest.ingest_county(s, COUNTY, FixtureTransport(FIXTURES)):
+        for r in ingest.ingest_county(s, COUNTY, FixtureTransport(FIXTURES), profile="sample"):
             self.assertEqual((r["rows_new"], r["rows_changed"], r["rows_retired"]), (0, 0, 0), r["connector"])
         self.assertEqual(s.scalar("SELECT COUNT(*) FROM raw_capture"), 7)
 

@@ -26,12 +26,12 @@ jobs:
         working-directory: monitorclt
         env:
           PYTHONPATH: src
-        run: python -m monitorclt --db contract.db contract --county MECKLENBURG --fixtures fixtures/mecklenburg --golden
+        run: python -m monitorclt --db contract.db contract --county MECKLENBURG --profile sample --fixtures fixtures/mecklenburg --golden
       - name: Daily pipeline dry run on fixtures must be clean
         working-directory: monitorclt
         env:
           PYTHONPATH: src
-        run: python -m monitorclt --db daily.db run-daily --county MECKLENBURG --fixtures fixtures/mecklenburg
+        run: python -m monitorclt --db daily.db run-daily --county MECKLENBURG --profile sample --fixtures fixtures/mecklenburg
       - name: Live-profile parsers against captured ArcGIS pages
         working-directory: monitorclt
         env:

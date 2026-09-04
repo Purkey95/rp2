@@ -7,13 +7,49 @@ the package into its own repository. Plus the daily run and what to do when it p
 ## 1. Daily run
 
 ```
-monitorclt --db /var/monitorclt/prod.db run-daily --county MECKLENBURG \
-    --alert-webhook "$ALERT_URL" --base-url https://monitorclt.internal/
+monitorclt --db "$MONITORCLT_DB" run-daily --county ALL --profile live \
+    --alert-webhook "$MONITORCLT_ALERT_WEBHOOK" --base-url http://127.0.0.1:8765/
 ```
 
-Exit code 1 means a connector failed or `status` found an anomaly; the summary is
-printed and POSTed to the alert webhook. Cron at 06:00 local, after the county
-systems' overnight loads. Steps: ingest, resolve, cluster, watchlists, deliver, status.
+`--county ALL` runs every county that has a `live` profile registered (today:
+Mecklenburg). Yes, run every county you have live sources for, every day: the
+sources are incremental after the first snapshot, the run is a few hundred requests
+per county at a one-second pace, and the value of the system is the change stream,
+which only exists if you pull daily. Add a county by registering its plugin under
+the `live` profile; it joins the schedule with no other change. Exit code 1 means a
+connector failed or `status` found an anomaly; the summary is printed and POSTed to
+the alert webhook. Steps: ingest, resolve, cluster, watchlists, deliver, status.
+
+### On the Mac mini (launchd)
+
+```
+mkdir -p "$HOME/Library/Application Support/MonitorCLT" "$HOME/Library/Logs/MonitorCLT"
+cat > ~/.monitorclt.env <<'ENV'
+export MONITORCLT_API_TOKEN="$(openssl rand -hex 24)"
+export MONITORCLT_ALERT_WEBHOOK=""          # optional: Slack/Teams incoming webhook
+export MCLT_WEBHOOK_SECRET_DEFAULT="$(openssl rand -hex 24)"   # referenced as env:MCLT_WEBHOOK_SECRET_DEFAULT by watchlists
+ENV
+chmod 600 ~/.monitorclt.env
+cd /path/to/repo/monitorclt
+for f in daily api; do
+  sed "s|__HOME__|$HOME|g; s|__REPO__|$(cd .. && pwd)|g" deploy/launchd/com.monitorclt.$f.plist > ~/Library/LaunchAgents/com.monitorclt.$f.plist
+  launchctl load -w ~/Library/LaunchAgents/com.monitorclt.$f.plist
+done
+launchctl start com.monitorclt.daily        # first run now; the snapshot takes a while
+tail -f ~/Library/Logs/MonitorCLT/daily.log
+```
+
+- The daily agent runs at 06:10 local and, being a LaunchAgent with a calendar
+  interval, runs at next wake if the machine was asleep. Keep the mini on mains
+  power and disable sleep in Energy Saver anyway.
+- The API agent binds to 127.0.0.1 only and reads the token from
+  `~/.monitorclt.env`. To reach it from another machine use an SSH tunnel
+  (`ssh -L 8765:127.0.0.1:8765 mini`), not a bind to 0.0.0.0.
+- The database lives in `~/Library/Application Support/MonitorCLT/`. Back it up
+  with Time Machine or a nightly `sqlite3 ... ".backup"`; it is the system of record
+  for labels, decisions, outcomes and the audit log.
+- Secrets never go in the plist (every process of the user can read it); they are
+  sourced from the 600-mode env file by the command line.
 
 When it pages:
 
@@ -43,11 +79,22 @@ identity-aware proxy, or a shared `--token` for a single operator.
 | `address_point` | `CountyData/MasterAddress/MapServer/0` | ~677k | snapshot, 5000/page; fills `geocode_cache` and parcel coordinates |
 | `deed` | `meckrod.manatron.com` Register of Deeds index (Aumentum) | ~85 deeds/day | incremental on date filed, 20 rows/page |
 
-Capture procedure used for the fixtures (repeat to refresh them): POST to each
-layer's `/query` with `f=json&outFields=*`, save each page verbatim as
-`fixtures/mecklenburg/live/<source>/<n>.json`, set `exceededTransferLimit` on all
-but the last page. The fixtures are public records published by the county; keep
-the sample small.
+Fixtures: the committed pages under `fixtures/mecklenburg/live/` are real captures
+with **every person-name token replaced by a stable pseudonym** (surnames become
+three- or four-syllable words that exist nowhere; markers like ESTATE OF, HEIRS,
+TRUST, initials, suffixes and organization words are kept, so the parsers see the
+real shapes). Raw captures live in `fixtures-private/` (git-ignored). To refresh:
+
+```
+python3 scripts/capture_mecklenburg_live.py fixtures-private/mecklenburg/live
+MCLT_PSEUDONYM_SALT="$(openssl rand -base64 32)" \
+  python3 scripts/pseudonymize_fixtures.py fixtures-private/mecklenburg/live fixtures/mecklenburg/live
+python3 -m monitorclt --db tmp.db contract --county MECKLENBURG --profile live --fixtures fixtures/mecklenburg/live --golden --write-golden
+```
+
+The salt is never committed; a fresh one per refresh means pseudonyms are not stable
+across refreshes, which is intended. Addresses, parcel ids, values and dates are left
+intact: they describe property, not people.
 
 Operational notes: the first parcel snapshot is ~115 requests; schedule it weekly and
 use `dateofsale >= TIMESTAMP` for a daily incremental of sales if the full snapshot

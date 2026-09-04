@@ -62,10 +62,25 @@ class ArcGisLayerConnector(Connector):
     out_fields: str = "*"
     return_geometry: bool = False
     base_where: str = "1=1"
+    min_interval_s: float = 0.5
 
-    def __init__(self, county: str, endpoint: Optional[str] = None) -> None:
+    def __init__(self, county: str, endpoint: Optional[str] = None, sleep: Any = None) -> None:
         super().__init__(county)
         self.endpoint = endpoint or self.layer_url
+        import time as _time
+
+        self._sleep = sleep or _time.sleep
+        self._last_request = 0.0
+
+    def _pace(self) -> None:
+        import time as _time
+
+        if self.endpoint.startswith("fixture://"):
+            return
+        wait = self._last_request + self.min_interval_s - _time.time()
+        if wait > 0:
+            self._sleep(wait)
+        self._last_request = _time.time()
 
     # ------------------------------------------------------------ fetch ---
 
@@ -95,6 +110,7 @@ class ArcGisLayerConnector(Connector):
                 if self.return_geometry:
                     params["outSR"] = "4326"
                 url = "{0}/query?{1}".format(self.endpoint.rstrip("/"), urlencode(params))
+                self._pace()
                 body, ctype = transport.get(url)
             yield Fetched(body=body, url=url, content_type=ctype or "application/json")
             try:

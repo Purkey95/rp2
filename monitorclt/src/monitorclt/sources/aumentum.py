@@ -113,11 +113,24 @@ class AumentumDeedConnector(Connector):
     window_days: int = 7  # incremental window when no watermark
     backfill_from: Optional[str] = None  # ISO date for a first pull
     max_pages: int = 500
+    min_interval_s: float = 1.0  # the connector paces itself; it does not rely on the transport being polite
 
-    def __init__(self, county: str, endpoint: Optional[str] = None, today: Optional[dt.date] = None) -> None:
+    def __init__(self, county: str, endpoint: Optional[str] = None, today: Optional[dt.date] = None, sleep: Any = None) -> None:
         super().__init__(county)
         self.endpoint = endpoint or self.base_url
         self.today = today or dt.date.today()
+        import time as _time
+
+        self._sleep = sleep or _time.sleep
+        self._last_request = 0.0
+
+    def _pace(self) -> None:
+        import time as _time
+
+        wait = self._last_request + self.min_interval_s - _time.time()
+        if wait > 0:
+            self._sleep(wait)
+        self._last_request = _time.time()
 
     # ------------------------------------------------------------- fetch ---
 
@@ -146,6 +159,7 @@ class AumentumDeedConnector(Connector):
 
         base = self.endpoint.rstrip("/")
         start, end = self.date_range(watermark)
+        self._pace()
         home, _ = transport.get(base + "/")
         f = hidden_fields(home.decode("utf-8", errors="replace"))
         f.update(
@@ -157,7 +171,9 @@ class AumentumDeedConnector(Connector):
                 "LoginForm1_txtPassword": "",
             }
         )
+        self._pace()
         transport.post(base + "/", f, base + "/")
+        self._pace()
         entry, _ = transport.get(base + "/RealEstate/SearchEntry.aspx")
         entry_html = entry.decode("utf-8", errors="replace")
         f = hidden_fields(entry_html)
@@ -188,6 +204,7 @@ class AumentumDeedConnector(Connector):
         for code in self.doc_types:
             if code in available:
                 f[available[code]] = code
+        self._pace()
         results, _ = transport.post(base + "/RealEstate/SearchEntry.aspx", f, base + "/RealEstate/SearchEntry.aspx")
         html = results.decode("utf-8", errors="replace")
         if "SearchResults" not in html and showing(html) is None:
@@ -206,6 +223,7 @@ class AumentumDeedConnector(Connector):
             if total is None or span is None or span[1] >= total or page >= self.max_pages:
                 return
             page += 1
+            self._pace()
             results, _ = transport.get("{0}/RealEstate/SearchResults.aspx?pg={1}".format(base, page))
             html = results.decode("utf-8", errors="replace")
 

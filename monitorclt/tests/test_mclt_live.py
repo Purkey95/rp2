@@ -136,7 +136,7 @@ class LiveProfileTests(unittest.TestCase):
 
     def test_counts_and_registry(self):
         s = self.store
-        self.assertEqual(registry.profiles(COUNTY), ["default", "live", "sample"])
+        self.assertEqual(registry.profiles(COUNTY), ["live", "sample"])
         self.assertEqual(s.scalar("SELECT COUNT(*) FROM parcel"), 255)
         self.assertEqual(s.scalar("SELECT COUNT(*) FROM record_version WHERE source = 'code_enforcement'"), 275)
         self.assertEqual(s.scalar("SELECT COUNT(*) FROM record_version WHERE source = 'lien'"), 63)
@@ -159,10 +159,14 @@ class LiveProfileTests(unittest.TestCase):
 
     def test_geocode_from_address_points(self):
         s = self.store
-        pt = geocode.lookup(s, "3508 Weddington Rd, Matthews NC 28105")
+        with open(os.path.join(LIVE, "address_point", "0.json"), encoding="utf-8") as f:
+            first = json.load(f)["features"][0]
+        addr, pid, geom = first["attributes"]["FullAddress"], first["attributes"]["TaxParcelID"], first["geometry"]
+        pt = geocode.lookup(s, addr)
         self.assertIsNotNone(pt)
-        self.assertAlmostEqual(pt[0], 35.0788, places=2)
-        parcel = entities.get_parcel(s, "MECKLENBURG/23125984")
+        self.assertAlmostEqual(pt[0], geom["y"], places=4)
+        parcel = entities.get_parcel(s, "MECKLENBURG/" + pid)
+        self.assertIsNotNone(parcel)
         self.assertIsNotNone(parcel["lat"])
 
     def test_signal_stack_on_real_parcels(self):
@@ -276,8 +280,10 @@ class DeedsIndexTests(unittest.TestCase):
 
         calls = []
         entry = ('<input type="hidden" name="__VIEWSTATE" value="v" /><input type="checkbox" name="ctl00$cphNoMargin$f$dclDocType$50" value="DEED" />').encode()
-        page1 = open(os.path.join(LIVE, "deed", "0.html"), "rb").read()
-        page2 = open(os.path.join(LIVE, "deed", "1.html"), "rb").read()
+        with open(os.path.join(LIVE, "deed", "0.html"), "rb") as f:
+            page1 = f.read()
+        with open(os.path.join(LIVE, "deed", "1.html"), "rb") as f:
+            page2 = f.read()
 
         class Site:
             def get(self, url, params=None):
@@ -308,6 +314,21 @@ class DeedsIndexTests(unittest.TestCase):
         self.assertIn("012026-8-31-0-0-0-0", search["cphNoMargin_f_ddcDateFiledFrom_clientState"])
         self.assertTrue(any("pg=2" in x[1] for x in calls if x[0] == "GET"))
         self.assertEqual(pages[0].watermark, "2026-09-04")
+
+    def test_connectors_pace_themselves(self):
+        import datetime as dt
+
+        waits = []
+        c = L.MecklenburgDeedConnector(COUNTY, "https://rod.example.invalid", today=dt.date(2026, 9, 4), sleep=waits.append)
+        c.min_interval_s = 5.0
+        c._last_request = 10**12  # pretend a request just happened far in the future so the next one must wait
+        c._pace()
+        self.assertTrue(waits and waits[0] > 0)
+        a = L.ParcelXapoConnector(COUNTY, sleep=waits.append)
+        a.min_interval_s = 5.0
+        a._last_request = 10**12
+        a._pace()
+        self.assertEqual(len(waits), 2)
 
     def test_deed_source_in_live_profile(self):
         s = live_store()

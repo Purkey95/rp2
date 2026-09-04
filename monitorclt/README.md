@@ -23,8 +23,8 @@ export PYTHONPATH=src            # or: pip install -e .
 export MONITORCLT_DB=monitorclt.db
 
 python3 -m monitorclt init
-python3 -m monitorclt contract --county MECKLENBURG --fixtures fixtures/mecklenburg --golden
-python3 -m monitorclt ingest   --county MECKLENBURG --fixtures fixtures/mecklenburg
+python3 -m monitorclt contract --county MECKLENBURG --profile sample --fixtures fixtures/mecklenburg --golden
+python3 -m monitorclt ingest   --county MECKLENBURG --profile sample --fixtures fixtures/mecklenburg
 python3 -m monitorclt resolve
 python3 -m monitorclt groups                # estate-centric review: every candidate per estate
 python3 -m monitorclt review-queue          # pair queue, ordered by review value
@@ -36,8 +36,11 @@ python3 -m monitorclt export --actor you --csv leads.csv
 python3 -m monitorclt rank --limit 20
 python3 -m monitorclt outcome declined --lead-id <lead> --by you   # suppresses on the spot
 python3 -m monitorclt outcomes-report
-python3 -m monitorclt run-daily --county MECKLENBURG --fixtures fixtures/mecklenburg
+python3 -m monitorclt run-daily --county MECKLENBURG --profile sample --fixtures fixtures/mecklenburg
 ```
+
+`--profile` is always explicit: `sample` is synthetic fixture data for tests and demos,
+`live` is the real endpoints. Nothing ingests fake data by accident.
 
 Operations, bringing a live source online, building a real labeled set, and splitting
 into its own repository are in `docs/RUNBOOK.md`.
@@ -110,7 +113,16 @@ python3 -m monitorclt run-daily --county MECKLENBURG --profile live --fixtures f
 
 # against the real endpoints (first parcel snapshot is ~450k rows, ~115 pages of 4000)
 python3 -m monitorclt run-daily --county MECKLENBURG --profile live
+
+# every county that has a live profile (today: Mecklenburg), for a scheduler
+python3 -m monitorclt run-daily --county ALL --profile live --alert-webhook "$MONITORCLT_ALERT_WEBHOOK"
 ```
+
+Deployment on a Mac mini: `deploy/launchd/` has a daily-run agent (06:10 local,
+catches up after sleep) and a loopback-only API agent; the runbook has the install
+steps. The API refuses to start without a token (`--token` or
+`MONITORCLT_API_TOKEN`) or a trusted proxy identity header unless `--insecure-local`
+is given for a loopback dev server.
 
 The assessor splits owner names into two columns with no consistent rule
 (`ESTATE OF` in either, trusts as last="KAREN L JOHNSON LIVING" first="TRUST",
@@ -118,7 +130,9 @@ heirs in parentheses, `C/O` contacts in the co-owner columns).
 `counties/mecklenburg_live.py` rebuilds one string per owner in the order the parser
 expects and routes `C/O`/`ATTN` parties to a `care_of` mention, which the resolver
 counts as a related party. On the captured sample this yields real estate-marked
-and trust-held parcels with correctly parsed decedents and settlors.
+and trust-held parcels with correctly parsed decedents and settlors. Committed
+fixtures carry pseudonymized names (raw captures stay in the git-ignored
+`fixtures-private/`; see the runbook).
 
 The Register of Deeds index (`meckrod.manatron.com`, Aumentum ROD Web Access) is
 the sixth live source: `sources/aumentum.py` replays the site's own form

@@ -35,7 +35,7 @@ def run_daily(
     alert_webhook: Optional[str] = None,
     base_url: str = "monitorclt://",
     sources: Optional[List[str]] = None,
-    profile: str = "default",
+    profile: str = "live",
     endpoints: Optional[Dict[str, str]] = None,
 ) -> Dict[str, Any]:
     sender = sender or _http_sender

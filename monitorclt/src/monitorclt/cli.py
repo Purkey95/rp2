@@ -228,13 +228,20 @@ def cmd_run_daily(args: argparse.Namespace) -> int:
     policy.default_retention(store)
     transport = FixtureTransport(args.fixtures) if args.fixtures else HttpTransport(cookies=True, min_interval_s=1.0)
     endpoints = counties.mecklenburg_live.fixture_endpoints() if (args.fixtures and args.profile == "live") else None
-    report = pipeline.run_daily(
-        store, args.county, transport, alert_webhook=args.alert_webhook, base_url=args.base_url, sources=args.source, profile=args.profile, endpoints=endpoints
-    )
-    print(pipeline.summary(report))
-    if args.json:
-        _print(report, True)
-    return 0 if report["ok"] else 1
+    if args.county.upper() == "ALL":
+        names = [c for c in registry.counties() if args.profile in registry.profiles(c)]
+    else:
+        names = [args.county]
+    ok = True
+    for county in names:
+        report = pipeline.run_daily(
+            store, county, transport, alert_webhook=args.alert_webhook, base_url=args.base_url, sources=args.source, profile=args.profile, endpoints=endpoints
+        )
+        print(pipeline.summary(report))
+        if args.json:
+            _print(report, True)
+        ok = ok and bool(report["ok"])
+    return 0 if ok else 1
 
 
 def cmd_decide(args: argparse.Namespace) -> int:
@@ -377,8 +384,18 @@ def cmd_contract(args: argparse.Namespace) -> int:
 def cmd_serve(args: argparse.Namespace) -> int:
     from .api import serve
 
+    token = args.token or os.environ.get("MONITORCLT_API_TOKEN")
+    if not token and not args.trust_proxy_header and not args.insecure_local:
+        print(
+            "refusing to serve without authentication: pass --token (or set MONITORCLT_API_TOKEN), --trust-proxy-header, or --insecure-local for a loopback-only dev server",
+            file=sys.stderr,
+        )
+        return 2
+    if args.insecure_local and args.host not in ("127.0.0.1", "localhost", "::1"):
+        print("--insecure-local only allows loopback hosts", file=sys.stderr)
+        return 2
     store = _store(args)
-    serve(store, args.host, args.port, args.token, args.trust_proxy_header)
+    serve(store, args.host, args.port, token, args.trust_proxy_header)
     return 0
 
 
@@ -398,7 +415,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--fixtures", help="serve bodies from this directory instead of the network")
     s.add_argument("--source", action="append", help="limit to these sources (repeatable)")
     s.add_argument("--endpoint", action="append", help="override an endpoint: source=url (repeatable)")
-    s.add_argument("--profile", default="default", help="county plugin profile: default (synthetic sample), live (real endpoints)")
+    s.add_argument("--profile", required=True, choices=["live", "sample"], help="live = real endpoints; sample = synthetic fixture data")
     s.set_defaults(fn=cmd_ingest)
 
     s = sub.add_parser("resolve", help="run the resolver over current mentions")
@@ -451,12 +468,12 @@ def build_parser() -> argparse.ArgumentParser:
     s.set_defaults(fn=cmd_geocode)
 
     s = sub.add_parser("run-daily", help="ingest -> resolve -> cluster -> watchlists -> deliver -> status; exit 1 on any problem")
-    s.add_argument("--county", required=True)
+    s.add_argument("--county", required=True, help="a county name, or ALL for every county that has the chosen profile")
     s.add_argument("--fixtures")
     s.add_argument("--source", action="append")
     s.add_argument("--alert-webhook")
     s.add_argument("--base-url", default="monitorclt://")
-    s.add_argument("--profile", default="default")
+    s.add_argument("--profile", required=True, choices=["live", "sample"], help="live = real endpoints; sample = synthetic fixture data")
     s.add_argument("--json", action="store_true")
     s.set_defaults(fn=cmd_run_daily)
 
@@ -532,14 +549,15 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--source", action="append")
     s.add_argument("--golden", action="store_true", help="compare against fixtures/golden/<source>.json")
     s.add_argument("--write-golden", action="store_true")
-    s.add_argument("--profile", default="default")
+    s.add_argument("--profile", required=True, choices=["live", "sample"])
     s.set_defaults(fn=cmd_contract)
 
     s = sub.add_parser("serve", help="HTTP API + reviewer UI")
     s.add_argument("--host", default="127.0.0.1")
     s.add_argument("--port", type=int, default=8765)
-    s.add_argument("--token")
+    s.add_argument("--token", help="shared API token (or set MONITORCLT_API_TOKEN)")
     s.add_argument("--trust-proxy-header", help="take reviewer identity from this header set by an identity-aware proxy (e.g. x-forwarded-user)")
+    s.add_argument("--insecure-local", action="store_true", help="allow an unauthenticated server bound to loopback only")
     s.set_defaults(fn=cmd_serve)
     return p
 

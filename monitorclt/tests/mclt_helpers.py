@@ -25,7 +25,7 @@ def fresh_store(when="2026-09-01T00:00:00Z"):
 
 def ingested(when="2026-09-01T00:00:00Z", sources=None):
     store = fresh_store(when)
-    results = ingest.ingest_county(store, COUNTY, FixtureTransport(FIXTURES), sources)
+    results = ingest.ingest_county(store, COUNTY, FixtureTransport(FIXTURES), sources, profile="sample")
     assert all(r.ok for r in results), [r["error"] for r in results if not r.ok]
     return store
 

@@ -327,7 +327,7 @@ class SecretsAndPipelineTests(unittest.TestCase):
     def test_run_daily_ok_and_failure(self):
         s = fresh_store()
         policy.default_retention(s)
-        report = pipeline.run_daily(s, COUNTY, FixtureTransport(FIXTURES), sender=lambda u, h, b: 200)
+        report = pipeline.run_daily(s, COUNTY, FixtureTransport(FIXTURES), sender=lambda u, h, b: 200, profile="sample")
         self.assertTrue(report["ok"], pipeline.summary(report))
         self.assertEqual([x["step"] for x in report["steps"]], ["ingest", "resolve", "cluster", "watchlists", "deliver", "status"])
         text = pipeline.summary(report)

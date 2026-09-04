@@ -8,7 +8,11 @@ Run everything from this directory:
 
     export PYTHONPATH=src MONITORCLT_DB=dev.db
     python3 -m unittest discover -s tests -p "test_mclt_*.py"
-    python3 -m monitorclt run-daily --county MECKLENBURG --fixtures fixtures/mecklenburg
+    python3 -m monitorclt run-daily --county MECKLENBURG --profile sample --fixtures fixtures/mecklenburg
+    python3 -m monitorclt run-daily --county MECKLENBURG --profile live --fixtures fixtures/mecklenburg/live
+
+Profiles are explicit everywhere: `sample` (synthetic) or `live` (real endpoints;
+`--fixtures` replays captured pages). `serve` needs a token or proxy header.
 
 Rules that are not up for negotiation in code changes:
 
@@ -21,5 +25,7 @@ Rules that are not up for negotiation in code changes:
   collects them alongside RP2's tests).
 - Fixtures under `fixtures/<county>/` are the connector contract; change a parser, run
   `monitorclt contract --golden --write-golden` and review the golden diff.
+- Never commit raw live captures: they go in `fixtures-private/` (git-ignored) and reach
+  `fixtures/` only through `scripts/pseudonymize_fixtures.py`.
 
 Where things live: `ARCHITECTURE.md` (why), `docs/RUNBOOK.md` (how to operate).

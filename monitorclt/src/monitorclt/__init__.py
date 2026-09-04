@@ -6,4 +6,4 @@ attached; reviewers' decisions become labels the model retrains on; and nothing
 leaves the system except through a deny-by-default policy layer. Pure stdlib.
 """
 
-__version__ = "2.0.0"
+__version__ = "2.1.0"

@@ -163,7 +163,7 @@ def _event(
 
 
 def ingest_county(
-    store: Store, county: str, transport: Transport, sources: Optional[List[str]] = None, profile: str = "default", endpoints: Optional[Dict[str, str]] = None
+    store: Store, county: str, transport: Transport, sources: Optional[List[str]] = None, profile: str = "live", endpoints: Optional[Dict[str, str]] = None
 ) -> List[IngestResult]:
     from .sources.base import registry
 

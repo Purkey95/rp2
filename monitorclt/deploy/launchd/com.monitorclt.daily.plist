@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- MonitorCLT daily run on a Mac mini. Install:
+         cp deploy/launchd/com.monitorclt.daily.plist ~/Library/LaunchAgents/
+         sed -i '' "s|__HOME__|$HOME|g; s|__REPO__|$(pwd)|g" ~/Library/LaunchAgents/com.monitorclt.daily.plist
+         launchctl load -w ~/Library/LaunchAgents/com.monitorclt.daily.plist
+       Runs at 06:10 local time every day; missed runs (machine asleep) run at next wake. -->
+  <key>Label</key><string>com.monitorclt.daily</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/zsh</string>
+    <string>-lc</string>
+    <string>cd __REPO__/monitorclt && /usr/bin/env PYTHONPATH=src python3 -m monitorclt --db "$MONITORCLT_DB" run-daily --county ALL --profile live --alert-webhook "$MONITORCLT_ALERT_WEBHOOK" --base-url "$MONITORCLT_BASE_URL"</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>MONITORCLT_DB</key><string>__HOME__/Library/Application Support/MonitorCLT/monitorclt.db</string>
+    <key>MONITORCLT_BASE_URL</key><string>http://127.0.0.1:8765/</string>
+    <!-- Put secrets in ~/.monitorclt.env (chmod 600) and source it from the command instead of here;
+         launchd plists are readable by every process of the user. -->
+    <key>MONITORCLT_ALERT_WEBHOOK</key><string></string>
+    <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+  <key>StartCalendarInterval</key>
+  <dict><key>Hour</key><integer>6</integer><key>Minute</key><integer>10</integer></dict>
+  <key>StandardOutPath</key><string>__HOME__/Library/Logs/MonitorCLT/daily.log</string>
+  <key>StandardErrorPath</key><string>__HOME__/Library/Logs/MonitorCLT/daily.err</string>
+  <key>RunAtLoad</key><false/>
+  <key>Nice</key><integer>5</integer>
+</dict>
+</plist>

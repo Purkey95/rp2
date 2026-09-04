@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "monitorclt"
-version = "2.0.0"
+version = "2.1.0"
 description = "Public-records monitoring and entity resolution for real property: bitemporal source history, a calibrated explainable resolver, a reviewer loop that trains it, and a deny-by-default export policy."
 readme = "README.md"
 requires-python = ">=3.8"

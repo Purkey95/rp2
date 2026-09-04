@@ -1,4 +1,8 @@
-"""Mecklenburg County, NC: the six sources MonitorCLT watches, declared.
+"""Mecklenburg County, NC: the synthetic "sample" profile, seven sources declared.
+
+This is fixture data for tests and demos (the v1 sample plus invented foreclosure, tax,
+code-enforcement and business-registry rows). Real records come from the "live"
+profile in mecklenburg_live.py.
 
 Endpoints default to recorded fixtures so the whole pipeline runs offline and the
 contract tests have something to hold the parsers to. A deployment points each
@@ -251,5 +255,4 @@ def connectors(endpoints: Optional[Dict[str, str]] = None) -> List[Connector]:
     return [cls(COUNTY, endpoints.get(cls.spec.name)) for cls in CONNECTORS]
 
 
-registry.register_county(COUNTY, connectors)
 registry.register_county(COUNTY, connectors, profile="sample")

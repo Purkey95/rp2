@@ -8,21 +8,21 @@
   },
   {
     "county": "MECKLENBURG",
-    "full_address": "6003 HAMPSTEAD POND LN CHARLOTTE NC",
+    "full_address": "6003 HAMPSTEAD NELVERWIL LN CHARLOTTE NC",
     "land_use": null,
     "pin": "23121368",
     "total_acres": 0.08581
   },
   {
     "county": "MECKLENBURG",
-    "full_address": "6138 HAMPSTEAD POND LN CHARLOTTE NC",
+    "full_address": "6138 HAMPSTEAD NELVERWIL LN CHARLOTTE NC",
     "land_use": null,
     "pin": "23121261",
     "total_acres": 0.42799
   },
   {
     "county": "MECKLENBURG",
-    "full_address": "6004 HAMPSTEAD POND LN CHARLOTTE NC",
+    "full_address": "6004 HAMPSTEAD NELVERWIL LN CHARLOTTE NC",
     "land_use": null,
     "pin": "23121260",
     "total_acres": 0.08165
@@ -36,7 +36,7 @@
   },
   {
     "county": "MECKLENBURG",
-    "full_address": "10315 PROVIDENCE CHURCH LN CHARLOTTE NC",
+    "full_address": "10315 TALDALLOR CHURCH LN CHARLOTTE NC",
     "land_use": null,
     "pin": "23120212",
     "total_acres": 1.09869
@@ -57,7 +57,7 @@
   },
   {
     "county": "MECKLENBURG",
-    "full_address": "PROVIDENCE CHURCH LN CHARLOTTE NC",
+    "full_address": "TALDALLOR CHURCH LN CHARLOTTE NC",
     "land_use": null,
     "pin": "23120101",
     "total_acres": 8.17996
@@ -141,56 +141,56 @@
   },
   {
     "county": "MECKLENBURG",
-    "full_address": "PROVIDENCE RD CHARLOTTE NC",
+    "full_address": "TALDALLOR RD CHARLOTTE NC",
     "land_use": null,
     "pin": "23113139",
     "total_acres": 1.85248
   },
   {
     "county": "MECKLENBURG",
-    "full_address": "12611 PROVIDENCE RD CHARLOTTE NC",
+    "full_address": "12611 TALDALLOR RD CHARLOTTE NC",
     "land_use": null,
     "pin": "23113115",
     "total_acres": 1.17155
   },
   {
     "county": "MECKLENBURG",
-    "full_address": "12615 PROVIDENCE RD UNINC NC",
+    "full_address": "12615 TALDALLOR RD UNINC NC",
     "land_use": null,
     "pin": "23113114",
     "total_acres": 0.22576
   },
   {
     "county": "MECKLENBURG",
-    "full_address": "12623 PROVIDENCE RD UNINC NC",
+    "full_address": "12623 TALDALLOR RD UNINC NC",
     "land_use": null,
     "pin": "23113113",
     "total_acres": 0.08532
   },
   {
     "county": "MECKLENBURG",
-    "full_address": "TILLEY MORRIS RD CHARLOTTE NC",
+    "full_address": "SENHELCORYOR MORRIS RD CHARLOTTE NC",
     "land_use": null,
     "pin": "23112799",
     "total_acres": 1.96774
   },
   {
     "county": "MECKLENBURG",
-    "full_address": "3827 TILLEY MORRIS RD UNINC NC",
+    "full_address": "3827 SENHELCORYOR MORRIS RD UNINC NC",
     "land_use": null,
     "pin": "23112746",
     "total_acres": 0.1384
   },
   {
     "county": "MECKLENBURG",
-    "full_address": "3732 FAWN HILL RD UNINC NC",
+    "full_address": "3732 FAWN DENDALMAR RD UNINC NC",
     "land_use": null,
     "pin": "23112707",
     "total_acres": 1.11972
   },
   {
     "county": "MECKLENBURG",
-    "full_address": "CHESTNUT HILL DR CHARLOTTE NC",
+    "full_address": "CHESTNUT DENDALMAR DR CHARLOTTE NC",
     "land_use": null,
     "pin": "23112324",
     "total_acres": 1.15592
@@ -204,14 +204,14 @@
   },
   {
     "county": "MECKLENBURG",
-    "full_address": "5450 TILLEY MANOR DR UNINC NC",
+    "full_address": "5450 SENHELCORYOR MANOR DR UNINC NC",
     "land_use": null,
     "pin": "23112119",
     "total_acres": 0.06063
   },
   {
     "county": "MECKLENBURG",
-    "full_address": "6325 TILLEY WY CHARLOTTE NC",
+    "full_address": "6325 SENHELCORYOR WY CHARLOTTE NC",
     "land_use": null,
     "pin": "23112118",
     "total_acres": 10.16744
@@ -232,35 +232,35 @@
   },
   {
     "county": "MECKLENBURG",
-    "full_address": "TILLEY MORRIS RD CHARLOTTE NC",
+    "full_address": "SENHELCORYOR MORRIS RD CHARLOTTE NC",
     "land_use": null,
     "pin": "23111445",
     "total_acres": 0.44543
   },
   {
     "county": "MECKLENBURG",
-    "full_address": "3537 TILLEY MORRIS RD CHARLOTTE NC",
+    "full_address": "3537 SENHELCORYOR MORRIS RD CHARLOTTE NC",
     "land_use": null,
     "pin": "23111439",
     "total_acres": 0.39549
   },
   {
     "county": "MECKLENBURG",
-    "full_address": "11020 FOX HEDGE RD CHARLOTTE NC",
+    "full_address": "11020 ZANZANKINYOR PORZANLOR RD CHARLOTTE NC",
     "land_use": null,
     "pin": "23111425",
     "total_acres": 0.33645
   },
   {
     "county": "MECKLENBURG",
-    "full_address": "3415 TILLEY MORRIS RD CHARLOTTE NC",
+    "full_address": "3415 SENHELCORYOR MORRIS RD CHARLOTTE NC",
     "land_use": null,
     "pin": "23111401",
     "total_acres": 1.61986
   },
   {
     "county": "MECKLENBURG",
-    "full_address": "CREEK POINTE DR UNINC NC",
+    "full_address": "CREEK RALNELYORGOR DR UNINC NC",
     "land_use": null,
     "pin": "23111399",
     "total_acres": 3.39848

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- MonitorCLT reviewer API/UI, loopback only, token from ~/.monitorclt.env. -->
+  <key>Label</key><string>com.monitorclt.api</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/zsh</string>
+    <string>-lc</string>
+    <string>source "$HOME/.monitorclt.env" && cd __REPO__/monitorclt && /usr/bin/env PYTHONPATH=src python3 -m monitorclt --db "$MONITORCLT_DB" serve --host 127.0.0.1 --port 8765</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>MONITORCLT_DB</key><string>__HOME__/Library/Application Support/MonitorCLT/monitorclt.db</string>
+    <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+  <key>KeepAlive</key><true/>
+  <key>RunAtLoad</key><true/>
+  <key>StandardOutPath</key><string>__HOME__/Library/Logs/MonitorCLT/api.log</string>
+  <key>StandardErrorPath</key><string>__HOME__/Library/Logs/MonitorCLT/api.err</string>
+</dict>
+</plist>

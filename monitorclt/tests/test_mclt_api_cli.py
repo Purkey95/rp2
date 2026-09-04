@@ -100,8 +100,8 @@ class CliTests(unittest.TestCase):
 
     def test_pipeline_via_cli(self):
         self.assertEqual(self.run_cli("init"), 0)
-        self.assertEqual(self.run_cli("contract", "--county", "MECKLENBURG", "--fixtures", FIXTURES, "--golden"), 0)
-        self.assertEqual(self.run_cli("ingest", "--county", "MECKLENBURG", "--fixtures", FIXTURES), 0)
+        self.assertEqual(self.run_cli("contract", "--county", "MECKLENBURG", "--profile", "sample", "--fixtures", FIXTURES, "--golden"), 0)
+        self.assertEqual(self.run_cli("ingest", "--county", "MECKLENBURG", "--profile", "sample", "--fixtures", FIXTURES), 0)
         self.assertEqual(self.run_cli("resolve"), 0)
         self.assertEqual(self.run_cli("review-queue"), 0)
         self.assertEqual(self.run_cli("import-labels", os.path.join(FIXTURES, "labels.csv")), 0)
@@ -129,7 +129,16 @@ class CliTests(unittest.TestCase):
         self.assertEqual(self.run_cli("cluster"), 0)
         self.assertEqual(self.run_cli("rebuild-blocks"), 0)
         self.assertEqual(self.run_cli("geocode"), 0)
-        self.assertEqual(self.run_cli("run-daily", "--county", "MECKLENBURG", "--fixtures", FIXTURES), 0)
+        self.assertEqual(self.run_cli("run-daily", "--county", "MECKLENBURG", "--profile", "sample", "--fixtures", FIXTURES), 0)
+        self.assertEqual(self.run_cli("run-daily", "--county", "ALL", "--profile", "sample", "--fixtures", FIXTURES), 0)
+
+    def test_profile_is_required_and_serve_refuses_without_auth(self):
+        self.assertEqual(self.run_cli("init"), 0)
+        with self.assertRaises(SystemExit):  # argparse: --profile is required
+            self.run_cli("ingest", "--county", "MECKLENBURG", "--fixtures", FIXTURES)
+        os.environ.pop("MONITORCLT_API_TOKEN", None)
+        self.assertEqual(self.run_cli("serve", "--port", "0"), 2)
+        self.assertEqual(self.run_cli("serve", "--port", "0", "--insecure-local", "--host", "0.0.0.0"), 2)
 
     def test_endpoint_override_imports_legacy_jsonl(self):
         legacy = os.path.normpath(os.path.join(FIXTURES, "..", "..", "..", "tools", "monitorclt_probate", "sample"))
@@ -140,6 +149,8 @@ class CliTests(unittest.TestCase):
             "ingest",
             "--county",
             "MECKLENBURG",
+            "--profile",
+            "sample",
             "--fixtures",
             legacy,
             "--source",

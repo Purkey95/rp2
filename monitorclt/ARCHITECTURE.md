@@ -204,7 +204,7 @@ labeled set, splitting the repository.
 `sources/arcgis.py` is a connector base for any ArcGIS feature layer or table: paged
 `/query`, incremental date filters, epoch-millisecond dates, ring centroids, and a
 fixture layout that replays captured pages. `counties/mecklenburg_live.py` declares
-five live sources on the City of Charlotte GIS server, registered under the `live`
+five live sources on the City of Charlotte GIS server plus the Register of Deeds index (six live sources in all), registered under the `live`
 profile of the county registry (the synthetic set stays as `default`/`sample`).
 
 The assessor's two-column owner split is the real-world lesson: `compose_owner`
