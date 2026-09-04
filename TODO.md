@@ -1,8 +1,15 @@
 # TODO
 
 Single tracked backlog for this repository. Items were gathered from the open
-pull requests, `AUDIT.md` (on the PR #3 branch), follow-ups named in
-`tools/monitorclt_probate/README.md`, and `TODO` comments in the source.
+pull requests and the branches behind them — `AUDIT.md` (PR #3),
+`MONITORCLT_PLATFORM_ROADMAP.md` (PR #2), the agent-layer specs under
+`tools/monitorclt_probate/agents/` (PR #10) — plus the follow-ups named in
+`tools/monitorclt_probate/README.md` on `main` and the `TODO` comments in the
+source.
+
+Two backlogs live here. Sections 2–7 are the rp2 tax calculator; sections
+8–11 are MonitorCLT, a real-estate platform that shares this repository but
+whose main implementation is not on GitHub at all.
 
 Conventions: `[ ]` open, `[x]` done. Keep the source reference on each item so
 it stays checkable. Add new items under the right section rather than at the
@@ -24,7 +31,8 @@ land it, revise it, or close it.
       changes.
 - [ ] **PR #2** — MonitorCLT opportunity-detection engine: seven-arbitrage
       taxonomy, signals, valuation, end-to-end pipeline
-      (`claude/progress-to-100-3ag1x7`).
+      (`claude/progress-to-100-3ag1x7`). 15 tool modules and a 41-item
+      roadmap — see section 10.
 - [ ] **PR #3** — Production-readiness audit report (`AUDIT.md`)
       (`claude/monitorclt-full-audit-7qf9y5`). Landing this first makes
       sections 2–5 below reviewable in-repo instead of on a branch.
@@ -36,7 +44,7 @@ land it, revise it, or close it.
       land (`claude/mecklenburg-adjacent-parcels-gpatwp`).
 - [ ] **PR #10** — Agent-operations layer spec for MonitorCLT
       (`claude/grockbot-monitorclt-integration-3sk79p`). CI is currently red
-      on this branch — fix before merging.
+      on this branch — fix before merging. Rollout phases in section 9.
 
 ## 2. Correctness — wrong numbers in tax output
 
@@ -226,10 +234,10 @@ document, some of them silently.
 - [ ] Optimize the `_fill_cell` hot path; bisect for filtered iteration;
       early-exit in the parser.
 
-## 8. MonitorCLT probate cross-reference
+## 8. MonitorCLT — probate cross-reference (on `main`)
 
-Follow-ups named in `tools/monitorclt_probate/README.md`, none of them yet
-done.
+The only MonitorCLT code merged to `main`. Follow-ups named at the end of
+`tools/monitorclt_probate/README.md`, none of them done.
 
 - [ ] Have a North Carolina real-estate/probate attorney review the workflow
       before operationalizing it.
@@ -242,7 +250,115 @@ done.
       describe the synthetic sample only. Label the hard cases — common
       surnames, remarriages, junior/senior pairs.
 
-## 9. Housekeeping
+## 9. MonitorCLT — agent operations layer (PR #10)
+
+Specs plus `intake/adapt.py` and `load_run.py`. The rollout is six phases with
+a gate on each; phase 0 is the PR itself, so phases 1–5 are all outstanding.
+Gates are quoted from `tools/monitorclt_probate/agents/README.md`.
+
+- [ ] Fix CI on the branch — currently red, blocking the merge.
+- [ ] **Phase 0** — agree the roster; load `AGENTS.md` into shared memory.
+- [ ] **Phase 1** — intake for one county, one source (estate cases),
+      human-triggered. Gate: two weeks, and a human spot-checks 20 records
+      against the source finding zero fabricated or dropped fields.
+- [ ] **Phase 2** — the runner. Gate: a loaded run is identical to a hand-run
+      of `crossref.py`, and the confirmed-row `CHECK` is settled and
+      implemented in `load_run.py`.
+- [ ] **Phase 3** — queue triage. Gate: the reviewer confirms the packet saved
+      time and never nudged toward a confirm.
+- [ ] **Phase 4** — calibration proposals. Gate: a proposal is adopted only
+      after `evaluate.py` holds target precision on a label set that *grew*
+      since the last change (a static label set is tuning to the test).
+- [ ] **Phase 5** — outreach drafts. Gate: NC attorney sign-off on both
+      template and process. No routine triggers outreach by construction.
+- [ ] Give the two orphaned run outputs their owners:
+      `unmatched_estate_parcels` → intake's backlog, `skipped_estates` →
+      calibration as a name-parsing problem no threshold reaches.
+- [ ] Hold the four known risks as review criteria, not one-time notes:
+      no browser-scraping at volume, no coordinator that digests the queue,
+      no PII in shareable artifacts, no calibrating against a static label set.
+
+## 10. MonitorCLT — platform roadmap (PR #2)
+
+`MONITORCLT_PLATFORM_ROADMAP.md` on that branch carries 41 unchecked items
+across 15 tool modules. **It stays the source of truth** — once PR #2 lands,
+work the roadmap and keep this section as a pointer, not a copy. Two things
+worth carrying here because they gate everything else:
+
+- [ ] **Phase 0 is the sequencing rule.** Nothing in phases 2–5 ships before
+      Phase 0 is green: 7 pipelines below 100% (three dead-lettered),
+      `contactable_pct` at 15% against a 50% target, message-queue backlog
+      growing, disk at 88%. Exit criterion is `pipeline.success_rate_7d` at
+      100% across the board for seven consecutive days. Distributing broken
+      lead flow to partners burns the only asset that makes the model work.
+- [ ] **Most of this work isn't in this repo.** The roadmap notes it lives in
+      rp2 for persistence only; implementation happens in the MonitorCLT
+      codebase, which is not on GitHub. Either run Claude Code on the
+      MonitorCLT host or push that codebase to a repo this account can attach
+      — until then these items can be tracked here but not worked here.
+
+Outstanding groups, so the shape is visible without opening the branch:
+
+- [ ] **Sourcing / provenance** — apply `schema.sql` and backfill provenance;
+      run the remaining 10 sources on the host and upsert into `signals`; emit
+      `source_coverage` into the daily digest (a source dropping to
+      `coverage_coming` is the alert dead-lettering never gave); convert the
+      dead-lettered scrapers (`rod_lending_ocr`/`rod_match`,
+      `iredell_delinquent` — needs a spatial-join adapter); St. Louis permits
+      (Accela App ID) and tax sale (Cloudflare — browser_api on the host or
+      ask the Collector); register each source as a nightly pipeline with its
+      own success metric and freshness gate.
+- [ ] **Scoring** — wire `load_*` to Postgres and write a `leads` table; emit
+      `score.leads_priority_plus` and band counts to the digest; build the ROD
+      lien job on the host (browser-only in all 8 counties; start with Gaston
+      CCS, no Cloudflare); add entity-resolution depth once ROD deed data is
+      wired; tune weights against real closed-deal outcomes.
+- [ ] **Contact enrichment** — load Regrid county exports into a `parcels`
+      table; replace CSV I/O with Postgres; run against the full contact base;
+      register a nightly `contact_enrichment` pipeline with digest metrics;
+      bake off BatchData / PropertyReach / Datafinder for skip trace; start
+      direct mail to absentee owners, which needs no skip trace and generates
+      the inbound that creates SMS consent.
+- [ ] **Phone / SMS activation** — the slow track: LLC + EIN, privacy policy
+      and SMS terms page, Twilio account and 704/980 numbers, A2P 10DLC brand
+      and campaign registration (1–3 weeks of carrier review), messaging
+      service with advanced opt-out. Then the build: `sms_sender` worker gated
+      on opt-in/DNC and quiet hours, inbound and delivery webhooks, STOP-reply
+      sync to a DB opt-out flag (Twilio-side blocking is not enough), inbound
+      voice with transcription, four `sms.*` metrics, end-to-end test before
+      approval lands. Then go-live: DNC and litigator scrub before any send,
+      warm-up ramp, no link shorteners.
+- [ ] **Entity resolution** — parcels → beneficial owner (LLC/person) so
+      portfolio and repeat-seller signals surface. Not built; named as the
+      edge neither competitor has.
+- [ ] **Cheap derived signals still to build** — `assemblage_adjacency_value`;
+      compute `neighbors`/`road_frontage` from real parcel polygons on the
+      host; `tax_lot_legal_lot_mismatch` and `address_anomaly_multiunit`; feed
+      real recorded dates into the catalyst calendar and resolution events
+      into the lifecycle engine as ROD/planning/tax sources come online.
+- [ ] **Calibrate the valuation constants** — adjustment coefficients ship as
+      Charlotte-SFR placeholders. The method is sound, the constants are not
+      yours yet; calibrate per submarket before trusting the dollar figures.
+- [ ] **Phases 1–5** (deal core, partner layer, buyer/dispo, intelligence
+      pages, funnel) — see the roadmap. Gated behind Phase 0.
+
+## 11. MonitorCLT — other open branches
+
+- [ ] **PR #5** adds `src/monitorclt/` (a BEA API client with a CLI) inside
+      the rp2 source tree. Decide whether MonitorCLT code belongs under
+      `src/` alongside the tax calculator, or in `tools/` with the other
+      MonitorCLT modules, before this sets a precedent.
+- [ ] **PR #6** adds `docs/user_notifications.md` for SendGrid/Twilio. Check
+      it against the A2P 10DLC and consent requirements in section 10 — a
+      notifications doc that predates carrier registration will be wrong about
+      what can actually be sent.
+- [ ] **PR #7** adds `mecklenburg_adjacent_parcels/` (fetch, classify,
+      analyze, and a generated map) at the repository root — same placement
+      question as PR #5, and it overlaps the adjacency work in
+      `monitorclt_geometry` on PR #2. Reconcile the two rather than merging
+      both.
+
+## 12. Housekeeping
 
 - [ ] Sync the fork with upstream `eprbell/rp2` v1.7.2+ (adds the LOST
       transaction type) and decide the fork's purpose: contribution branch or
@@ -255,3 +371,7 @@ done.
 - [ ] The `second-brain/` vault is still empty: `wiki/index.md` has no entries
       and `log.md` only has the init line. Ingest a first source or drop the
       vault.
+- [ ] Decide what this repository is. It is an upstream tax-calculator fork
+      carrying an unrelated real-estate platform across seven branches that
+      never merge. Either split MonitorCLT into its own repository or accept
+      the mixture deliberately and say so in the README.
