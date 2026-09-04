@@ -199,11 +199,29 @@ black/isort/flake8. `CLAUDE.md` carries the conventions; `docs/RUNBOOK.md` carri
 procedures that need outside access: bringing a live source online, building the
 labeled set, splitting the repository.
 
+## Round three: real data
+
+`sources/arcgis.py` is a connector base for any ArcGIS feature layer or table: paged
+`/query`, incremental date filters, epoch-millisecond dates, ring centroids, and a
+fixture layout that replays captured pages. `counties/mecklenburg_live.py` declares
+five live sources on the City of Charlotte GIS server, registered under the `live`
+profile of the county registry (the synthetic set stays as `default`/`sample`).
+
+The assessor's two-column owner split is the real-world lesson: `compose_owner`
+rebuilds one string per owner in the order the name parser expects, and
+`split_routing` sends `C/O`/`ATTN` parties to a `care_of` mention that the resolver
+treats as a related party (a personal representative listed as the tax contact on the
+decedent's parcel is strong evidence). Address points fill the geocode cache and
+parcel coordinates, so `coordinates_match` and boundary watchlists work county-wide
+with no external geocoder. New parcel signals: `city_lien`, `vacant_land`,
+`code_finding_of_fact`. `signals.ParcelIndex` groups parcel-keyed records once per
+ranking instead of scanning per parcel.
+
 ## What is deliberately not here yet
 
-- **Live connectors.** Endpoints default to fixtures; real county portals need
-  session handling, paging and rate limits that should be written against captured
-  bytes from those sites, then frozen as fixtures here.
+- **Estate and deed connectors.** Parcels, code enforcement, liens, vacant land and
+  address points are live. Estate cases (eCourts) and the deed index (Register of
+  Deeds) are not on an open feature service; they need a terms check and a capture.
 - **A Postgres `Store`.** The DDL ships; the query layer is SQLite-flavoured in a
   few places (`INSERT OR IGNORE`, `ON CONFLICT`). A second store class is the plan.
 - **Authentication beyond a shared token.** The API takes `X-MonitorCLT-Token`;

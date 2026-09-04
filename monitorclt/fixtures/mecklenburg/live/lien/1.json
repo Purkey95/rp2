@@ -1,0 +1,111 @@
+{
+ "displayFieldName": "Customer_Name",
+ "exceededTransferLimit": false,
+ "features": [
+  {
+   "attributes": {
+    "CustomerID": "170727BURG              ",
+    "Customer_Name": "GLORIA S BURCH                                                        ",
+    "InvoiceNo": "HS-18000155                                       ",
+    "Invoice_Date": "07-27-2017",
+    "LienNo": "17M6260     ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 17749,
+    "ParcelID": "07839103       ",
+    "Property_Address": "1901  PATTON AV                                                                                     "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "170727BURG              ",
+    "Customer_Name": "GLORIA S BURCH                                                        ",
+    "InvoiceNo": "HS-18001552                                       ",
+    "Invoice_Date": "06-05-2018",
+    "LienNo": "18M4526     ",
+    "Lien_Status": "LF - LIEN FILED          ",
+    "ObjectID": 18779,
+    "ParcelID": "07839103       ",
+    "Property_Address": "1901  PATTON AV                                                                                     "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "240610ESTH              ",
+    "Customer_Name": "ESTATE OF MICHAEL HOUSTON                                             ",
+    "InvoiceNo": "HS-24001110                                       ",
+    "Invoice_Date": "06-10-2024",
+    "LienNo": "25M001785   ",
+    "Lien_Status": "LF - LIEN FILED          ",
+    "ObjectID": 24985,
+    "ParcelID": "08909610       ",
+    "Property_Address": "4927  SNOW WHITE LN                                                                                 "
+   }
+  }
+ ],
+ "fieldAliases": {
+  "CustomerID": "Customer ID",
+  "Customer_Name": "Customer Name",
+  "InvoiceNo": "Invoice No.",
+  "Invoice_Date": "Invoice Date",
+  "LienNo": "Lien No.",
+  "Lien_Status": "Lien Status",
+  "ObjectID": "ObjectID",
+  "ParcelID": "Parcel ID",
+  "Property_Address": "Property Address"
+ },
+ "fields": [
+  {
+   "alias": "ObjectID",
+   "name": "ObjectID",
+   "type": "esriFieldTypeOID"
+  },
+  {
+   "alias": "Lien No.",
+   "length": 12,
+   "name": "LienNo",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "alias": "Lien Status",
+   "length": 25,
+   "name": "Lien_Status",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "alias": "Customer ID",
+   "length": 24,
+   "name": "CustomerID",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "alias": "Customer Name",
+   "length": 70,
+   "name": "Customer_Name",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "alias": "Property Address",
+   "length": 100,
+   "name": "Property_Address",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "alias": "Invoice No.",
+   "length": 50,
+   "name": "InvoiceNo",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "alias": "Invoice Date",
+   "length": 10,
+   "name": "Invoice_Date",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "alias": "Parcel ID",
+   "length": 15,
+   "name": "ParcelID",
+   "type": "esriFieldTypeString"
+  }
+ ]
+}

@@ -48,7 +48,32 @@ SIGNALS: Dict[str, Signal] = {
     "outcome_not_in_estate": Signal("outcome_not_in_estate", -40, "Outreach established the parcel is not in the estate."),
     "outcome_already_sold": Signal("outcome_already_sold", -40, "Outreach established the parcel has already been sold."),
     "outcome_declined": Signal("outcome_declined", -100, "The authorized contact declined; suppressed."),
+    "city_lien": Signal("city_lien", 15, "An unpaid city lien (nuisance abatement, demolition, housing invoice); +5 per additional lien."),
+    "vacant_land": Signal("vacant_land", 8, "Flagged as vacant land by the planning department."),
+    "code_finding_of_fact": Signal("code_finding_of_fact", 12, "A finding of fact was ordered on a code case (repair/demolish order stage)."),
 }
+
+LIEN_CLEARED = ("LP", "WO", "RL", "PD")  # paid, write-off, released, paid
+
+
+class ParcelIndex:
+    """Current records of parcel-keyed sources, grouped by parcel id, built once per ranking."""
+
+    def __init__(self, store: Store, sources: "tuple[str, ...]" = ("foreclosure", "tax_delinquency", "code_enforcement", "lien", "vacant_land")) -> None:
+        self.by_parcel: Dict[str, Dict[str, List[Dict[str, Any]]]] = {}
+        from .normalize.pins import parcel_id
+
+        for src in sources:
+            for rec in history.current_records(store, src):
+                pl = rec["payload"]
+                pin = pl.get("pin") or pl.get("parcel_pin")
+                if not pin:
+                    continue
+                pid = parcel_id(pl.get("county") or rec["county"], pin)
+                self.by_parcel.setdefault(pid, {}).setdefault(src, []).append(pl)
+
+    def records(self, source: str, pid: str) -> List[Dict[str, Any]]:
+        return self.by_parcel.get(pid, {}).get(source, [])
 
 
 def _days_between(a: Optional[str], b: Optional[str]) -> Optional[int]:
@@ -60,10 +85,13 @@ def _days_between(a: Optional[str], b: Optional[str]) -> Optional[int]:
         return None
 
 
-def parcel_signals(store: Store, parcel: Dict[str, Any]) -> List[Dict[str, Any]]:
+def parcel_signals(store: Store, parcel: Dict[str, Any], index: Optional[ParcelIndex] = None) -> List[Dict[str, Any]]:
     pid = parcel["id"]
     now = store.now()
     found: List[Dict[str, Any]] = []
+
+    def recs(source: str) -> List[Dict[str, Any]]:
+        return index.records(source, pid) if index is not None else _current_for_parcel(store, source, pid)
 
     def add(name: str, detail: Dict[str, Any], weight: Optional[float] = None) -> None:
         sig = SIGNALS[name]
@@ -86,7 +114,7 @@ def parcel_signals(store: Store, parcel: Dict[str, Any]) -> List[Dict[str, Any]]
         if markers:
             add("estate_marker_on_owner", {"markers": markers})
 
-    for rec in _current_for_parcel(store, "foreclosure", pid):
+    for rec in recs("foreclosure"):
         if str(rec.get("status") or "").upper() not in ("DISMISSED", "WITHDRAWN", "SOLD", "CLOSED"):
             add(
                 "foreclosure_pending",
@@ -97,7 +125,7 @@ def parcel_signals(store: Store, parcel: Dict[str, Any]) -> List[Dict[str, Any]]
                     "status": rec.get("status"),
                 },
             )
-    tax = _current_for_parcel(store, "tax_delinquency", pid)
+    tax = recs("tax_delinquency")
     if tax:
         years = max(int(r.get("years_delinquent") or 1) for r in tax)
         add(
@@ -109,9 +137,22 @@ def parcel_signals(store: Store, parcel: Dict[str, Any]) -> List[Dict[str, Any]]
             },
             SIGNALS["tax_delinquent"].weight + 5 * max(0, years - 1),
         )
-    for rec in _current_for_parcel(store, "code_enforcement", pid):
+    fof = False
+    for rec in recs("code_enforcement"):
         if str(rec.get("status") or "").upper() not in ("CLOSED", "COMPLIED", "RESOLVED"):
             add("code_case_open", {"case_number": rec.get("case_number"), "violation_type": rec.get("violation_type"), "opened_date": rec.get("opened_date")})
+            fof = fof or bool(rec.get("finding_of_fact_ordered"))
+    if fof:
+        add("code_finding_of_fact", {})
+    liens = [r for r in recs("lien") if str(r.get("status") or "").upper() not in LIEN_CLEARED]
+    if liens:
+        add(
+            "city_lien",
+            {"liens": [r.get("lien_number") for r in liens], "statuses": sorted({str(r.get("status_label") or r.get("status")) for r in liens})},
+            SIGNALS["city_lien"].weight + 5 * (len(liens) - 1),
+        )
+    if recs("vacant_land"):
+        add("vacant_land", {})
 
     mailing = parse_address(parcel.get("owner_mailing_norm"))
     situs = parse_address(parcel.get("situs_norm"))
@@ -178,6 +219,7 @@ def score(signals: List[Dict[str, Any]]) -> float:
 
 
 def rank(store: Store, county: Optional[str] = None, limit: int = 50, min_score: float = 1.0, zips: Optional[List[str]] = None) -> List[Dict[str, Any]]:
+    index = ParcelIndex(store)
     sql = "SELECT * FROM parcel WHERE retired_at IS NULL"
     params: List[Any] = []
     if county:
@@ -188,7 +230,7 @@ def rank(store: Store, county: Optional[str] = None, limit: int = 50, min_score:
         params.extend(zips)
     out = []
     for parcel in store.query(sql, params):
-        sigs = parcel_signals(store, parcel)
+        sigs = parcel_signals(store, parcel, index)
         total = score(sigs)
         if total < min_score:
             continue

@@ -95,6 +95,37 @@ estates within NC rules on contacting personal representatives. `confirmed` is a
 records match, not a conclusion: verify chain of title, liens, heirs and the
 representative's authority before any outreach.
 
+## Live sources (Mecklenburg)
+
+The City of Charlotte publishes the county assessor roll and several property
+datasets as ArcGIS feature layers on `gis.charlottenc.gov`. The `live` profile reads
+them directly through paged `/query` calls (no scraping): the ownership roll
+("Parcel XAPO": owner, co-owner, situs, mailing, values, sale, deed book/page, use),
+all code enforcement cases, city liens, vacant land, and the master address points
+that double as a county-wide geocoder.
+
+```bash
+# replay the captured pages under fixtures/mecklenburg/live (offline, what CI runs)
+python3 -m monitorclt run-daily --county MECKLENBURG --profile live --fixtures fixtures/mecklenburg/live
+
+# against the real endpoints (first parcel snapshot is ~450k rows, ~115 pages of 4000)
+python3 -m monitorclt run-daily --county MECKLENBURG --profile live
+```
+
+The assessor splits owner names into two columns with no consistent rule
+(`ESTATE OF` in either, trusts as last="KAREN L JOHNSON LIVING" first="TRUST",
+heirs in parentheses, `C/O` contacts in the co-owner columns).
+`counties/mecklenburg_live.py` rebuilds one string per owner in the order the parser
+expects and routes `C/O`/`ATTN` parties to a `care_of` mention, which the resolver
+counts as a related party. On the captured sample this yields real estate-marked
+and trust-held parcels with correctly parsed decedents and settlors.
+
+Not on that server, and still needed for the probate link itself: estate cases
+(Clerk of Superior Court, on the statewide eCourts portal) and the deed index
+(Register of Deeds). Those connectors stay on the synthetic fixtures until a source
+with acceptable terms is captured; the runbook has the procedure. The server also
+carries police layers; MonitorCLT does not read them, by design.
+
 ## From v1 (`tools/monitorclt_probate`)
 
 v1's matching logic is preserved as the resolver's *seed*: the same blocking rule,

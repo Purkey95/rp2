@@ -5,6 +5,6 @@ plus a fixture directory; nothing else in the system changes.
 """
 
 from ..sources.base import registry  # noqa: F401
-from . import mecklenburg  # noqa: F401
+from . import mecklenburg, mecklenburg_live  # noqa: F401
 
-__all__ = ["registry", "mecklenburg"]
+__all__ = ["registry", "mecklenburg", "mecklenburg_live"]

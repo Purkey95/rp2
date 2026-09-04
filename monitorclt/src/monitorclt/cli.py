@@ -78,9 +78,11 @@ def cmd_init(args: argparse.Namespace) -> int:
 def cmd_ingest(args: argparse.Namespace) -> int:
     store = _store(args)
     endpoints = _endpoints(args.endpoint)
+    if args.fixtures and args.profile == "live" and not endpoints:
+        endpoints = counties.mecklenburg_live.fixture_endpoints()
     transport = FixtureTransport(args.fixtures) if args.fixtures else HttpTransport()
     results = []
-    for connector in counties.mecklenburg.connectors(endpoints) if args.county.upper() == counties.mecklenburg.COUNTY else registry.connectors(args.county):
+    for connector in registry.connectors(args.county, args.profile, endpoints):
         if args.source and connector.name not in args.source:
             continue
         r = ingest.ingest(store, connector, transport)
@@ -225,7 +227,10 @@ def cmd_run_daily(args: argparse.Namespace) -> int:
     store = _store(args)
     policy.default_retention(store)
     transport = FixtureTransport(args.fixtures) if args.fixtures else HttpTransport()
-    report = pipeline.run_daily(store, args.county, transport, alert_webhook=args.alert_webhook, base_url=args.base_url, sources=args.source)
+    endpoints = counties.mecklenburg_live.fixture_endpoints() if (args.fixtures and args.profile == "live") else None
+    report = pipeline.run_daily(
+        store, args.county, transport, alert_webhook=args.alert_webhook, base_url=args.base_url, sources=args.source, profile=args.profile, endpoints=endpoints
+    )
     print(pipeline.summary(report))
     if args.json:
         _print(report, True)
@@ -354,7 +359,8 @@ def cmd_provenance(args: argparse.Namespace) -> int:
 
 def cmd_contract(args: argparse.Namespace) -> int:
     ok = True
-    for connector in registry.connectors(args.county):
+    endpoints = counties.mecklenburg_live.fixture_endpoints() if args.profile == "live" else None
+    for connector in registry.connectors(args.county, args.profile, endpoints):
         if args.source and connector.name not in args.source:
             continue
         golden = os.path.join(args.fixtures, "golden", connector.name + ".json") if args.golden else None
@@ -392,6 +398,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--fixtures", help="serve bodies from this directory instead of the network")
     s.add_argument("--source", action="append", help="limit to these sources (repeatable)")
     s.add_argument("--endpoint", action="append", help="override an endpoint: source=url (repeatable)")
+    s.add_argument("--profile", default="default", help="county plugin profile: default (synthetic sample), live (real endpoints)")
     s.set_defaults(fn=cmd_ingest)
 
     s = sub.add_parser("resolve", help="run the resolver over current mentions")
@@ -449,6 +456,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--source", action="append")
     s.add_argument("--alert-webhook")
     s.add_argument("--base-url", default="monitorclt://")
+    s.add_argument("--profile", default="default")
     s.add_argument("--json", action="store_true")
     s.set_defaults(fn=cmd_run_daily)
 
@@ -524,6 +532,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--source", action="append")
     s.add_argument("--golden", action="store_true", help="compare against fixtures/golden/<source>.json")
     s.add_argument("--write-golden", action="store_true")
+    s.add_argument("--profile", default="default")
     s.set_defaults(fn=cmd_contract)
 
     s = sub.add_parser("serve", help="HTTP API + reviewer UI")

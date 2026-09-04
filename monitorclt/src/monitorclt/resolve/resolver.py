@@ -55,7 +55,7 @@ class _Preload:
         self.party_keys: Dict[Tuple[str, str, str], List[str]] = defaultdict(list)
         self.related: Dict[Tuple[str, str], List[str]] = defaultdict(list)
         rows = store.query(
-            "SELECT source, county, natural_key, role, key_fl FROM mention WHERE current = 1 AND ((source = ? AND role = ?) OR (source = ? AND role = ?)) ORDER BY position",
+            "SELECT source, county, natural_key, role, key_fl FROM mention WHERE current = 1 AND ((source = ? AND role IN (?, 'care_of')) OR (source = ? AND role = ?)) ORDER BY position",
             (kind.candidate_source, kind.candidate_role, kind.subject_source, kind.related_role or ""),
         )
         for r in rows:

@@ -104,28 +104,37 @@ def parse_csv(body: bytes) -> List[Dict[str, Any]]:
 
 
 class Registry:
-    """County plugins register the connectors they provide."""
+    """County plugins register the connectors they provide, under a profile.
+
+    The "default" profile is what `ingest --county X` uses. A county can also expose
+    alternative profiles ("live" for the real endpoints, "sample" for synthetic data)
+    that produce records for the same county name.
+    """
 
     def __init__(self) -> None:
-        self._counties: Dict[str, Callable[[], List[Connector]]] = {}
+        self._counties: Dict[Tuple[str, str], Callable[..., List[Connector]]] = {}
 
-    def register_county(self, county: str, factory: Callable[[], List[Connector]]) -> None:
-        self._counties[county.upper()] = factory
+    def register_county(self, county: str, factory: Callable[..., List[Connector]], profile: str = "default") -> None:
+        self._counties[(county.upper(), profile)] = factory
 
     def counties(self) -> List[str]:
-        return sorted(self._counties)
+        return sorted({c for c, _ in self._counties})
 
-    def connectors(self, county: str) -> List[Connector]:
+    def profiles(self, county: str) -> List[str]:
+        return sorted(p for c, p in self._counties if c == county.upper())
+
+    def connectors(self, county: str, profile: str = "default", endpoints: Optional[Dict[str, str]] = None) -> List[Connector]:
         try:
-            return self._counties[county.upper()]()
+            factory = self._counties[(county.upper(), profile)]
         except KeyError:
-            raise KeyError("no county plugin registered for {0!r}; known: {1}".format(county, self.counties()))
+            raise KeyError("no county plugin for {0!r} profile {1!r}; known: {2}".format(county, profile, sorted(self._counties)))
+        return factory(endpoints) if endpoints is not None else factory()
 
-    def connector(self, county: str, source: str) -> Connector:
-        for c in self.connectors(county):
+    def connector(self, county: str, source: str, profile: str = "default") -> Connector:
+        for c in self.connectors(county, profile):
             if c.name == source:
                 return c
-        raise KeyError("county {0} has no source {1!r}".format(county, source))
+        raise KeyError("county {0} profile {1} has no source {2!r}".format(county, profile, source))
 
 
 registry = Registry()

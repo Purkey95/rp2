@@ -52,6 +52,35 @@ def upsert_parcel(store: Store, county: str, payload: Dict[str, Any]) -> str:
     return pid
 
 
+def index_address_point(store: Store, county: str, payload: Dict[str, Any]) -> None:
+    """An address point is a free geocode for its address and, when the parcel has no
+    coordinates yet, for the parcel itself."""
+    lat, lon = payload.get("lat"), payload.get("lon")
+    if lat is None or lon is None:
+        return
+    norm = parse_address(payload.get("full_address")).normalized
+    if norm:
+        store.execute(
+            "INSERT OR REPLACE INTO geocode_cache (address_norm, lat, lon, provider, geocoded_at) VALUES (?, ?, ?, 'address_point', ?)",
+            (norm, float(lat), float(lon), store.now()),
+        )
+    if payload.get("parcel_pin"):
+        pid = parcel_id(payload.get("county") or county, payload["parcel_pin"])
+        store.execute("UPDATE parcel SET lat = ?, lon = ? WHERE id = ? AND (lat IS NULL OR lon IS NULL)", (float(lat), float(lon), pid))
+
+
+def backfill_parcel_coordinates(store: Store) -> int:
+    """After a parcel snapshot, pull coordinates from address points already ingested."""
+    n = 0
+    for p in store.query("SELECT id, situs_norm FROM parcel WHERE (lat IS NULL OR lon IS NULL) AND situs_norm IS NOT NULL"):
+        g = store.one("SELECT lat, lon FROM geocode_cache WHERE address_norm = ? AND lat IS NOT NULL", (p["situs_norm"],))
+        if g:
+            store.update("parcel", {"lat": g["lat"], "lon": g["lon"]}, "id = ?", (p["id"],))
+            n += 1
+    store.commit()
+    return n
+
+
 def retire_parcel(store: Store, county: str, pin: str) -> Optional[str]:
     pid = parcel_id(county, pin)
     if store.update("parcel", {"retired_at": store.now()}, "id = ? AND retired_at IS NULL", (pid,)):

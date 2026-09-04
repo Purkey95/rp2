@@ -252,3 +252,4 @@ def connectors(endpoints: Optional[Dict[str, str]] = None) -> List[Connector]:
 
 
 registry.register_county(COUNTY, connectors)
+registry.register_county(COUNTY, connectors, profile="sample")

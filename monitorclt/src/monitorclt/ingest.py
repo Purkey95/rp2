@@ -110,6 +110,8 @@ def _index(store: Store, connector: Connector, county: str, key: str, version_id
     spec = connector.spec
     if spec.name == "parcel":
         entities.upsert_parcel(store, county, rec)
+    elif spec.name == "address_point":
+        entities.index_address_point(store, county, rec)
     entities.index_mentions(store, spec, county, key, version_id, rec)
 
 
@@ -160,11 +162,13 @@ def _event(
     )
 
 
-def ingest_county(store: Store, county: str, transport: Transport, sources: Optional[List[str]] = None) -> List[IngestResult]:
+def ingest_county(
+    store: Store, county: str, transport: Transport, sources: Optional[List[str]] = None, profile: str = "default", endpoints: Optional[Dict[str, str]] = None
+) -> List[IngestResult]:
     from .sources.base import registry
 
     results = []
-    for connector in registry.connectors(county):
+    for connector in registry.connectors(county, profile, endpoints):
         if sources and connector.name not in sources:
             continue
         results.append(ingest(store, connector, transport))

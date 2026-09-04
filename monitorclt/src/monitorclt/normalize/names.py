@@ -59,6 +59,33 @@ DEFAULT_RULES: Dict[str, Any] = {
         "REIT",
         "VENTURES",
         "ENTERPRISES",
+        "REALTY",
+        "REAL",
+        "RENTALS",
+        "HOMES",
+        "BUILDERS",
+        "CONSTRUCTION",
+        "MANAGEMENT",
+        "SERVICES",
+        "CAPITAL",
+        "EQUITIES",
+        "ACQUISITIONS",
+        "VENTURE",
+        "INDUSTRIES",
+        "HOSPITAL",
+        "SCHOOL",
+        "SCHOOLS",
+        "UNIVERSITY",
+        "COLLEGE",
+        "DIOCESE",
+        "CEMETERY",
+        "CLUB",
+        "LODGE",
+        "HOUSING",
+        "ASSOC",
+        "ASSN",
+        "LTD",
+        "PLC",
     ],
     "estate_markers": [
         "ESTATE OF",
@@ -177,6 +204,8 @@ def parse_name(raw: Optional[str], name_format: str = "last_first", rules: Optio
 
     if any(m.endswith(" OF") for m in markers):
         name_format = "first_last"
+    if name_format == "last_first" and "," not in tokens and len(tokens) >= 2 and len(tokens[0]) == 1 and len(tokens[-1]) > 1:
+        name_format = "first_last"  # "J J SHEETS": a surname is never a lone initial
 
     if "," in tokens:
         cut = tokens.index(",")
@@ -198,6 +227,7 @@ def split_parties(raw: Optional[str], name_format: str = "last_first", rules: Op
     """Split a multi-owner string into parties, inheriting an implied surname."""
     rules = rules or DEFAULT_RULES
     body = clean_text(raw)
+    body = re.sub(r"\bAMENDED AND RESTATED\b", "AMENDED RESTATED", body)  # a trust phrase, not two owners
     parts = [p.strip() for p in re.split(r"\s*&\s*|\s+AND\s+|\s*;\s*", body) if p.strip()]
     if not parts:
         return []
@@ -209,7 +239,10 @@ def split_parties(raw: Optional[str], name_format: str = "last_first", rules: Op
         name = parse_name(part, name_format, rules)
         primary = out[0]
         tokens = [t for t in part.split() if t not in suffixes and t != "," and t not in trust_words]
-        if not name.is_organization and not primary.is_organization and primary.last and 0 < len(tokens) <= 2 and not name.markers:
+        part_has_trust = any(t in ("TRUST", "TRUSTEE", "TRUSTEES", "TTEE", "TTEES") for t in part.split()) and not any(
+            t in TRUST_ROLE_TOKENS for t in part.split()
+        )
+        if not name.is_organization and not primary.is_organization and primary.last and 0 < len(tokens) <= 2 and not name.markers and not part_has_trust:
             name = Name(raw=part, clean=part, first=tokens[0], middle=" ".join(tokens[1:]), last=primary.last, trust=name.trust)
         out.append(name)
     if any_trust:
@@ -261,21 +294,44 @@ TRUST_NAME_TOKENS = {
     "BYPASS",
     "QTIP",
     "SURVIVORS",
+    "FAM",
+    "LIV",
+    "IRREV",
+    "REV",
+    "LAND",
+    "NEEDS",
+    "SPECIAL",
+    "TESTAMENTARY",
+    "SUCCESSOR",
+    "AND",
+    "RESTATED",
+    "AMENDED",
 }
+TRUST_QUALIFIERS = {"REVOCABLE", "IRREVOCABLE", "LIVING", "FAMILY", "THE", "AMENDED", "RESTATED", "DECLARATION", "TESTAMENTARY", "REV", "IRREV", "LIV", "FAM"}
 
 
 def _strip_trust(tokens: List[str]) -> "tuple[bool, bool, List[str]]":
     """Remove trust vocabulary. Returns (was_trust, natural_order_likely, remaining_tokens).
 
-    "PUBLIC JOHN Q TRUSTEE" keeps the source's order (a trustee suffix on an assessor row).
-    "JOHN Q PUBLIC REVOCABLE LIVING TRUST" is almost always written in natural order.
+    Assessor rows are surname-first, but a trust *name* is written the way its
+    settlor wrote it, which is natural order. What tells them apart on real data:
+      "KAREN L JOHNSON LIVING TRUST"      qualifiers (LIVING/REVOCABLE/FAMILY/THE) -> natural
+      "HAZEL LEAVITT TRUST"               bare TRUST, no trailing initial           -> natural
+      "MUSA JUDITH A (TRUST)"             bare TRUST after LAST FIRST M             -> source order
+      "PUBLIC JOHN Q TRUSTEE"             a role suffix on an assessor row          -> source order
+      "TRUSTEE THE DONNA T MOORE LIVING TRUST"  role *and* qualifiers               -> natural
     """
-    if not any(t in TRUST_ROLE_TOKENS or t in TRUST_NAME_TOKENS for t in tokens):
-        return False, False, tokens
     if not any(t in ("TRUST", "TRUSTEE", "TRUSTEES", "TTEE", "TTEES") for t in tokens):
         return False, False, tokens
-    natural = any(t in ("TRUST", "REVOCABLE", "IRREVOCABLE", "LIVING", "FAMILY") for t in tokens) and not any(t in TRUST_ROLE_TOKENS for t in tokens)
+    has_qualifier = any(t in TRUST_QUALIFIERS for t in tokens)
+    has_role = any(t in TRUST_ROLE_TOKENS for t in tokens)
     kept = [t for t in tokens if t not in TRUST_ROLE_TOKENS and t not in TRUST_NAME_TOKENS and not re.fullmatch(r"\d{1,2}/\d{1,2}/\d{2,4}|\d{4}|\d{1,2}", t)]
+    if has_qualifier:
+        natural = True
+    elif has_role:
+        natural = False
+    else:
+        natural = not (kept and len(kept[-1]) == 1)  # trailing initial = LAST FIRST M
     return True, natural, kept
 
 

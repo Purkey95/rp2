@@ -35,6 +35,8 @@ def run_daily(
     alert_webhook: Optional[str] = None,
     base_url: str = "monitorclt://",
     sources: Optional[List[str]] = None,
+    profile: str = "default",
+    endpoints: Optional[Dict[str, str]] = None,
 ) -> Dict[str, Any]:
     sender = sender or _http_sender
     report: Dict[str, Any] = {"county": county, "started_at": store.now(), "steps": [], "ok": True}
@@ -51,10 +53,13 @@ def run_daily(
 
     def do_ingest() -> Dict[str, Any]:
         results = []
-        for connector in registry.connectors(county):
+        for connector in registry.connectors(county, profile, endpoints):
             if sources and connector.name not in sources:
                 continue
             results.append(ingest.ingest(store, connector, transport))
+        from . import entities
+
+        entities.backfill_parcel_coordinates(store)
         failed = [r for r in results if not r.ok]
         if failed:
             report["ok"] = False

@@ -1,0 +1,852 @@
+{
+ "displayFieldName": "Customer_Name",
+ "exceededTransferLimit": true,
+ "features": [
+  {
+   "attributes": {
+    "CustomerID": "R000002692              ",
+    "Customer_Name": "MICHAEL TODD GORTNEY                                                  ",
+    "InvoiceNo": "HS-00009830                                       ",
+    "Invoice_Date": "09-13-2004",
+    "LienNo": "05M686      ",
+    "Lien_Status": "WO - WRITE OFF           ",
+    "ObjectID": 1,
+    "ParcelID": "03302604       ",
+    "Property_Address": "8608 OLD PLANK RD                                                                                   "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000003897              ",
+    "Customer_Name": "JACQUELINE A BROWN                                                    ",
+    "InvoiceNo": "DM-10000005                                       ",
+    "Invoice_Date": "04-27-2010",
+    "LienNo": "10 M 4714   ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 2,
+    "ParcelID": "07110104       ",
+    "Property_Address": "2215  ROZZELLES FERRY RD                                                                            "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100427SUSS              ",
+    "Customer_Name": "Sussmanrandall Enterprises LLC                                        ",
+    "InvoiceNo": "DM-10000008                                       ",
+    "Invoice_Date": "04-27-2010",
+    "LienNo": "10 M 4715   ",
+    "Lien_Status": "WO - WRITE OFF           ",
+    "ObjectID": 3,
+    "ParcelID": "16110804       ",
+    "Property_Address": "1713  DALLAS AV                                                                                     "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000002072              ",
+    "Customer_Name": "JITEN & ASHA PANDYA                                                   ",
+    "InvoiceNo": "DM-10000007                                       ",
+    "Invoice_Date": "04-27-2010",
+    "LienNo": "10 M 4716   ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 4,
+    "ParcelID": "11911424       ",
+    "Property_Address": "2617  OSMOND ST                                                                                     "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100609J&EL              ",
+    "Customer_Name": "J & E Land Holding Company LLC                                        ",
+    "InvoiceNo": "HS-10000754                                       ",
+    "Invoice_Date": "06-10-2010",
+    "LienNo": "10M10000    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 5,
+    "ParcelID": "04318203       ",
+    "Property_Address": "7508  MELSTRAND WY                                                                                  "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100609J&EL              ",
+    "Customer_Name": "J & E Land Holding Company LLC                                        ",
+    "InvoiceNo": "HS-10000755                                       ",
+    "Invoice_Date": "06-10-2010",
+    "LienNo": "10M10001    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 6,
+    "ParcelID": "04318201       ",
+    "Property_Address": "7516  MELSTRAND WY                                                                                  "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100609J&EL              ",
+    "Customer_Name": "J & E Land Holding Company LLC                                        ",
+    "InvoiceNo": "HS-10000756                                       ",
+    "Invoice_Date": "06-10-2010",
+    "LienNo": "10M10002    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 7,
+    "ParcelID": "04318233       ",
+    "Property_Address": "8903  MCADAM WY                                                                                     "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100609JOHB              ",
+    "Customer_Name": "Bill Johnston                                                         ",
+    "InvoiceNo": "HS-10000757                                       ",
+    "Invoice_Date": "06-10-2010",
+    "LienNo": "10M10003    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 8,
+    "ParcelID": "08902307       ",
+    "Property_Address": "201  BENNETT ST                                                                                     "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000002429              ",
+    "Customer_Name": "LIMITED PARTNERSHIP ENTERPRISE                                        ",
+    "InvoiceNo": "HS-10000758                                       ",
+    "Invoice_Date": "06-10-2010",
+    "LienNo": "10M10004    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 9,
+    "ParcelID": "15701701       ",
+    "Property_Address": "2711  MONROE RD                                                                                     "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000010199              ",
+    "Customer_Name": "ROBERT JR & MARTHA LYTCH                                              ",
+    "InvoiceNo": "HS-10000672                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10005    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 10,
+    "ParcelID": "06909126       ",
+    "Property_Address": "1805  BEATTIES FORD RD                                                                              "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000016406              ",
+    "Customer_Name": "ALVA R & MAE T MACKEN                                                 ",
+    "InvoiceNo": "HS-10000673                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10006    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 11,
+    "ParcelID": "06305103       ",
+    "Property_Address": "1113  MONTCALM ST                                                                                   "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000009903              ",
+    "Customer_Name": "JAMES MANGUM III                                                      ",
+    "InvoiceNo": "HS-10000759                                       ",
+    "Invoice_Date": "06-10-2010",
+    "LienNo": "10M10007    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 12,
+    "ParcelID": "04311617       ",
+    "Property_Address": "6323  ROCKWELL BV                                                                                   "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100608MANM              ",
+    "Customer_Name": "Michael S & Paula D Mann                                              ",
+    "InvoiceNo": "HS-10000674                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10008    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 13,
+    "ParcelID": "16521115       ",
+    "Property_Address": "7825  CLOUGHY CR                                                                                    "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000012364              ",
+    "Customer_Name": "WILLIAM B & ELIDA P MANN                                              ",
+    "InvoiceNo": "HS-10000760                                       ",
+    "Invoice_Date": "06-10-2010",
+    "LienNo": "10M10009    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 14,
+    "ParcelID": "16302116       ",
+    "Property_Address": "5601  LANTANA AV                                                                                    "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100608MAZJ              ",
+    "Customer_Name": "John J Mazzetti                                                       ",
+    "InvoiceNo": "HS-10000676                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10010    ",
+    "Lien_Status": "WO - WRITE OFF           ",
+    "ObjectID": 15,
+    "ParcelID": "10112109       ",
+    "Property_Address": "3126  SUDBURY RD                                                                                    "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100608MEAE              ",
+    "Customer_Name": "Eric Meade                                                            ",
+    "InvoiceNo": "HS-10000677                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10011    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 16,
+    "ParcelID": "11702219       ",
+    "Property_Address": "1825  REMOUNT RD                                                                                    "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100608MOOS              ",
+    "Customer_Name": "Sherri Moore                                                          ",
+    "InvoiceNo": "HS-10000681                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10012    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 17,
+    "ParcelID": "03713214       ",
+    "Property_Address": "9212  EDGEVALE DR                                                                                   "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100608MOSR              ",
+    "Customer_Name": "Robin Moss                                                            ",
+    "InvoiceNo": "HS-10000682                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10013    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 18,
+    "ParcelID": "03513266       ",
+    "Property_Address": "1513  TIRANO CT                                                                                     "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000009096              ",
+    "Customer_Name": "CAROLYN K MULLIS                                                      ",
+    "InvoiceNo": "HS-10000683                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10014    ",
+    "Lien_Status": "WO - WRITE OFF           ",
+    "ObjectID": 19,
+    "ParcelID": "03722823       ",
+    "Property_Address": "7817  CASA LOMA RD                                                                                  "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000009096              ",
+    "Customer_Name": "CAROLYN K MULLIS                                                      ",
+    "InvoiceNo": "HS-10000684                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10015    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 20,
+    "ParcelID": "03722824       ",
+    "Property_Address": "4915  LABORDE AV                                                                                    "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000009096              ",
+    "Customer_Name": "CAROLYN K MULLIS                                                      ",
+    "InvoiceNo": "HS-10000685                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10016    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 21,
+    "ParcelID": "03722825       ",
+    "Property_Address": "4915  LABORDE AV                                                                                    "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100609MCCA              ",
+    "Customer_Name": "Amy D McCallum                                                        ",
+    "InvoiceNo": "HS-10000761                                       ",
+    "Invoice_Date": "06-10-2010",
+    "LienNo": "10M10017    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 22,
+    "ParcelID": "18914304       ",
+    "Property_Address": "7340  ROLLINGRIDGE DR                                                                               "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000021635              ",
+    "Customer_Name": "KELLY C MCCALLUM                                                      ",
+    "InvoiceNo": "HS-10000686                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10018    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 23,
+    "ParcelID": "03314378       ",
+    "Property_Address": "4517  HYPERION CT                                                                                   "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000016924              ",
+    "Customer_Name": "EMILY MCINTYRE                                                        ",
+    "InvoiceNo": "HS-10000687                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10019    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 24,
+    "ParcelID": "11502631       ",
+    "Property_Address": "2740  MAYFAIR AV                                                                                    "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000019967              ",
+    "Customer_Name": "JAMES W MCKINNEY JR                                                   ",
+    "InvoiceNo": "HS-10000688                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10020    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 25,
+    "ParcelID": "08114606       ",
+    "Property_Address": "1016  PARKWOOD AV                                                                                   "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000011984              ",
+    "Customer_Name": "GWENDOLYN H MCMANUS                                                   ",
+    "InvoiceNo": "HS-10000689                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10021    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 26,
+    "ParcelID": "06502201       ",
+    "Property_Address": "3401  ROGERS ST                                                                                     "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000015155              ",
+    "Customer_Name": "JACINTA L MCNEIL                                                      ",
+    "InvoiceNo": "HS-10000690                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10022    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 27,
+    "ParcelID": "03510526       ",
+    "Property_Address": "825  VALLEY RIDGE RD                                                                                "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100608NELC              ",
+    "Customer_Name": "Charles H & Alfreda Nelson Sr                                         ",
+    "InvoiceNo": "HS-10000693                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10023    ",
+    "Lien_Status": "LF - LIEN FILED          ",
+    "ObjectID": 28,
+    "ParcelID": "16720965       ",
+    "Property_Address": "406  CHERRY WOOD LN                                                                                 "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000011279              ",
+    "Customer_Name": "ROBERT NIPPLE                                                         ",
+    "InvoiceNo": "HS-10000695                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10024    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 29,
+    "ParcelID": "05106143       ",
+    "Property_Address": "910  HOUSTON HEIGHTS RD                                                                             "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000012228              ",
+    "Customer_Name": "KRISTIN NIRCHI                                                        ",
+    "InvoiceNo": "HS-10000696                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10025    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 30,
+    "ParcelID": "03715665       ",
+    "Property_Address": "6604  AUTUMN GATE LN                                                                                "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000020740              ",
+    "Customer_Name": "ANA ELSA & IVAN NOSSA                                                 ",
+    "InvoiceNo": "HS-10000762                                       ",
+    "Invoice_Date": "06-10-2010",
+    "LienNo": "10M10034    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 31,
+    "ParcelID": "23121850       ",
+    "Property_Address": "7443  LAMPLIGHTER CLOSE DR                                                                          "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100609ONER              ",
+    "Customer_Name": "One Randolph Place LLC                                                ",
+    "InvoiceNo": "HS-10000763                                       ",
+    "Invoice_Date": "06-10-2010",
+    "LienNo": "10M10035    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 32,
+    "ParcelID": "12711318       ",
+    "Property_Address": "2428  VAIL AV                                                                                       "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100609ONER              ",
+    "Customer_Name": "One Randolph Place LLC                                                ",
+    "InvoiceNo": "HS-10000764                                       ",
+    "Invoice_Date": "06-10-2010",
+    "LienNo": "10M10036    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 33,
+    "ParcelID": "12711316       ",
+    "Property_Address": "2434  VAIL AV                                                                                       "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100609ONER              ",
+    "Customer_Name": "One Randolph Place LLC                                                ",
+    "InvoiceNo": "HS-10000765                                       ",
+    "Invoice_Date": "06-10-2010",
+    "LienNo": "10M10037    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 34,
+    "ParcelID": "12711314       ",
+    "Property_Address": "2442  VAIL AV                                                                                       "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000019620              ",
+    "Customer_Name": "JUN HONG ONG                                                          ",
+    "InvoiceNo": "HS-10000697                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10038    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 35,
+    "ParcelID": "09304203       ",
+    "Property_Address": "1844  ACADEMY ST                                                                                    "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000003462              ",
+    "Customer_Name": "KIMBERLY B PARKER                                                     ",
+    "InvoiceNo": "HS-10000699                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10039    ",
+    "Lien_Status": "WO - WRITE OFF           ",
+    "ObjectID": 36,
+    "ParcelID": "03723612       ",
+    "Property_Address": "5413  SKYCREST DR                                                                                   "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100609PARL              ",
+    "Customer_Name": "Larry Wayne Parker Jr                                                 ",
+    "InvoiceNo": "HS-10000766                                       ",
+    "Invoice_Date": "06-10-2010",
+    "LienNo": "10M10040    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 37,
+    "ParcelID": "15714813       ",
+    "Property_Address": "1214  RICHLAND DR                                                                                   "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000020146              ",
+    "Customer_Name": "DWAYNE PELTER                                                         ",
+    "InvoiceNo": "HS-10000700                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10041    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 38,
+    "ParcelID": "03510125       ",
+    "Property_Address": "6936  RED BUD CR                                                                                    "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000020814              ",
+    "Customer_Name": "DONALD W PERRY JR                                                     ",
+    "InvoiceNo": "HS-10000701                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10042    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 39,
+    "ParcelID": "07107327       ",
+    "Property_Address": "410 S BRUNS AV                                                                                      "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100608PERM              ",
+    "Customer_Name": "Marguerite W Perry                                                    ",
+    "InvoiceNo": "HS-10000702                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10043    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 40,
+    "ParcelID": "03930216       ",
+    "Property_Address": "3631  BARDOT DR                                                                                     "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000004576              ",
+    "Customer_Name": "GLORIA JEAN & ISAAC PHIFER                                            ",
+    "InvoiceNo": "HS-10000767                                       ",
+    "Invoice_Date": "06-10-2010",
+    "LienNo": "10M10044    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 41,
+    "ParcelID": "08913405       ",
+    "Property_Address": "5400  HUGHES DR                                                                                     "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100608PIEI              ",
+    "Customer_Name": "Isabel Pierce                                                         ",
+    "InvoiceNo": "HS-10000703                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10045    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 42,
+    "ParcelID": "03513263       ",
+    "Property_Address": "1512  TIRANO CT                                                                                     "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100608PILS              ",
+    "Customer_Name": "Sylvia Pillsbury                                                      ",
+    "InvoiceNo": "HS-10000704                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10046    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 43,
+    "ParcelID": "05124136       ",
+    "Property_Address": "2243  CLONMEL PL                                                                                    "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000018303              ",
+    "Customer_Name": "DAROUNY PRACHITH                                                      ",
+    "InvoiceNo": "HS-10000705                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10047    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 44,
+    "ParcelID": "03510538       ",
+    "Property_Address": "6809  CIERA NICHOLE CT                                                                              "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000016475              ",
+    "Customer_Name": "DARRIN L & HOLLY RANKIN                                               ",
+    "InvoiceNo": "HS-10000708                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10048    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 45,
+    "ParcelID": "07504714       ",
+    "Property_Address": "1517  LASALLE ST                                                                                    "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100517ROBM              ",
+    "Customer_Name": "Michael Robinson                                                      ",
+    "InvoiceNo": "HS-10000709                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10049    ",
+    "Lien_Status": "WO - WRITE OFF           ",
+    "ObjectID": 46,
+    "ParcelID": "05135178       ",
+    "Property_Address": "2011  DAVID EARL DR                                                                                 "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000008335              ",
+    "Customer_Name": "HUEY M ROWE-ANDERSON                                                  ",
+    "InvoiceNo": "HS-10000768                                       ",
+    "Invoice_Date": "06-10-2010",
+    "LienNo": "10M10050    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 47,
+    "ParcelID": "08919137       ",
+    "Property_Address": "722  DOBSON DR                                                                                      "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000010837              ",
+    "Customer_Name": "MATTIE M RUSSELL                                                      ",
+    "InvoiceNo": "HS-10000710                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10051    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 48,
+    "ParcelID": "11503112       ",
+    "Property_Address": "2738  CAPITOL DR                                                                                    "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000021373              ",
+    "Customer_Name": "LORENZA SAVAGE                                                        ",
+    "InvoiceNo": "HS-10000713                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10052    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 49,
+    "ParcelID": "21921222       ",
+    "Property_Address": "13507  HELMSLEY CT                                                                                  "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100607SEIG              ",
+    "Customer_Name": "Seigle Avenue Presbyterian                                            ",
+    "InvoiceNo": "HS-10000714                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10053    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 50,
+    "ParcelID": "08111401       ",
+    "Property_Address": "832  SEIGLE AV                                                                                      "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000020215              ",
+    "Customer_Name": "NANCY WILKINSON SIMMONS                                               ",
+    "InvoiceNo": "HS-10000715                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10054    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 51,
+    "ParcelID": "03723659       ",
+    "Property_Address": "8039  PINEWOOD DR                                                                                   "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000019686              ",
+    "Customer_Name": "FELIX & DEBBIE SMITH                                                  ",
+    "InvoiceNo": "HS-10000716                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10055    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 52,
+    "ParcelID": "10118213       ",
+    "Property_Address": "1824  DARBROOK DR                                                                                   "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100608SOUT              ",
+    "Customer_Name": "Southern Mechanical of the                                            ",
+    "InvoiceNo": "HS-10000717                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10056    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 53,
+    "ParcelID": "08112101       ",
+    "Property_Address": "911  HARRILL ST                                                                                     "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100608SOUT              ",
+    "Customer_Name": "Southern Mechanical of the                                            ",
+    "InvoiceNo": "HS-10000718                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10057    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 54,
+    "ParcelID": "08112102       ",
+    "Property_Address": "915  HARRILL ST                                                                                     "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100608SPRM              ",
+    "Customer_Name": "Mary & Ernest Springs                                                 ",
+    "InvoiceNo": "HS-10000719                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10058    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 55,
+    "ParcelID": "03722912       ",
+    "Property_Address": "6823  JAMISON LN                                                                                    "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000020449              ",
+    "Customer_Name": "KIMBERLY B STEINBERG                                                  ",
+    "InvoiceNo": "HS-10000720                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10059    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 56,
+    "ParcelID": "03142155       ",
+    "Property_Address": "133  QUEENSGATE LN                                                                                  "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000004531              ",
+    "Customer_Name": "JONATHAN C STEWART                                                    ",
+    "InvoiceNo": "HS-10000721                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10060    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 57,
+    "ParcelID": "05926201       ",
+    "Property_Address": "2616  SLOAN DR                                                                                      "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "100607STOJ              ",
+    "Customer_Name": "James Stokley                                                         ",
+    "InvoiceNo": "HS-10000722                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10061    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 58,
+    "ParcelID": "06505303       ",
+    "Property_Address": "3609  AVALON AV                                                                                     "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000021476              ",
+    "Customer_Name": "W P THIELE, INC                                                       ",
+    "InvoiceNo": "HS-10000770                                       ",
+    "Invoice_Date": "06-10-2010",
+    "LienNo": "10M10062    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 59,
+    "ParcelID": "21349108       ",
+    "Property_Address": "9600  MONROE RD                                                                                     "
+   }
+  },
+  {
+   "attributes": {
+    "CustomerID": "R000014353              ",
+    "Customer_Name": "ROBERT THOMSON                                                        ",
+    "InvoiceNo": "HS-10000724                                       ",
+    "Invoice_Date": "06-09-2010",
+    "LienNo": "10M10063    ",
+    "Lien_Status": "LP - LIEN PAID           ",
+    "ObjectID": 60,
+    "ParcelID": "09308612       ",
+    "Property_Address": "2811  HILLIARD DR                                                                                   "
+   }
+  }
+ ],
+ "fieldAliases": {
+  "CustomerID": "Customer ID",
+  "Customer_Name": "Customer Name",
+  "InvoiceNo": "Invoice No.",
+  "Invoice_Date": "Invoice Date",
+  "LienNo": "Lien No.",
+  "Lien_Status": "Lien Status",
+  "ObjectID": "ObjectID",
+  "ParcelID": "Parcel ID",
+  "Property_Address": "Property Address"
+ },
+ "fields": [
+  {
+   "alias": "ObjectID",
+   "name": "ObjectID",
+   "type": "esriFieldTypeOID"
+  },
+  {
+   "alias": "Lien No.",
+   "length": 12,
+   "name": "LienNo",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "alias": "Lien Status",
+   "length": 25,
+   "name": "Lien_Status",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "alias": "Customer ID",
+   "length": 24,
+   "name": "CustomerID",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "alias": "Customer Name",
+   "length": 70,
+   "name": "Customer_Name",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "alias": "Property Address",
+   "length": 100,
+   "name": "Property_Address",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "alias": "Invoice No.",
+   "length": 50,
+   "name": "InvoiceNo",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "alias": "Invoice Date",
+   "length": 10,
+   "name": "Invoice_Date",
+   "type": "esriFieldTypeString"
+  },
+  {
+   "alias": "Parcel ID",
+   "length": 15,
+   "name": "ParcelID",
+   "type": "esriFieldTypeString"
+  }
+ ]
+}

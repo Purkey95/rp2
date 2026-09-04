@@ -1,0 +1,3542 @@
+[
+  {
+    "address_id": "488217",
+    "county": "MECKLENBURG",
+    "full_address": "9643 HAMPTON OAKS LN CHARLOTTE NC 28270",
+    "lat": 35.07596863625843,
+    "lon": -80.75869699746286,
+    "parcel_pin": "23115177",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "85160",
+    "county": "MECKLENBURG",
+    "full_address": "2505 SOUTH BV CHARLOTTE NC 28203",
+    "lat": 35.20296489625243,
+    "lon": -80.86409032481104,
+    "parcel_pin": "12107707",
+    "status": "A",
+    "zip": "28203"
+  },
+  {
+    "address_id": "407817",
+    "county": "MECKLENBURG",
+    "full_address": "12120 ALBEMARLE RD MINT HILL NC 28227",
+    "lat": 35.21856527265484,
+    "lon": -80.64620575379017,
+    "parcel_pin": "13714105",
+    "status": "A",
+    "zip": "28227"
+  },
+  {
+    "address_id": "559380",
+    "county": "MECKLENBURG",
+    "full_address": "4913 PROVIDENCE COUNTRY CLUB DR CHARLOTTE NC 28277",
+    "lat": 35.04732436374038,
+    "lon": -80.76623643916605,
+    "parcel_pin": "23113237",
+    "status": "A",
+    "zip": "28277"
+  },
+  {
+    "address_id": "559278",
+    "county": "MECKLENBURG",
+    "full_address": "7913 WAVERLY WALK AV CHARLOTTE NC 28277",
+    "lat": 35.04609570677775,
+    "lon": -80.76600968130556,
+    "parcel_pin": "23113210",
+    "status": "A",
+    "zip": "28277"
+  },
+  {
+    "address_id": "540725",
+    "county": "MECKLENBURG",
+    "full_address": "3832 FRANKLIN MEADOWS DR MATTHEWS NC 28105",
+    "lat": 35.06973627920892,
+    "lon": -80.72711146875429,
+    "parcel_pin": "23109530",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "569732",
+    "county": "MECKLENBURG",
+    "full_address": "11208 GLANMIRE DR MATTHEWS NC 28105",
+    "lat": 35.052194878736465,
+    "lon": -80.75720360044713,
+    "parcel_pin": "23123131",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "569731",
+    "county": "MECKLENBURG",
+    "full_address": "11212 GLANMIRE DR MATTHEWS NC 28105",
+    "lat": 35.05235563383387,
+    "lon": -80.75717377340874,
+    "parcel_pin": "23123130",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "514193",
+    "county": "MECKLENBURG",
+    "full_address": "11827 SPRINGPOINT LN CHARLOTTE NC 28278",
+    "lat": 35.14936287325471,
+    "lon": -81.00054427461434,
+    "parcel_pin": "19921235",
+    "status": "A",
+    "zip": "28278"
+  },
+  {
+    "address_id": "522295",
+    "county": "MECKLENBURG",
+    "full_address": "10606 KRISTENS MARE DR CHARLOTTE NC 28277",
+    "lat": 35.02622005760388,
+    "lon": -80.8181863499293,
+    "parcel_pin": "22937855",
+    "status": "A",
+    "zip": "28277"
+  },
+  {
+    "address_id": "379581",
+    "county": "MECKLENBURG",
+    "full_address": "4606 PEBBLE RUN DR MATTHEWS NC 28105",
+    "lat": 35.05438111742295,
+    "lon": -80.74427162279694,
+    "parcel_pin": "23111163",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "116241",
+    "county": "MECKLENBURG",
+    "full_address": "3809 MANOR HOUSE DR CHARLOTTE NC 28270",
+    "lat": 35.073543480144345,
+    "lon": -80.73357935827644,
+    "parcel_pin": "23125439",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "109079",
+    "county": "MECKLENBURG",
+    "full_address": "3416 WEDDINGTON RD MATTHEWS NC 28105",
+    "lat": 35.0793050092199,
+    "lon": -80.72976216494033,
+    "parcel_pin": "23125982",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "569381",
+    "county": "MECKLENBURG",
+    "full_address": "9815 AVENAL LN CHARLOTTE NC 28270",
+    "lat": 35.07404204762764,
+    "lon": -80.7636459092807,
+    "parcel_pin": "23102314",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "501743",
+    "county": "MECKLENBURG",
+    "full_address": "2202 COLTSVIEW LN MATTHEWS NC 28105",
+    "lat": 35.06613919451051,
+    "lon": -80.73115827008293,
+    "parcel_pin": "23109C99",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "501817",
+    "county": "MECKLENBURG",
+    "full_address": "2437 COLTSVIEW LN MATTHEWS NC 28105",
+    "lat": 35.06672985027113,
+    "lon": -80.72944606175137,
+    "parcel_pin": "23109C99",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "636718",
+    "county": "MECKLENBURG",
+    "full_address": "123 E 8TH ST CHARLOTTE NC 28202",
+    "lat": 35.22970859541936,
+    "lon": -80.83803123254592,
+    "parcel_pin": "08003303",
+    "status": "A",
+    "zip": "28202"
+  },
+  {
+    "address_id": "21750",
+    "county": "MECKLENBURG",
+    "full_address": "119 E 8TH ST CHARLOTTE NC 28202",
+    "lat": 35.22982708981165,
+    "lon": -80.83796832572821,
+    "parcel_pin": "08003303",
+    "status": "A",
+    "zip": "28202"
+  },
+  {
+    "address_id": "140704",
+    "county": "MECKLENBURG",
+    "full_address": "501 N COLLEGE ST CHARLOTTE NC 28202",
+    "lat": 35.229528765473475,
+    "lon": -80.83770704892981,
+    "parcel_pin": "08003305",
+    "status": "A",
+    "zip": "28202"
+  },
+  {
+    "address_id": "599399",
+    "county": "MECKLENBURG",
+    "full_address": "3422 WEDDINGTON RD MATTHEWS NC 28105",
+    "lat": 35.0791354280918,
+    "lon": -80.72965844404516,
+    "parcel_pin": "23125983",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "604567",
+    "county": "MECKLENBURG",
+    "full_address": "6024 HAMPSTEAD POND LN MATTHEWS NC 28105",
+    "lat": 35.08121840676506,
+    "lon": -80.71832126760874,
+    "parcel_pin": "23121255",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "604603",
+    "county": "MECKLENBURG",
+    "full_address": "6107 HAMPSTEAD POND LN MATTHEWS NC 28105",
+    "lat": 35.08069959805187,
+    "lon": -80.7177647706052,
+    "parcel_pin": "23121586",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "604583",
+    "county": "MECKLENBURG",
+    "full_address": "6021 HAMPSTEAD POND LN MATTHEWS NC 28105",
+    "lat": 35.08133886197555,
+    "lon": -80.71776894295354,
+    "parcel_pin": "23121342",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "604733",
+    "county": "MECKLENBURG",
+    "full_address": "1337 REIDHAVEN ST MATTHEWS NC 28105",
+    "lat": 35.082213215296,
+    "lon": -80.7147940438687,
+    "parcel_pin": "23121570",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "604732",
+    "county": "MECKLENBURG",
+    "full_address": "1333 REIDHAVEN ST MATTHEWS NC 28105",
+    "lat": 35.08235084086524,
+    "lon": -80.71477073624402,
+    "parcel_pin": "23121569",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "604582",
+    "county": "MECKLENBURG",
+    "full_address": "6017 HAMPSTEAD POND LN MATTHEWS NC 28105",
+    "lat": 35.08145484504403,
+    "lon": -80.71779924278539,
+    "parcel_pin": "23121341",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "622291",
+    "county": "MECKLENBURG",
+    "full_address": "3508 WEDDINGTON RD MATTHEWS NC 28105",
+    "lat": 35.0788104103587,
+    "lon": -80.72946886727294,
+    "parcel_pin": "23125984",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "501737",
+    "county": "MECKLENBURG",
+    "full_address": "4503 PARKGATE DR MATTHEWS NC 28105",
+    "lat": 35.066483131679206,
+    "lon": -80.73055388751253,
+    "parcel_pin": "23109C99",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "672316",
+    "county": "MECKLENBURG",
+    "full_address": "2460 COLTSVIEW LN MATTHEWS NC 28105",
+    "lat": 35.0665814661041,
+    "lon": -80.72869590756845,
+    "parcel_pin": "23109C99",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "692461",
+    "county": "MECKLENBURG",
+    "full_address": "601 MILLER ST CHARLOTTE NC 28203",
+    "lat": 35.205806762884556,
+    "lon": -80.87409293362995,
+    "parcel_pin": "14501508",
+    "status": "A",
+    "zip": "28203"
+  },
+  {
+    "address_id": "508554",
+    "county": "MECKLENBURG",
+    "full_address": "4511 PARKGATE DR MATTHEWS NC 28105",
+    "lat": 35.06611326936234,
+    "lon": -80.73066637174966,
+    "parcel_pin": "23109C99",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "683014",
+    "county": "MECKLENBURG",
+    "full_address": "1111 SIMFIELD VALLEY CT MATTHEWS NC 28105",
+    "lat": 35.07308262540944,
+    "lon": -80.72322376881294,
+    "parcel_pin": "23107252",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "707719",
+    "county": "MECKLENBURG",
+    "full_address": "2829 NEW PINEOLA RD CHARLOTTE NC 28208",
+    "lat": 35.20630172528752,
+    "lon": -80.91264506697435,
+    "parcel_pin": "14308170",
+    "status": "A",
+    "zip": "28208"
+  },
+  {
+    "address_id": "708915",
+    "county": "MECKLENBURG",
+    "full_address": "1701 ABBEY PL B CHARLOTTE NC 28209",
+    "lat": 35.17000988437224,
+    "lon": -80.84776431017319,
+    "parcel_pin": "17514525",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "725915",
+    "county": "MECKLENBURG",
+    "full_address": "2415 MCKEE RD CHARLOTTE NC 28270",
+    "lat": 35.08091919503424,
+    "lon": -80.7305770541343,
+    "parcel_pin": "23125973",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "725918",
+    "county": "MECKLENBURG",
+    "full_address": "2055 MCKEE FARM LN CHARLOTTE NC 28270",
+    "lat": 35.07855749109833,
+    "lon": -80.732274244575,
+    "parcel_pin": "23125851",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "729521",
+    "county": "MECKLENBURG",
+    "full_address": "6607 FIELDSTONE MANOR DR MATTHEWS NC 28105",
+    "lat": 35.077259909100455,
+    "lon": -80.72805738683998,
+    "parcel_pin": "23107129",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "723248",
+    "county": "MECKLENBURG",
+    "full_address": "12119 LAVINIA LN CHARLOTTE NC 28277",
+    "lat": 35.02196193805936,
+    "lon": -80.82648995607748,
+    "parcel_pin": "22957344",
+    "status": "A",
+    "zip": "28277"
+  },
+  {
+    "address_id": "54009",
+    "county": "MECKLENBURG",
+    "full_address": "1701 ABBEY PL CHARLOTTE NC 28209",
+    "lat": 35.17000988437224,
+    "lon": -80.84776431017319,
+    "parcel_pin": "17514525",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "162945",
+    "county": "MECKLENBURG",
+    "full_address": "614 BILLINGSLEY RD CHARLOTTE NC 28211",
+    "lat": 35.19109127487402,
+    "lon": -80.80093974441971,
+    "parcel_pin": "15705429",
+    "status": "A",
+    "zip": "28211"
+  },
+  {
+    "address_id": "410403",
+    "county": "MECKLENBURG",
+    "full_address": "304 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16842103455864,
+    "lon": -80.84499120534856,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "215551",
+    "county": "MECKLENBURG",
+    "full_address": "308 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.1684657228126,
+    "lon": -80.84519221927484,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "408577",
+    "county": "MECKLENBURG",
+    "full_address": "300 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16845283905221,
+    "lon": -80.84484874634441,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "486916",
+    "county": "MECKLENBURG",
+    "full_address": "408 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16945718041023,
+    "lon": -80.84543245783208,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "486917",
+    "county": "MECKLENBURG",
+    "full_address": "400 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16920948443939,
+    "lon": -80.84559975223506,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "486918",
+    "county": "MECKLENBURG",
+    "full_address": "404 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.169329843164405,
+    "lon": -80.84549035593311,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "395814",
+    "county": "MECKLENBURG",
+    "full_address": "316 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.168540298186365,
+    "lon": -80.845416661007,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "395784",
+    "county": "MECKLENBURG",
+    "full_address": "312 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16851861597615,
+    "lon": -80.84530892578232,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "423175",
+    "county": "MECKLENBURG",
+    "full_address": "528 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16947196802044,
+    "lon": -80.84486091628185,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "400208",
+    "county": "MECKLENBURG",
+    "full_address": "540 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16926313049029,
+    "lon": -80.84517929871106,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "471277",
+    "county": "MECKLENBURG",
+    "full_address": "524 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16944226100209,
+    "lon": -80.844729418199,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "168528",
+    "county": "MECKLENBURG",
+    "full_address": "556 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.168953757415814,
+    "lon": -80.84479138019456,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "466610",
+    "county": "MECKLENBURG",
+    "full_address": "544 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16911004604377,
+    "lon": -80.84518926408262,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "457443",
+    "county": "MECKLENBURG",
+    "full_address": "560 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16878045604408,
+    "lon": -80.84468535507987,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "18424",
+    "county": "MECKLENBURG",
+    "full_address": "564 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16868333590123,
+    "lon": -80.84470753628416,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "227494",
+    "county": "MECKLENBURG",
+    "full_address": "568 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16858090449526,
+    "lon": -80.84470601073158,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "461645",
+    "county": "MECKLENBURG",
+    "full_address": "512 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16977629733414,
+    "lon": -80.84453689730415,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "492272",
+    "county": "MECKLENBURG",
+    "full_address": "532 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16946442890127,
+    "lon": -80.84497113153536,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "347186",
+    "county": "MECKLENBURG",
+    "full_address": "418 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16992205471911,
+    "lon": -80.84507296566315,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "534325",
+    "county": "MECKLENBURG",
+    "full_address": "516 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16968058131378,
+    "lon": -80.84456260796244,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "201124",
+    "county": "MECKLENBURG",
+    "full_address": "508 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.169983363267825,
+    "lon": -80.84461129333198,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "492273",
+    "county": "MECKLENBURG",
+    "full_address": "536 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16939100357123,
+    "lon": -80.84515019819526,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "466615",
+    "county": "MECKLENBURG",
+    "full_address": "548 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16898335005139,
+    "lon": -80.84503185470773,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "174137",
+    "county": "MECKLENBURG",
+    "full_address": "320 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16864781209898,
+    "lon": -80.84558289207361,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "444670",
+    "county": "MECKLENBURG",
+    "full_address": "328 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16891782931687,
+    "lon": -80.84565898756192,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "501043",
+    "county": "MECKLENBURG",
+    "full_address": "500 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.17001244380742,
+    "lon": -80.84484848377693,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "399700",
+    "county": "MECKLENBURG",
+    "full_address": "412 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.169627207979374,
+    "lon": -80.84527964168059,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "406389",
+    "county": "MECKLENBURG",
+    "full_address": "504 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16999525871024,
+    "lon": -80.84472932467173,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "150366",
+    "county": "MECKLENBURG",
+    "full_address": "552 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16896256782978,
+    "lon": -80.84491020328765,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "505866",
+    "county": "MECKLENBURG",
+    "full_address": "520 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16958145517215,
+    "lon": -80.84456634886155,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "474022",
+    "county": "MECKLENBURG",
+    "full_address": "324 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16878361364331,
+    "lon": -80.84560284368295,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "406321",
+    "county": "MECKLENBURG",
+    "full_address": "227 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16778060623579,
+    "lon": -80.84415953311213,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "489896",
+    "county": "MECKLENBURG",
+    "full_address": "231 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.167745477587815,
+    "lon": -80.84435149530142,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "443383",
+    "county": "MECKLENBURG",
+    "full_address": "405 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16957976301354,
+    "lon": -80.84605772754698,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "441418",
+    "county": "MECKLENBURG",
+    "full_address": "401 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.169452610610094,
+    "lon": -80.84613148558245,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "330701",
+    "county": "MECKLENBURG",
+    "full_address": "533 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.17018321540552,
+    "lon": -80.84387972576339,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "330702",
+    "county": "MECKLENBURG",
+    "full_address": "539 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16987927448721,
+    "lon": -80.84403538174602,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "274437",
+    "county": "MECKLENBURG",
+    "full_address": "219 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16770586686968,
+    "lon": -80.84378976566624,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "441416",
+    "county": "MECKLENBURG",
+    "full_address": "301 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.168035671247765,
+    "lon": -80.8450243624429,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "324571",
+    "county": "MECKLENBURG",
+    "full_address": "201 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.167537001776765,
+    "lon": -80.84326811248175,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "274277",
+    "county": "MECKLENBURG",
+    "full_address": "209 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16758199852039,
+    "lon": -80.84352534794104,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "441408",
+    "county": "MECKLENBURG",
+    "full_address": "241 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16782611266318,
+    "lon": -80.84491415852895,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "74607",
+    "county": "MECKLENBURG",
+    "full_address": "339 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.1687243991907,
+    "lon": -80.84653658768508,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "227988",
+    "county": "MECKLENBURG",
+    "full_address": "427 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.170295779877236,
+    "lon": -80.84552483312966,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "457956",
+    "county": "MECKLENBURG",
+    "full_address": "521 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.17036021087726,
+    "lon": -80.84421120185091,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "9023",
+    "county": "MECKLENBURG",
+    "full_address": "549 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16953572480902,
+    "lon": -80.84412467035528,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "310226",
+    "county": "MECKLENBURG",
+    "full_address": "205 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16755195495152,
+    "lon": -80.84339117217931,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "441427",
+    "county": "MECKLENBURG",
+    "full_address": "237 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16767740306807,
+    "lon": -80.84468549952614,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "157204",
+    "county": "MECKLENBURG",
+    "full_address": "331 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16845540603347,
+    "lon": -80.84646384293755,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "441424",
+    "county": "MECKLENBURG",
+    "full_address": "419 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16998339387359,
+    "lon": -80.84580573488645,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "361633",
+    "county": "MECKLENBURG",
+    "full_address": "507 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.17063666065317,
+    "lon": -80.84459453983212,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "470912",
+    "county": "MECKLENBURG",
+    "full_address": "541 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.169886756319116,
+    "lon": -80.84389204127555,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "75070",
+    "county": "MECKLENBURG",
+    "full_address": "343 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.168920974979294,
+    "lon": -80.84638335103834,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "1168",
+    "county": "MECKLENBURG",
+    "full_address": "425 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.17022937932838,
+    "lon": -80.84562618180368,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "509087",
+    "county": "MECKLENBURG",
+    "full_address": "529 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.17030159821104,
+    "lon": -80.8439403112771,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "43369",
+    "county": "MECKLENBURG",
+    "full_address": "547 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16963833297973,
+    "lon": -80.84409593197958,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "274278",
+    "county": "MECKLENBURG",
+    "full_address": "215 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16763731439484,
+    "lon": -80.8436994369288,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "502102",
+    "county": "MECKLENBURG",
+    "full_address": "569 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.168537107049175,
+    "lon": -80.84428098768582,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "532641",
+    "county": "MECKLENBURG",
+    "full_address": "127 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.167562900076064,
+    "lon": -80.84303733037564,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "60592",
+    "county": "MECKLENBURG",
+    "full_address": "311 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.168148683994474,
+    "lon": -80.84545694783323,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "428432",
+    "county": "MECKLENBURG",
+    "full_address": "325 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16833831134079,
+    "lon": -80.84618340925607,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "399633",
+    "county": "MECKLENBURG",
+    "full_address": "435 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.1704464705445,
+    "lon": -80.84521376940795,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "489302",
+    "county": "MECKLENBURG",
+    "full_address": "223 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.167762934384584,
+    "lon": -80.8440344141304,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "441419",
+    "county": "MECKLENBURG",
+    "full_address": "349 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16923371003853,
+    "lon": -80.84624250961294,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "440400",
+    "county": "MECKLENBURG",
+    "full_address": "409 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.169703281013724,
+    "lon": -80.84597486992917,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "526279",
+    "county": "MECKLENBURG",
+    "full_address": "525 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.17040717011477,
+    "lon": -80.84409142060562,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "523639",
+    "county": "MECKLENBURG",
+    "full_address": "535 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.170044466679194,
+    "lon": -80.84384603068067,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "59686",
+    "county": "MECKLENBURG",
+    "full_address": "515 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.170487788977205,
+    "lon": -80.84437102408276,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "294220",
+    "county": "MECKLENBURG",
+    "full_address": "563 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.168735899277124,
+    "lon": -80.84425123540755,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "623526",
+    "county": "MECKLENBURG",
+    "full_address": "529 WAKEFIELD DR D CHARLOTTE NC 28209",
+    "lat": 35.17030159821104,
+    "lon": -80.8439403112771,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "680909",
+    "county": "MECKLENBURG",
+    "full_address": "303 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16782819950634,
+    "lon": -80.84523404517044,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "27884",
+    "county": "MECKLENBURG",
+    "full_address": "307 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16811902131219,
+    "lon": -80.84533700043296,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "500761",
+    "county": "MECKLENBURG",
+    "full_address": "315 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.168194873280136,
+    "lon": -80.8455789110703,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "399632",
+    "county": "MECKLENBURG",
+    "full_address": "439 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.17047124825336,
+    "lon": -80.84509131561238,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "399645",
+    "county": "MECKLENBURG",
+    "full_address": "431 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.17040001000851,
+    "lon": -80.84532431587405,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "464880",
+    "county": "MECKLENBURG",
+    "full_address": "561 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.1689047849662,
+    "lon": -80.84411064186197,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "294212",
+    "county": "MECKLENBURG",
+    "full_address": "565 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.168638012572075,
+    "lon": -80.84425080037929,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "404423",
+    "county": "MECKLENBURG",
+    "full_address": "319 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16827494428495,
+    "lon": -80.84583021678432,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "489904",
+    "county": "MECKLENBURG",
+    "full_address": "233 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.167654680985926,
+    "lon": -80.84445490072122,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "468373",
+    "county": "MECKLENBURG",
+    "full_address": "335 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16858469605049,
+    "lon": -80.8465127063748,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "441425",
+    "county": "MECKLENBURG",
+    "full_address": "421 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.17009616302745,
+    "lon": -80.84570565740991,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "441423",
+    "county": "MECKLENBURG",
+    "full_address": "415 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16984776242197,
+    "lon": -80.84585807994597,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "102622",
+    "county": "MECKLENBURG",
+    "full_address": "501 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.17056311839394,
+    "lon": -80.84488398754648,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "367938",
+    "county": "MECKLENBURG",
+    "full_address": "545 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.16973855524203,
+    "lon": -80.84409657998388,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "750957",
+    "county": "MECKLENBURG",
+    "full_address": "546 WAKEFIELD DR CHARLOTTE NC 28209",
+    "lat": 35.168762618502114,
+    "lon": -80.84509981150576,
+    "parcel_pin": "17513C96",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "143996",
+    "county": "MECKLENBURG",
+    "full_address": "5149 SADDLE HORN TL MATTHEWS NC 28104",
+    "lat": 35.04566069972222,
+    "lon": -80.75581733720888,
+    "parcel_pin": "23114114",
+    "status": "A",
+    "zip": "28104"
+  },
+  {
+    "address_id": "782148",
+    "county": "MECKLENBURG",
+    "full_address": "305 W CRAIGHEAD RD CHARLOTTE NC 28206",
+    "lat": 35.25851981833198,
+    "lon": -80.80253501162001,
+    "parcel_pin": "08511505",
+    "status": "A",
+    "zip": "28206"
+  },
+  {
+    "address_id": "470047",
+    "county": "MECKLENBURG",
+    "full_address": "6504 ROBINSON CHURCH RD CHARLOTTE NC 28215",
+    "lat": 35.23036883380683,
+    "lon": -80.7220115708842,
+    "parcel_pin": "10730170",
+    "status": "A",
+    "zip": "28215"
+  },
+  {
+    "address_id": "492345",
+    "county": "MECKLENBURG",
+    "full_address": "5404 ALLISON LN CHARLOTTE NC 28277",
+    "lat": 35.0583118010078,
+    "lon": -80.77510573385877,
+    "parcel_pin": "22944325",
+    "status": "A",
+    "zip": "28277"
+  },
+  {
+    "address_id": "45492",
+    "county": "MECKLENBURG",
+    "full_address": "1509 MONTGOMERY ST CHARLOTTE NC 28216",
+    "lat": 35.23828812551108,
+    "lon": -80.85779145670156,
+    "parcel_pin": "07818209",
+    "status": "A",
+    "zip": "28216"
+  },
+  {
+    "address_id": "61631",
+    "county": "MECKLENBURG",
+    "full_address": "1901 PATTON AV CHARLOTTE NC 28216",
+    "lat": 35.24892454881279,
+    "lon": -80.85305928597377,
+    "parcel_pin": "07839103",
+    "status": "A",
+    "zip": "28216"
+  },
+  {
+    "address_id": "179779",
+    "county": "MECKLENBURG",
+    "full_address": "700 E 36TH ST CHARLOTTE NC 28205",
+    "lat": 35.24609179155308,
+    "lon": -80.80355311009507,
+    "parcel_pin": "08308711",
+    "status": "A",
+    "zip": "28205"
+  },
+  {
+    "address_id": "69888",
+    "county": "MECKLENBURG",
+    "full_address": "206 E CRAIGHEAD RD CHARLOTTE NC 28206",
+    "lat": 35.252991418063,
+    "lon": -80.79955168903003,
+    "parcel_pin": "09111102",
+    "status": "A",
+    "zip": "28206"
+  },
+  {
+    "address_id": "114602",
+    "county": "MECKLENBURG",
+    "full_address": "3713 FREW RD CHARLOTTE NC 28206",
+    "lat": 35.25860000468426,
+    "lon": -80.80307970146397,
+    "parcel_pin": "08511504",
+    "status": "A",
+    "zip": "28206"
+  },
+  {
+    "address_id": "127950",
+    "county": "MECKLENBURG",
+    "full_address": "4307 DINGLEWOOD AV CHARLOTTE NC 28205",
+    "lat": 35.2502339550874,
+    "lon": -80.78310548738206,
+    "parcel_pin": "09103352",
+    "status": "A",
+    "zip": "28205"
+  },
+  {
+    "address_id": "121667",
+    "county": "MECKLENBURG",
+    "full_address": "4042 REDWOOD AV CHARLOTTE NC 28205",
+    "lat": 35.25011468088637,
+    "lon": -80.78820839134464,
+    "parcel_pin": "09104330",
+    "status": "A",
+    "zip": "28205"
+  },
+  {
+    "address_id": "139391",
+    "county": "MECKLENBURG",
+    "full_address": "4927 SNOW WHITE LN CHARLOTTE NC 28213",
+    "lat": 35.26884949653834,
+    "lon": -80.78720922735587,
+    "parcel_pin": "08909610",
+    "status": "A",
+    "zip": "28213"
+  },
+  {
+    "address_id": "137461",
+    "county": "MECKLENBURG",
+    "full_address": "4818 SPRINGVIEW RD CHARLOTTE NC 28213",
+    "lat": 35.26265406316991,
+    "lon": -80.78431233181753,
+    "parcel_pin": "08910226",
+    "status": "A",
+    "zip": "28213"
+  },
+  {
+    "address_id": "133772",
+    "county": "MECKLENBURG",
+    "full_address": "4608 SOMERDALE LN CHARLOTTE NC 28205",
+    "lat": 35.22817449099099,
+    "lon": -80.75210162121991,
+    "parcel_pin": "10104507",
+    "status": "A",
+    "zip": "28205"
+  },
+  {
+    "address_id": "23807",
+    "county": "MECKLENBURG",
+    "full_address": "1207 GEORGETOWN DR CHARLOTTE NC 28213",
+    "lat": 35.27318926392974,
+    "lon": -80.78102134279852,
+    "parcel_pin": "08914417",
+    "status": "A",
+    "zip": "28213"
+  },
+  {
+    "address_id": "158736",
+    "county": "MECKLENBURG",
+    "full_address": "6000 BAYSWATER LN CHARLOTTE NC 28212",
+    "lat": 35.21901877069466,
+    "lon": -80.741379487472,
+    "parcel_pin": "10309165",
+    "status": "A",
+    "zip": "28212"
+  },
+  {
+    "address_id": "172040",
+    "county": "MECKLENBURG",
+    "full_address": "6539 WICKVILLE DR CHARLOTTE NC 28215",
+    "lat": 35.23018365531957,
+    "lon": -80.72222620040652,
+    "parcel_pin": "10730170",
+    "status": "A",
+    "zip": "28215"
+  },
+  {
+    "address_id": "56762",
+    "county": "MECKLENBURG",
+    "full_address": "1745 WILMORE DR CHARLOTTE NC 28203",
+    "lat": 35.21762805245843,
+    "lon": -80.86703843353915,
+    "parcel_pin": "11907112",
+    "status": "A",
+    "zip": "28203"
+  },
+  {
+    "address_id": "100994",
+    "county": "MECKLENBURG",
+    "full_address": "3119 SEYMOUR DR CHARLOTTE NC 28208",
+    "lat": 35.21954561181299,
+    "lon": -80.91194067746095,
+    "parcel_pin": "11503208",
+    "status": "A",
+    "zip": "28208"
+  },
+  {
+    "address_id": "85556",
+    "county": "MECKLENBURG",
+    "full_address": "2511 SOUTH BV CHARLOTTE NC 28203",
+    "lat": 35.20294200295449,
+    "lon": -80.86435814517031,
+    "parcel_pin": "12107708",
+    "status": "A",
+    "zip": "28203"
+  },
+  {
+    "address_id": "62422",
+    "county": "MECKLENBURG",
+    "full_address": "1912 WILMORE DR CHARLOTTE NC 28203",
+    "lat": 35.21619172919838,
+    "lon": -80.86946683078273,
+    "parcel_pin": "11904110",
+    "status": "A",
+    "zip": "28203"
+  },
+  {
+    "address_id": "1479",
+    "county": "MECKLENBURG",
+    "full_address": "1004 W TREMONT AV CHARLOTTE NC 28203",
+    "lat": 35.213188790456265,
+    "lon": -80.87243510375262,
+    "parcel_pin": "11904611",
+    "status": "A",
+    "zip": "28203"
+  },
+  {
+    "address_id": "1736",
+    "county": "MECKLENBURG",
+    "full_address": "1008 W TREMONT AV CHARLOTTE NC 28203",
+    "lat": 35.213275302241534,
+    "lon": -80.87235002850039,
+    "parcel_pin": "11904610",
+    "status": "A",
+    "zip": "28203"
+  },
+  {
+    "address_id": "92253",
+    "county": "MECKLENBURG",
+    "full_address": "2800 N SHARON AMITY RD CHARLOTTE NC 28205",
+    "lat": 35.19624019476108,
+    "lon": -80.76315914188402,
+    "parcel_pin": "13302103",
+    "status": "A",
+    "zip": "28205"
+  },
+  {
+    "address_id": "25788",
+    "county": "MECKLENBURG",
+    "full_address": "12200 ALBEMARLE RD MINT HILL NC 28227",
+    "lat": 35.21855153620783,
+    "lon": -80.64620547618298,
+    "parcel_pin": "13714105",
+    "status": "A",
+    "zip": "28227"
+  },
+  {
+    "address_id": "186625",
+    "county": "MECKLENBURG",
+    "full_address": "7307 MATTHEWS-MINT HILL RD MINT HILL NC 28227",
+    "lat": 35.175184622455134,
+    "lon": -80.65504561812205,
+    "parcel_pin": "13730127",
+    "status": "A",
+    "zip": "28227"
+  },
+  {
+    "address_id": "118456",
+    "county": "MECKLENBURG",
+    "full_address": "3919 SARAH DR CHARLOTTE NC 28217",
+    "lat": 35.192387961916054,
+    "lon": -80.88128395727752,
+    "parcel_pin": "14519205",
+    "status": "A",
+    "zip": "28217"
+  },
+  {
+    "address_id": "98895",
+    "county": "MECKLENBURG",
+    "full_address": "3046 RIDGE AV CHARLOTTE NC 28208",
+    "lat": 35.20729012718963,
+    "lon": -80.90016807148429,
+    "parcel_pin": "14518812",
+    "status": "A",
+    "zip": "28208"
+  },
+  {
+    "address_id": "17776",
+    "county": "MECKLENBURG",
+    "full_address": "1137 COMSTOCK DR CHARLOTTE NC 28217",
+    "lat": 35.20407415539896,
+    "lon": -80.89003491932753,
+    "parcel_pin": "14511512",
+    "status": "A",
+    "zip": "28217"
+  },
+  {
+    "address_id": "492289",
+    "county": "MECKLENBURG",
+    "full_address": "6823 MARICOPA RD CHARLOTTE NC 28277",
+    "lat": 35.05940196898315,
+    "lon": -80.77833799538473,
+    "parcel_pin": "22944105",
+    "status": "A",
+    "zip": "28277"
+  },
+  {
+    "address_id": "104375",
+    "county": "MECKLENBURG",
+    "full_address": "3221 GRAYMONT DR CHARLOTTE NC 28217",
+    "lat": 35.20321361743656,
+    "lon": -80.88318795436348,
+    "parcel_pin": "14507514",
+    "status": "A",
+    "zip": "28217"
+  },
+  {
+    "address_id": "159263",
+    "county": "MECKLENBURG",
+    "full_address": "601 BILLINGSLEY RD CHARLOTTE NC 28211",
+    "lat": 35.19134898896901,
+    "lon": -80.80171875488298,
+    "parcel_pin": "15704117",
+    "status": "A",
+    "zip": "28211"
+  },
+  {
+    "address_id": "148175",
+    "county": "MECKLENBURG",
+    "full_address": "5335 BUENA VISTA AV CHARLOTTE NC 28205",
+    "lat": 35.1935350459058,
+    "lon": -80.77075018749761,
+    "parcel_pin": "16103111",
+    "status": "A",
+    "zip": "28205"
+  },
+  {
+    "address_id": "195012",
+    "county": "MECKLENBURG",
+    "full_address": "7822 CLOUGHY CR CHARLOTTE NC 28212",
+    "lat": 35.177375664595715,
+    "lon": -80.73150618548316,
+    "parcel_pin": "16521118",
+    "status": "A",
+    "zip": "28212"
+  },
+  {
+    "address_id": "140587",
+    "county": "MECKLENBURG",
+    "full_address": "501 INWOOD DR CHARLOTTE NC 28209",
+    "lat": 35.174249485562484,
+    "lon": -80.87406077669655,
+    "parcel_pin": "17101307",
+    "status": "A",
+    "zip": "28209"
+  },
+  {
+    "address_id": "156781",
+    "county": "MECKLENBURG",
+    "full_address": "5900 CHERRYCREST LN CHARLOTTE NC 28217",
+    "lat": 35.15671228904614,
+    "lon": -80.88190956349683,
+    "parcel_pin": "16916713",
+    "status": "A",
+    "zip": "28217"
+  },
+  {
+    "address_id": "94186",
+    "county": "MECKLENBURG",
+    "full_address": "2859 SHARON VIEW RD CHARLOTTE NC 28210",
+    "lat": 35.144299352214404,
+    "lon": -80.83142642784541,
+    "parcel_pin": "18313359",
+    "status": "A",
+    "zip": "28210"
+  },
+  {
+    "address_id": "77313",
+    "county": "MECKLENBURG",
+    "full_address": "2227 LONGLEAF DR CHARLOTTE NC 28210",
+    "lat": 35.10921003226299,
+    "lon": -80.87269015052306,
+    "parcel_pin": "20712145",
+    "status": "A",
+    "zip": "28210"
+  },
+  {
+    "address_id": "72501",
+    "county": "MECKLENBURG",
+    "full_address": "212 N BRACKENBURY LN CHARLOTTE NC 28270",
+    "lat": 35.12924678595636,
+    "lon": -80.75368575143388,
+    "parcel_pin": "21311535",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "15820",
+    "county": "MECKLENBURG",
+    "full_address": "11214 PARK RD CHARLOTTE NC 28226",
+    "lat": 35.08370933873565,
+    "lon": -80.86843725938424,
+    "parcel_pin": "22138615",
+    "status": "A",
+    "zip": "28226"
+  },
+  {
+    "address_id": "108808",
+    "county": "MECKLENBURG",
+    "full_address": "3411 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.080157998834935,
+    "lon": -80.73227140346056,
+    "parcel_pin": "23125914",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "109104",
+    "county": "MECKLENBURG",
+    "full_address": "3417 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.08020705218253,
+    "lon": -80.73210863263817,
+    "parcel_pin": "23125915",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "111846",
+    "county": "MECKLENBURG",
+    "full_address": "3539 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.08032903446228,
+    "lon": -80.7303093083105,
+    "parcel_pin": "23125929",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "112008",
+    "county": "MECKLENBURG",
+    "full_address": "3551 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.08002103179767,
+    "lon": -80.73013228007794,
+    "parcel_pin": "23125932",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "66485",
+    "county": "MECKLENBURG",
+    "full_address": "2005 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.080109255982606,
+    "lon": -80.73145466152098,
+    "parcel_pin": "23125946",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "66735",
+    "county": "MECKLENBURG",
+    "full_address": "2009 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.08000003307535,
+    "lon": -80.73140554109256,
+    "parcel_pin": "23125947",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "73237",
+    "county": "MECKLENBURG",
+    "full_address": "2128 KAYBIRD LN CHARLOTTE NC 28270",
+    "lat": 35.07839651117467,
+    "lon": -80.73015800992708,
+    "parcel_pin": "23125964",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "72994",
+    "county": "MECKLENBURG",
+    "full_address": "2124 KAYBIRD LN CHARLOTTE NC 28270",
+    "lat": 35.07849436049116,
+    "lon": -80.73023363046576,
+    "parcel_pin": "23125965",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "109272",
+    "county": "MECKLENBURG",
+    "full_address": "3420 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.0799257431224,
+    "lon": -80.7317951015546,
+    "parcel_pin": "23125907",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "109914",
+    "county": "MECKLENBURG",
+    "full_address": "3437 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.08041671309817,
+    "lon": -80.73147790108486,
+    "parcel_pin": "23125920",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "110538",
+    "county": "MECKLENBURG",
+    "full_address": "3503 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.08051935547983,
+    "lon": -80.73121931830792,
+    "parcel_pin": "23125922",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "112047",
+    "county": "MECKLENBURG",
+    "full_address": "3560 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.07962598321118,
+    "lon": -80.7304682353609,
+    "parcel_pin": "23125937",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "108861",
+    "county": "MECKLENBURG",
+    "full_address": "3412 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.07977677981186,
+    "lon": -80.73202595414186,
+    "parcel_pin": "23125909",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "109321",
+    "county": "MECKLENBURG",
+    "full_address": "3421 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.08022256240304,
+    "lon": -80.73198527077624,
+    "parcel_pin": "23125916",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "111663",
+    "county": "MECKLENBURG",
+    "full_address": "3531 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.08049659019682,
+    "lon": -80.73050675749474,
+    "parcel_pin": "23125927",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "109049",
+    "county": "MECKLENBURG",
+    "full_address": "3416 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.07983899408384,
+    "lon": -80.73190358202827,
+    "parcel_pin": "23125908",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "108582",
+    "county": "MECKLENBURG",
+    "full_address": "3408 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.079731097189686,
+    "lon": -80.7321453317735,
+    "parcel_pin": "23125910",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "109489",
+    "county": "MECKLENBURG",
+    "full_address": "3425 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.080274027099804,
+    "lon": -80.73184595448417,
+    "parcel_pin": "23125917",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "109807",
+    "county": "MECKLENBURG",
+    "full_address": "3433 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.08037633391355,
+    "lon": -80.73161076476894,
+    "parcel_pin": "23125919",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "111508",
+    "county": "MECKLENBURG",
+    "full_address": "3526 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.08022622116154,
+    "lon": -80.73077181472209,
+    "parcel_pin": "23125942",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "108427",
+    "county": "MECKLENBURG",
+    "full_address": "3404 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.07970672154396,
+    "lon": -80.73231196857925,
+    "parcel_pin": "23125911",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "109647",
+    "county": "MECKLENBURG",
+    "full_address": "3429 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.08032240884019,
+    "lon": -80.73172997295683,
+    "parcel_pin": "23125918",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "111220",
+    "county": "MECKLENBURG",
+    "full_address": "3519 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.080580817256475,
+    "lon": -80.7307659639639,
+    "parcel_pin": "23125925",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "112050",
+    "county": "MECKLENBURG",
+    "full_address": "3564 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.07962032750145,
+    "lon": -80.73028759363194,
+    "parcel_pin": "23125936",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "110803",
+    "county": "MECKLENBURG",
+    "full_address": "3510 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.080242961135035,
+    "lon": -80.73094600904821,
+    "parcel_pin": "23125943",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "107263",
+    "county": "MECKLENBURG",
+    "full_address": "3327 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.07965871337554,
+    "lon": -80.73163565435054,
+    "parcel_pin": "23125906",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "110011",
+    "county": "MECKLENBURG",
+    "full_address": "3441 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.08047348012975,
+    "lon": -80.73135206895007,
+    "parcel_pin": "23125921",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "110742",
+    "county": "MECKLENBURG",
+    "full_address": "3509 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.08057944452076,
+    "lon": -80.73105343720923,
+    "parcel_pin": "23125923",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "110934",
+    "county": "MECKLENBURG",
+    "full_address": "3513 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.08058425190915,
+    "lon": -80.73090978910314,
+    "parcel_pin": "23125924",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "112020",
+    "county": "MECKLENBURG",
+    "full_address": "3554 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.07976494420361,
+    "lon": -80.7305514176145,
+    "parcel_pin": "23125938",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "111954",
+    "county": "MECKLENBURG",
+    "full_address": "3546 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.08003929200233,
+    "lon": -80.73058398061849,
+    "parcel_pin": "23125940",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "110521",
+    "county": "MECKLENBURG",
+    "full_address": "3502 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.0801910662589,
+    "lon": -80.73111540425036,
+    "parcel_pin": "23125944",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "112179",
+    "county": "MECKLENBURG",
+    "full_address": "3600 TILLEY MORRIS RD MATTHEWS NC 28105",
+    "lat": 35.05728407165908,
+    "lon": -80.7477914109014,
+    "parcel_pin": "23110137",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "8023",
+    "county": "MECKLENBURG",
+    "full_address": "10500 DOYLESTOWN RD MATTHEWS NC 28105",
+    "lat": 35.0581475075199,
+    "lon": -80.74756591924458,
+    "parcel_pin": "23110138",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "7289",
+    "county": "MECKLENBURG",
+    "full_address": "10416 DOYLESTOWN RD MATTHEWS NC 28105",
+    "lat": 35.05839082698528,
+    "lon": -80.74727367751832,
+    "parcel_pin": "23110139",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "26130",
+    "county": "MECKLENBURG",
+    "full_address": "12210 LANDING GREEN DR CHARLOTTE NC 28277",
+    "lat": 35.03514678643456,
+    "lon": -80.80019608264637,
+    "parcel_pin": "22932110",
+    "status": "A",
+    "zip": "28277"
+  },
+  {
+    "address_id": "29596",
+    "county": "MECKLENBURG",
+    "full_address": "12511 ABBOTSBURY CT CHARLOTTE NC 28277",
+    "lat": 35.033490907222806,
+    "lon": -80.79549860661193,
+    "parcel_pin": "22933130",
+    "status": "A",
+    "zip": "28277"
+  },
+  {
+    "address_id": "177186",
+    "county": "MECKLENBURG",
+    "full_address": "6815 OLDECASTLE CT CHARLOTTE NC 28277",
+    "lat": 35.034738074087535,
+    "lon": -80.79977609898836,
+    "parcel_pin": "22932113",
+    "status": "A",
+    "zip": "28277"
+  },
+  {
+    "address_id": "108158",
+    "county": "MECKLENBURG",
+    "full_address": "3400 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.0798846727154,
+    "lon": -80.73235920726238,
+    "parcel_pin": "23125912",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "214936",
+    "county": "MECKLENBURG",
+    "full_address": "9122 FAIRBRIDGE RD CHARLOTTE NC 28277",
+    "lat": 35.031098730608626,
+    "lon": -80.81158017311265,
+    "parcel_pin": "22931149",
+    "status": "A",
+    "zip": "28277"
+  },
+  {
+    "address_id": "108405",
+    "county": "MECKLENBURG",
+    "full_address": "3403 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.080030040773394,
+    "lon": -80.7323790088305,
+    "parcel_pin": "23125913",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "111918",
+    "county": "MECKLENBURG",
+    "full_address": "3543 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.0802227996432,
+    "lon": -80.73024353734944,
+    "parcel_pin": "23125930",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "111962",
+    "county": "MECKLENBURG",
+    "full_address": "3547 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.08012476060501,
+    "lon": -80.7301812834025,
+    "parcel_pin": "23125931",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "109933",
+    "county": "MECKLENBURG",
+    "full_address": "3438 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.08013434919167,
+    "lon": -80.73123789411102,
+    "parcel_pin": "23125945",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "67470",
+    "county": "MECKLENBURG",
+    "full_address": "2015 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.07990493090848,
+    "lon": -80.73132997602721,
+    "parcel_pin": "23125948",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "73510",
+    "county": "MECKLENBURG",
+    "full_address": "2131 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.07842719748147,
+    "lon": -80.73050967210273,
+    "parcel_pin": "23125962",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "73857",
+    "county": "MECKLENBURG",
+    "full_address": "2137 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.078301206592435,
+    "lon": -80.73048025625454,
+    "parcel_pin": "23125963",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "68198",
+    "county": "MECKLENBURG",
+    "full_address": "2023 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.07969492395758,
+    "lon": -80.7312185416741,
+    "parcel_pin": "23125950",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "73088",
+    "county": "MECKLENBURG",
+    "full_address": "2125 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.0785306369459,
+    "lon": -80.73057872786569,
+    "parcel_pin": "23125961",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "71848",
+    "county": "MECKLENBURG",
+    "full_address": "2112 KAYBIRD LN CHARLOTTE NC 28270",
+    "lat": 35.078838940970314,
+    "lon": -80.73035125628584,
+    "parcel_pin": "23125968",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "67762",
+    "county": "MECKLENBURG",
+    "full_address": "2019 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.07979575766865,
+    "lon": -80.73127751389926,
+    "parcel_pin": "23125949",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "68784",
+    "county": "MECKLENBURG",
+    "full_address": "2031 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.0795615981297,
+    "lon": -80.73112545099008,
+    "parcel_pin": "23125951",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "69186",
+    "county": "MECKLENBURG",
+    "full_address": "2039 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.07936281704896,
+    "lon": -80.73099753955547,
+    "parcel_pin": "23125953",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "69552",
+    "county": "MECKLENBURG",
+    "full_address": "2047 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.07914716960498,
+    "lon": -80.73089601949835,
+    "parcel_pin": "23125955",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "71262",
+    "county": "MECKLENBURG",
+    "full_address": "2105 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.07894525770567,
+    "lon": -80.73079478913674,
+    "parcel_pin": "23125957",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "71194",
+    "county": "MECKLENBURG",
+    "full_address": "2104 KAYBIRD LN CHARLOTTE NC 28270",
+    "lat": 35.079060066922885,
+    "lon": -80.73026234110854,
+    "parcel_pin": "23125970",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "68500",
+    "county": "MECKLENBURG",
+    "full_address": "2027 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.0795758285272,
+    "lon": -80.73070787350603,
+    "parcel_pin": "23125972",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "112038",
+    "county": "MECKLENBURG",
+    "full_address": "3559 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.079753375583756,
+    "lon": -80.73001628443751,
+    "parcel_pin": "23125934",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "111831",
+    "county": "MECKLENBURG",
+    "full_address": "3538 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.08014548054027,
+    "lon": -80.73065309395542,
+    "parcel_pin": "23125941",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "69066",
+    "county": "MECKLENBURG",
+    "full_address": "2035 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.079458062264784,
+    "lon": -80.73106307767048,
+    "parcel_pin": "23125952",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "71974",
+    "county": "MECKLENBURG",
+    "full_address": "2113 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.07874363584573,
+    "lon": -80.73067350632759,
+    "parcel_pin": "23125959",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "72563",
+    "county": "MECKLENBURG",
+    "full_address": "2120 KAYBIRD LN CHARLOTTE NC 28270",
+    "lat": 35.078609173375796,
+    "lon": -80.73027618095445,
+    "parcel_pin": "23125966",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "111996",
+    "county": "MECKLENBURG",
+    "full_address": "3550 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.07991281946631,
+    "lon": -80.7305879843458,
+    "parcel_pin": "23125939",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "69457",
+    "county": "MECKLENBURG",
+    "full_address": "2043 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.079253549642985,
+    "lon": -80.73095176227032,
+    "parcel_pin": "23125954",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "69710",
+    "county": "MECKLENBURG",
+    "full_address": "2051 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.07904903327702,
+    "lon": -80.73084044954447,
+    "parcel_pin": "23125956",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "70752",
+    "county": "MECKLENBURG",
+    "full_address": "2100 KAYBIRD LN CHARLOTTE NC 28270",
+    "lat": 35.07912782191743,
+    "lon": -80.73013674213236,
+    "parcel_pin": "23125971",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "443638",
+    "county": "MECKLENBURG",
+    "full_address": "2025 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.07958725033119,
+    "lon": -80.73125303167419,
+    "parcel_pin": "23125972",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "111468",
+    "county": "MECKLENBURG",
+    "full_address": "3525 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.08054147594051,
+    "lon": -80.73063474847056,
+    "parcel_pin": "23125926",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "111783",
+    "county": "MECKLENBURG",
+    "full_address": "3535 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.080421198388805,
+    "lon": -80.73039818253272,
+    "parcel_pin": "23125928",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "112025",
+    "county": "MECKLENBURG",
+    "full_address": "3555 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.07991768693107,
+    "lon": -80.73005654172682,
+    "parcel_pin": "23125933",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "112049",
+    "county": "MECKLENBURG",
+    "full_address": "3563 LAURENHURST LN CHARLOTTE NC 28270",
+    "lat": 35.07965800585088,
+    "lon": -80.73015132805527,
+    "parcel_pin": "23125935",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "71492",
+    "county": "MECKLENBURG",
+    "full_address": "2109 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.078841578823614,
+    "lon": -80.7307424448865,
+    "parcel_pin": "23125958",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "72398",
+    "county": "MECKLENBURG",
+    "full_address": "2119 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.078634316803885,
+    "lon": -80.73063107172759,
+    "parcel_pin": "23125960",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "72188",
+    "county": "MECKLENBURG",
+    "full_address": "2116 KAYBIRD LN CHARLOTTE NC 28270",
+    "lat": 35.07872143140892,
+    "lon": -80.73030530538713,
+    "parcel_pin": "23125967",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "71394",
+    "county": "MECKLENBURG",
+    "full_address": "2108 KAYBIRD LN CHARLOTTE NC 28270",
+    "lat": 35.07898373378375,
+    "lon": -80.73041115575042,
+    "parcel_pin": "23125969",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "33354",
+    "county": "MECKLENBURG",
+    "full_address": "13102 CHASEWATER DR CHARLOTTE NC 28277",
+    "lat": 35.03648233572566,
+    "lon": -80.77478145060643,
+    "parcel_pin": "22942114",
+    "status": "A",
+    "zip": "28277"
+  },
+  {
+    "address_id": "167536",
+    "county": "MECKLENBURG",
+    "full_address": "6328 COUNTY DONEGAL CT CHARLOTTE NC 28277",
+    "lat": 35.04335554081775,
+    "lon": -80.78354215136055,
+    "parcel_pin": "22941234",
+    "status": "A",
+    "zip": "28277"
+  },
+  {
+    "address_id": "145723",
+    "county": "MECKLENBURG",
+    "full_address": "5227 CADBURY CT CHARLOTTE NC 28277",
+    "lat": 35.03552199292351,
+    "lon": -80.77542548512245,
+    "parcel_pin": "22942129",
+    "status": "A",
+    "zip": "28277"
+  },
+  {
+    "address_id": "34673",
+    "county": "MECKLENBURG",
+    "full_address": "13228 PROVIDENCE GREEN CT CHARLOTTE NC 28277",
+    "lat": 35.039011836715844,
+    "lon": -80.77582215596318,
+    "parcel_pin": "22942204",
+    "status": "A",
+    "zip": "28277"
+  },
+  {
+    "address_id": "31612",
+    "county": "MECKLENBURG",
+    "full_address": "12801 TOM SHORT RD CHARLOTTE NC 28277",
+    "lat": 35.03405252508983,
+    "lon": -80.79191914860907,
+    "parcel_pin": "22934414",
+    "status": "A",
+    "zip": "28277"
+  },
+  {
+    "address_id": "205172",
+    "county": "MECKLENBURG",
+    "full_address": "8501 TONAWANDA DR CHARLOTTE NC 28277",
+    "lat": 35.025147787179,
+    "lon": -80.81476227358398,
+    "parcel_pin": "22937427",
+    "status": "A",
+    "zip": "28277"
+  },
+  {
+    "address_id": "347525",
+    "county": "MECKLENBURG",
+    "full_address": "3540 COLE MILL RD CHARLOTTE NC 28270",
+    "lat": 35.07072703027932,
+    "lon": -80.74539180489823,
+    "parcel_pin": "23105565",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "102930",
+    "county": "MECKLENBURG",
+    "full_address": "3200 ALLENWOOD RD CHARLOTTE NC 28270",
+    "lat": 35.071562323953046,
+    "lon": -80.74121455323754,
+    "parcel_pin": "23105204",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "495232",
+    "county": "MECKLENBURG",
+    "full_address": "3505 MCKEE RD CHARLOTTE NC 28270",
+    "lat": 35.07383623783341,
+    "lon": -80.74702943133332,
+    "parcel_pin": "23105415",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "405846",
+    "county": "MECKLENBURG",
+    "full_address": "11129 SAINTSBURY PL CHARLOTTE NC 28270",
+    "lat": 35.06239096186095,
+    "lon": -80.76398417813482,
+    "parcel_pin": "23104778",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "502584",
+    "county": "MECKLENBURG",
+    "full_address": "3544 SOUTH BANK CT MATTHEWS NC 28105",
+    "lat": 35.06546986552885,
+    "lon": -80.73241420602382,
+    "parcel_pin": "23109C99",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "379539",
+    "county": "MECKLENBURG",
+    "full_address": "3615 DARLINGTON RD MATTHEWS NC 28105",
+    "lat": 35.07538721279932,
+    "lon": -80.7274767379921,
+    "parcel_pin": "23107531",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "310585",
+    "county": "MECKLENBURG",
+    "full_address": "817 HAMPSHIRE HILL RD MATTHEWS NC 28105",
+    "lat": 35.05127286387581,
+    "lon": -80.75392206185373,
+    "parcel_pin": "23111549",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "361448",
+    "county": "MECKLENBURG",
+    "full_address": "708 HAMPSHIRE HILL RD MATTHEWS NC 28105",
+    "lat": 35.04942419991563,
+    "lon": -80.75405277414654,
+    "parcel_pin": "23111604",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "15814",
+    "county": "MECKLENBURG",
+    "full_address": "11214 BRUSH HOLLOW RD MATTHEWS NC 28105",
+    "lat": 35.056870656852695,
+    "lon": -80.75033928115342,
+    "parcel_pin": "23111309",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "99848",
+    "county": "MECKLENBURG",
+    "full_address": "3101 MCKEE RD CHARLOTTE NC 28270",
+    "lat": 35.0765146935669,
+    "lon": -80.74024715138674,
+    "parcel_pin": "23106304",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "111774",
+    "county": "MECKLENBURG",
+    "full_address": "3535 FAWN HILL RD MATTHEWS NC 28105",
+    "lat": 35.05613001684925,
+    "lon": -80.75062418703156,
+    "parcel_pin": "23111337",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "344231",
+    "county": "MECKLENBURG",
+    "full_address": "11020 FOX HEDGE RD MATTHEWS NC 28105",
+    "lat": 35.05350977293905,
+    "lon": -80.75165747618631,
+    "parcel_pin": "23111425",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "368003",
+    "county": "MECKLENBURG",
+    "full_address": "10032 WARWICKSHIRE LN CHARLOTTE NC 28270",
+    "lat": 35.07006065812053,
+    "lon": -80.76100116705625,
+    "parcel_pin": "23116120",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "8999",
+    "county": "MECKLENBURG",
+    "full_address": "10601 SOUTH HALL DR CHARLOTTE NC 28270",
+    "lat": 35.06652673420248,
+    "lon": -80.76023301046436,
+    "parcel_pin": "23116218",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "362460",
+    "county": "MECKLENBURG",
+    "full_address": "2535 HARLINGTON LN CHARLOTTE NC 28270",
+    "lat": 35.0702523778619,
+    "lon": -80.73159650527859,
+    "parcel_pin": "23109418",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "405991",
+    "county": "MECKLENBURG",
+    "full_address": "10304 COLUMBIA CREST CT CHARLOTTE NC 28270",
+    "lat": 35.06390463953056,
+    "lon": -80.76119923630965,
+    "parcel_pin": "23104543",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "7709",
+    "county": "MECKLENBURG",
+    "full_address": "10436 STONEMEDE LN MATTHEWS NC 28105",
+    "lat": 35.061115340865136,
+    "lon": -80.75156001036673,
+    "parcel_pin": "23118418",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "8727",
+    "county": "MECKLENBURG",
+    "full_address": "10536 PROVIDENCE ARBOURS DR CHARLOTTE NC 28270",
+    "lat": 35.06638558571457,
+    "lon": -80.76350229304313,
+    "parcel_pin": "23119111",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "139057",
+    "county": "MECKLENBURG",
+    "full_address": "4919 DERBYSHIRE DR CHARLOTTE NC 28270",
+    "lat": 35.07195428878285,
+    "lon": -80.75835112233364,
+    "parcel_pin": "23117242",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "379323",
+    "county": "MECKLENBURG",
+    "full_address": "3926 CAMERON CREEK DR MATTHEWS NC 28105",
+    "lat": 35.07597856524122,
+    "lon": -80.7248416086582,
+    "parcel_pin": "23107561",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "130398",
+    "county": "MECKLENBURG",
+    "full_address": "4411 BELLWOOD LN CHARLOTTE NC 28270",
+    "lat": 35.06902962170232,
+    "lon": -80.76705247808692,
+    "parcel_pin": "23120219",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "501684",
+    "county": "MECKLENBURG",
+    "full_address": "4404 PARKGATE DR MATTHEWS NC 28105",
+    "lat": 35.06747013140784,
+    "lon": -80.73102016131618,
+    "parcel_pin": "23109C99",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "458077",
+    "county": "MECKLENBURG",
+    "full_address": "6747 FIELDSTONE MANOR DR MATTHEWS NC 28105",
+    "lat": 35.07893583336781,
+    "lon": -80.72684648948231,
+    "parcel_pin": "23107652",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "458122",
+    "county": "MECKLENBURG",
+    "full_address": "3407 DARLINGTON RD MATTHEWS NC 28105",
+    "lat": 35.078667766701756,
+    "lon": -80.72541335418722,
+    "parcel_pin": "23107702",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "457981",
+    "county": "MECKLENBURG",
+    "full_address": "3242 DARLINGTON RD MATTHEWS NC 28105",
+    "lat": 35.08002932999912,
+    "lon": -80.72744129441308,
+    "parcel_pin": "23107156",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "458104",
+    "county": "MECKLENBURG",
+    "full_address": "6732 FIELDSTONE MANOR DR MATTHEWS NC 28105",
+    "lat": 35.078314513136995,
+    "lon": -80.7264789834779,
+    "parcel_pin": "23107677",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "461884",
+    "county": "MECKLENBURG",
+    "full_address": "1719 CANDLEWOOD RIDGE LN MATTHEWS NC 28105",
+    "lat": 35.080150809617535,
+    "lon": -80.72027968495652,
+    "parcel_pin": "23121661",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "461910",
+    "county": "MECKLENBURG",
+    "full_address": "2211 SAVANNAH HILLS DR MATTHEWS NC 28105",
+    "lat": 35.079078075063684,
+    "lon": -80.72092567287017,
+    "parcel_pin": "23121673",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "108344",
+    "county": "MECKLENBURG",
+    "full_address": "3401 SAVANNAH HILLS DR MATTHEWS NC 28105",
+    "lat": 35.083228834357016,
+    "lon": -80.71021139367703,
+    "parcel_pin": "23121553",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "405806",
+    "county": "MECKLENBURG",
+    "full_address": "4815 GRIER FARM LN CHARLOTTE NC 28270",
+    "lat": 35.0631914847711,
+    "lon": -80.76374077366998,
+    "parcel_pin": "23104768",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "268972",
+    "county": "MECKLENBURG",
+    "full_address": "3530 ARBORHILL RD CHARLOTTE NC 28270",
+    "lat": 35.076146341955436,
+    "lon": -80.73203580826639,
+    "parcel_pin": "23125215",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "74268",
+    "county": "MECKLENBURG",
+    "full_address": "2146 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.07801176506033,
+    "lon": -80.73092542014132,
+    "parcel_pin": "23125166",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "461841",
+    "county": "MECKLENBURG",
+    "full_address": "7515 CARRINGTON FOREST LN MATTHEWS NC 28105",
+    "lat": 35.079704033926646,
+    "lon": -80.72154730817486,
+    "parcel_pin": "23121737",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "265534",
+    "county": "MECKLENBURG",
+    "full_address": "3007 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.07797050322676,
+    "lon": -80.73456672103099,
+    "parcel_pin": "23125372",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "83412",
+    "county": "MECKLENBURG",
+    "full_address": "2420 NORMANCREST CT CHARLOTTE NC 28270",
+    "lat": 35.077546108640426,
+    "lon": -80.73024361011011,
+    "parcel_pin": "23125147",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "172633",
+    "county": "MECKLENBURG",
+    "full_address": "6605 ALLEN BLACK RD CHARLOTTE NC 28227",
+    "lat": 35.15965813319508,
+    "lon": -80.62567468446807,
+    "parcel_pin": "19705202",
+    "status": "A",
+    "zip": "28227"
+  },
+  {
+    "address_id": "266317",
+    "county": "MECKLENBURG",
+    "full_address": "2722 TRAPPERS CREEK CT CHARLOTTE NC 28270",
+    "lat": 35.07639370347639,
+    "lon": -80.73509648392233,
+    "parcel_pin": "23125503",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "361476",
+    "county": "MECKLENBURG",
+    "full_address": "3825 FAWN HILL RD MATTHEWS NC 28105",
+    "lat": 35.05653559859481,
+    "lon": -80.75392152323765,
+    "parcel_pin": "23112712",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "333897",
+    "county": "MECKLENBURG",
+    "full_address": "4710 ALLISON ASHWORTH CT CHARLOTTE NC 28217",
+    "lat": 35.172869319695,
+    "lon": -80.95580920406701,
+    "parcel_pin": "14110585",
+    "status": "A",
+    "zip": "28217"
+  },
+  {
+    "address_id": "414567",
+    "county": "MECKLENBURG",
+    "full_address": "15705 CABARRUS RD CHARLOTTE NC 28227",
+    "lat": 35.21448553597588,
+    "lon": -80.5975530893331,
+    "parcel_pin": "13915109",
+    "status": "A",
+    "zip": "28227"
+  },
+  {
+    "address_id": "481140",
+    "county": "MECKLENBURG",
+    "full_address": "9526 RIDGEFOREST DR CHARLOTTE NC 28277",
+    "lat": 35.023844208045254,
+    "lon": -80.81555514190653,
+    "parcel_pin": "22937621",
+    "status": "A",
+    "zip": "28277"
+  },
+  {
+    "address_id": "192468",
+    "county": "MECKLENBURG",
+    "full_address": "7616 CARELOCK CR CHARLOTTE NC 28215",
+    "lat": 35.21493010475891,
+    "lon": -80.68429246110932,
+    "parcel_pin": "11114601",
+    "status": "A",
+    "zip": "28215"
+  },
+  {
+    "address_id": "434238",
+    "county": "MECKLENBURG",
+    "full_address": "9632 COTTON STAND RD CHARLOTTE NC 28277",
+    "lat": 35.02024351278819,
+    "lon": -80.82488240129206,
+    "parcel_pin": "22943317",
+    "status": "A",
+    "zip": "28277"
+  },
+  {
+    "address_id": "502695",
+    "county": "MECKLENBURG",
+    "full_address": "3522 SOUTH BANK CT MATTHEWS NC 28105",
+    "lat": 35.06553824103065,
+    "lon": -80.73282009857408,
+    "parcel_pin": "23109C99",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "505923",
+    "county": "MECKLENBURG",
+    "full_address": "3410 WEDDINGTON RD MATTHEWS NC 28105",
+    "lat": 35.07947374082502,
+    "lon": -80.72985727158142,
+    "parcel_pin": "23125981",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "501714",
+    "county": "MECKLENBURG",
+    "full_address": "4403 PARKGATE DR MATTHEWS NC 28105",
+    "lat": 35.067437106431996,
+    "lon": -80.73091171331664,
+    "parcel_pin": "23109C99",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "501742",
+    "county": "MECKLENBURG",
+    "full_address": "2216 COLTSVIEW LN MATTHEWS NC 28105",
+    "lat": 35.066091491625386,
+    "lon": -80.73138322451231,
+    "parcel_pin": "23109C99",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "541482",
+    "county": "MECKLENBURG",
+    "full_address": "3537 SOUTH BANK CT MATTHEWS NC 28105",
+    "lat": 35.06637921966874,
+    "lon": -80.73215501675418,
+    "parcel_pin": "23109C99",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "502570",
+    "county": "MECKLENBURG",
+    "full_address": "3521 SOUTH BANK CT MATTHEWS NC 28105",
+    "lat": 35.066359135400155,
+    "lon": -80.73292368995422,
+    "parcel_pin": "23109C99",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "501751",
+    "county": "MECKLENBURG",
+    "full_address": "2246 COLTSVIEW LN MATTHEWS NC 28105",
+    "lat": 35.065309279570805,
+    "lon": -80.73192280032545,
+    "parcel_pin": "23109C99",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "501774",
+    "county": "MECKLENBURG",
+    "full_address": "2318 COLTSVIEW LN MATTHEWS NC 28105",
+    "lat": 35.065138436926084,
+    "lon": -80.73099665909241,
+    "parcel_pin": "23109C99",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "502542",
+    "county": "MECKLENBURG",
+    "full_address": "3553 SOUTH BANK CT MATTHEWS NC 28105",
+    "lat": 35.06611250374141,
+    "lon": -80.73216722183749,
+    "parcel_pin": "23109C99",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "501769",
+    "county": "MECKLENBURG",
+    "full_address": "2302 COLTSVIEW LN MATTHEWS NC 28105",
+    "lat": 35.06518027130164,
+    "lon": -80.73152899637658,
+    "parcel_pin": "23109C99",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "502543",
+    "county": "MECKLENBURG",
+    "full_address": "3501 SOUTH BANK CT MATTHEWS NC 28105",
+    "lat": 35.066342541827474,
+    "lon": -80.73334983462499,
+    "parcel_pin": "23109C99",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "502547",
+    "county": "MECKLENBURG",
+    "full_address": "3506 SOUTH BANK CT MATTHEWS NC 28105",
+    "lat": 35.06554973245391,
+    "lon": -80.73330376147274,
+    "parcel_pin": "23109C99",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "501783",
+    "county": "MECKLENBURG",
+    "full_address": "2336 COLTSVIEW LN MATTHEWS NC 28105",
+    "lat": 35.065320492033,
+    "lon": -80.73056600079519,
+    "parcel_pin": "23109C99",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "502694",
+    "county": "MECKLENBURG",
+    "full_address": "3545 SOUTH BANK CT MATTHEWS NC 28105",
+    "lat": 35.06612421081557,
+    "lon": -80.73247960665658,
+    "parcel_pin": "23109C99",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "541483",
+    "county": "MECKLENBURG",
+    "full_address": "2230 COLTSVIEW LN MATTHEWS NC 28105",
+    "lat": 35.06636586666707,
+    "lon": -80.73182997181782,
+    "parcel_pin": "23109C99",
+    "status": "A",
+    "zip": "28105"
+  },
+  {
+    "address_id": "98815",
+    "county": "MECKLENBURG",
+    "full_address": "3041 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.078485388056556,
+    "lon": -80.73468965647791,
+    "parcel_pin": "23125380",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "105668",
+    "county": "MECKLENBURG",
+    "full_address": "3274 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.07866267791771,
+    "lon": -80.73267759031388,
+    "parcel_pin": "23125845",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "105671",
+    "county": "MECKLENBURG",
+    "full_address": "3276 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.0787114185494,
+    "lon": -80.73268839984297,
+    "parcel_pin": "23125846",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "66323",
+    "county": "MECKLENBURG",
+    "full_address": "2002 CHINABROOK CT CHARLOTTE NC 28270",
+    "lat": 35.07883961306136,
+    "lon": -80.73202946021105,
+    "parcel_pin": "23125860",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "105577",
+    "county": "MECKLENBURG",
+    "full_address": "3260 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.078303852982856,
+    "lon": -80.73272283238244,
+    "parcel_pin": "23125840",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "105674",
+    "county": "MECKLENBURG",
+    "full_address": "3278 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.07877740261189,
+    "lon": -80.73268645798535,
+    "parcel_pin": "23125847",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "66404",
+    "county": "MECKLENBURG",
+    "full_address": "2004 CHINABROOK CT CHARLOTTE NC 28270",
+    "lat": 35.07869907108746,
+    "lon": -80.732056563994,
+    "parcel_pin": "23125859",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "68337",
+    "county": "MECKLENBURG",
+    "full_address": "2025 CHINABROOK CT CHARLOTTE NC 28270",
+    "lat": 35.07853538278315,
+    "lon": -80.73139786388698,
+    "parcel_pin": "23125866",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "67855",
+    "county": "MECKLENBURG",
+    "full_address": "2020 CHINABROOK CT CHARLOTTE NC 28270",
+    "lat": 35.0784309204513,
+    "lon": -80.73178343510929,
+    "parcel_pin": "23125856",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "66612",
+    "county": "MECKLENBURG",
+    "full_address": "2008 CHINABROOK CT CHARLOTTE NC 28270",
+    "lat": 35.07855900489789,
+    "lon": -80.7320502478418,
+    "parcel_pin": "23125858",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "105587",
+    "county": "MECKLENBURG",
+    "full_address": "3264 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.07843032290862,
+    "lon": -80.73271883198522,
+    "parcel_pin": "23125842",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "69540",
+    "county": "MECKLENBURG",
+    "full_address": "2046 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.079055822443706,
+    "lon": -80.73132533167252,
+    "parcel_pin": "23125873",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "106494",
+    "county": "MECKLENBURG",
+    "full_address": "3311 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.079472850973595,
+    "lon": -80.73213984968777,
+    "parcel_pin": "23125902",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "66360",
+    "county": "MECKLENBURG",
+    "full_address": "2003 CHINABROOK CT CHARLOTTE NC 28270",
+    "lat": 35.07889965522937,
+    "lon": -80.73186692949977,
+    "parcel_pin": "23125861",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "67603",
+    "county": "MECKLENBURG",
+    "full_address": "2017 CHINABROOK CT CHARLOTTE NC 28270",
+    "lat": 35.078742503075716,
+    "lon": -80.73151926157952,
+    "parcel_pin": "23125864",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "106744",
+    "county": "MECKLENBURG",
+    "full_address": "3316 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.0791946736194,
+    "lon": -80.73179964472045,
+    "parcel_pin": "23125878",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "106545",
+    "county": "MECKLENBURG",
+    "full_address": "3312 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.07915713721613,
+    "lon": -80.73192588275907,
+    "parcel_pin": "23125879",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "106049",
+    "county": "MECKLENBURG",
+    "full_address": "3301 ELIZABETH GLEN DR CHARLOTTE NC 28270",
+    "lat": 35.07811731176714,
+    "lon": -80.73199741569711,
+    "parcel_pin": "23125852",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "106585",
+    "county": "MECKLENBURG",
+    "full_address": "3313 ELIZABETH GLEN DR CHARLOTTE NC 28270",
+    "lat": 35.07822800366397,
+    "lon": -80.73175238359053,
+    "parcel_pin": "23125854",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "71636",
+    "county": "MECKLENBURG",
+    "full_address": "2110 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.07863296073543,
+    "lon": -80.73110909255936,
+    "parcel_pin": "23125869",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "69792",
+    "county": "MECKLENBURG",
+    "full_address": "2054 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.078848512148966,
+    "lon": -80.73121729871062,
+    "parcel_pin": "23125871",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "106871",
+    "county": "MECKLENBURG",
+    "full_address": "3319 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.07956980659385,
+    "lon": -80.73189452543507,
+    "parcel_pin": "23125904",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "347336",
+    "county": "MECKLENBURG",
+    "full_address": "3262 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.078369882302766,
+    "lon": -80.73271754853647,
+    "parcel_pin": "23125841",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "105737",
+    "county": "MECKLENBURG",
+    "full_address": "3280 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.07884338396984,
+    "lon": -80.73268451606712,
+    "parcel_pin": "23125848",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "105741",
+    "county": "MECKLENBURG",
+    "full_address": "3284 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.07895630333418,
+    "lon": -80.73270722638533,
+    "parcel_pin": "23125850",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "69412",
+    "county": "MECKLENBURG",
+    "full_address": "2042 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.079159598714554,
+    "lon": -80.73137099283592,
+    "parcel_pin": "23125874",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "107121",
+    "county": "MECKLENBURG",
+    "full_address": "3324 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.07929721727963,
+    "lon": -80.73154774796517,
+    "parcel_pin": "23125876",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "106161",
+    "county": "MECKLENBURG",
+    "full_address": "3304 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.07904104450781,
+    "lon": -80.73216411345884,
+    "parcel_pin": "23125881",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "106246",
+    "county": "MECKLENBURG",
+    "full_address": "3307 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.0794161780723,
+    "lon": -80.73225899788235,
+    "parcel_pin": "23125901",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "105590",
+    "county": "MECKLENBURG",
+    "full_address": "3266 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.078493750634024,
+    "lon": -80.73270346171432,
+    "parcel_pin": "23125843",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "347337",
+    "county": "MECKLENBURG",
+    "full_address": "3268 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.07856343941105,
+    "lon": -80.73269888400449,
+    "parcel_pin": "23125844",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "66564",
+    "county": "MECKLENBURG",
+    "full_address": "2007 CHINABROOK CT CHARLOTTE NC 28270",
+    "lat": 35.078957045784165,
+    "lon": -80.73169765296903,
+    "parcel_pin": "23125862",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "67101",
+    "county": "MECKLENBURG",
+    "full_address": "2011 CHINABROOK CT CHARLOTTE NC 28270",
+    "lat": 35.078865602627914,
+    "lon": -80.73155864685954,
+    "parcel_pin": "23125863",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "106969",
+    "county": "MECKLENBURG",
+    "full_address": "3320 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.0792486457804,
+    "lon": -80.73167709729836,
+    "parcel_pin": "23125877",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "106298",
+    "county": "MECKLENBURG",
+    "full_address": "3308 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.079103306864035,
+    "lon": -80.73203840055506,
+    "parcel_pin": "23125880",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "67985",
+    "county": "MECKLENBURG",
+    "full_address": "2021 CHINABROOK CT CHARLOTTE NC 28270",
+    "lat": 35.078633375992766,
+    "lon": -80.73146346012034,
+    "parcel_pin": "23125865",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "68573",
+    "county": "MECKLENBURG",
+    "full_address": "2029 CHINABROOK CT CHARLOTTE NC 28270",
+    "lat": 35.078437438357625,
+    "lon": -80.73132892585829,
+    "parcel_pin": "23125867",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "105739",
+    "county": "MECKLENBURG",
+    "full_address": "3282 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.07889548675842,
+    "lon": -80.7326923084652,
+    "parcel_pin": "23125849",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "67365",
+    "county": "MECKLENBURG",
+    "full_address": "2014 CHINABROOK CT CHARLOTTE NC 28270",
+    "lat": 35.078483853240215,
+    "lon": -80.73192496414497,
+    "parcel_pin": "23125857",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "72341",
+    "county": "MECKLENBURG",
+    "full_address": "2118 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.078529137348696,
+    "lon": -80.73106677401873,
+    "parcel_pin": "23125868",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "107292",
+    "county": "MECKLENBURG",
+    "full_address": "3328 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.0793348490993,
+    "lon": -80.73141482771152,
+    "parcel_pin": "23125875",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "106340",
+    "county": "MECKLENBURG",
+    "full_address": "3309 ELIZABETH GLEN DR CHARLOTTE NC 28270",
+    "lat": 35.07814964125272,
+    "lon": -80.73185101092086,
+    "parcel_pin": "23125853",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "106784",
+    "county": "MECKLENBURG",
+    "full_address": "3317 ELIZABETH GLEN DR CHARLOTTE NC 28270",
+    "lat": 35.078298269663186,
+    "lon": -80.73164355639918,
+    "parcel_pin": "23125855",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "71305",
+    "county": "MECKLENBURG",
+    "full_address": "2106 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.07874497899573,
+    "lon": -80.73115492806981,
+    "parcel_pin": "23125870",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "69669",
+    "county": "MECKLENBURG",
+    "full_address": "2050 MCKENZIE CREEK DR CHARLOTTE NC 28270",
+    "lat": 35.078952286644665,
+    "lon": -80.73126296067883,
+    "parcel_pin": "23125872",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "106682",
+    "county": "MECKLENBURG",
+    "full_address": "3315 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.07951043550601,
+    "lon": -80.73201027143662,
+    "parcel_pin": "23125903",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "107084",
+    "county": "MECKLENBURG",
+    "full_address": "3323 MANNINGTON DR CHARLOTTE NC 28270",
+    "lat": 35.07962667174636,
+    "lon": -80.73176200979695,
+    "parcel_pin": "23125905",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "516213",
+    "county": "MECKLENBURG",
+    "full_address": "5733 GLENMORE GARDEN DR CHARLOTTE NC 28270",
+    "lat": 35.07058243024743,
+    "lon": -80.75025890771107,
+    "parcel_pin": "23105162",
+    "status": "A",
+    "zip": "28270"
+  },
+  {
+    "address_id": "374207",
+    "county": "MECKLENBURG",
+    "full_address": "3715 FREW RD CHARLOTTE NC 28206",
+    "lat": 35.258603413277136,
+    "lon": -80.8030153416573,
+    "parcel_pin": "08511504",
+    "status": "A",
+    "zip": "28206"
+  },
+  {
+    "address_id": "286034",
+    "county": "MECKLENBURG",
+    "full_address": "6527 FALLS LAKE DR CHARLOTTE NC 28270",
+    "lat": 35.07064442245081,
+    "lon": -80.74364964373795,
+    "parcel_pin": "23105680",
+    "status": "A",
+    "zip": "28270"
+  }
+]

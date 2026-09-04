@@ -29,7 +29,33 @@ Secrets: watchlist webhook secrets are stored as `env:NAME` references and read 
 delivery; the API takes `--trust-proxy-header x-forwarded-user` behind an
 identity-aware proxy, or a shared `--token` for a single operator.
 
-## 2. Bringing a live source online
+## 2. Live sources already wired (Mecklenburg)
+
+`--profile live` uses these City of Charlotte ArcGIS layers (`sources/arcgis.py`,
+`counties/mecklenburg_live.py`):
+
+| Source | Layer | Rows | Mode |
+|---|---|---|---|
+| `parcel` | `Accela/Accela/MapServer/16` (Parcel XAPO, assessor roll) | ~450k | snapshot, 4000/page |
+| `code_enforcement` | `HNS/CodeEnforcementCasesAll/MapServer/0` | ~430k | incremental on `DateCreated` |
+| `lien` | `ODP/FMSLienData/MapServer/0` (table) | ~25k | snapshot |
+| `vacant_land` | `PLN/VacantLand/MapServer/0` | ~27k | snapshot |
+| `address_point` | `CountyData/MasterAddress/MapServer/0` | ~677k | snapshot, 5000/page; fills `geocode_cache` and parcel coordinates |
+
+Capture procedure used for the fixtures (repeat to refresh them): POST to each
+layer's `/query` with `f=json&outFields=*`, save each page verbatim as
+`fixtures/mecklenburg/live/<source>/<n>.json`, set `exceededTransferLimit` on all
+but the last page. The fixtures are public records published by the county; keep
+the sample small.
+
+Operational notes: the first parcel snapshot is ~115 requests; schedule it weekly and
+use `dateofsale >= TIMESTAMP` for a daily incremental of sales if the full snapshot
+is too heavy (`ParcelXapoConnector.base_where`). The server returned no
+`copyrightText`; confirm the city's open data terms before commercial use.
+
+Still missing for the probate link: estate cases and the deed index. See the next section.
+
+## 3. Bringing a live source online (estates, deeds)
 
 Do this once per source, against captured bytes, never against the live site in a loop.
 
@@ -59,7 +85,7 @@ Do this once per source, against captured bytes, never against the live site in 
 6. **Run it for a week on a scratch database** before pointing watchlists at it. Watch
    `status` for delta anomalies and the resolver's blocked-out rate.
 
-## 3. Building the labeled set
+## 4. Building the labeled set
 
 The fixture labels are synthetic. Before trusting any threshold:
 
@@ -78,7 +104,7 @@ The fixture labels are synthetic. Before trusting any threshold:
 6. Turn on the audit sample (10 percent of auto-confirms into the queue) and re-run
    `evaluate` monthly. Precision is a time series, not a number.
 
-## 4. Splitting into its own repository
+## 5. Splitting into its own repository
 
 ```
 git subtree split -P monitorclt -b monitorclt-standalone
@@ -89,7 +115,7 @@ Then in the new repo: move `.github/workflows/monitorclt.yml` to `.github/workfl
 and drop its `paths:` filters and the `monitorclt/` prefixes. Nothing in the package
 references the parent repository.
 
-## 5. Review operations
+## 6. Review operations
 
 - Reviewers work in the **Estates** tab (one estate, all candidates) by default. The
   **Pairs** tab is ordered by review value (uncertainty × parcel value). The **Audit
